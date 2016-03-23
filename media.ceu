@@ -1,0 +1,53 @@
+#define MEDIA_FRAME_RATE 2    // 1 fps
+
+#define PERIOD_US (1000000/MEDIA_FRAME_RATE)
+
+// INTERFACES: pure Ceu, no external types, C, etc
+
+data Rect with
+    var int x;
+    var int y;
+    var int width;
+    var int height;
+end
+
+interface Media with
+    var char[]& url;
+    var Rect&   rect;
+end
+
+// IMPLEMENTATIONS
+// heavy code with C, finalization, etc
+// uses a single global clock controlled from Ceu
+
+native @nohold _printf();
+
+class VideoMedia with
+    interface Media;
+do
+    // plays the video inside the rectangle
+    // respecting MEDIA_FRAME_RATE
+
+    var u64 time_us = 0;
+
+    _printf("%-15s | START\n", &&this.url);
+    finalize with
+        _printf("%-15s | STOP\n", &&this.url);
+    end
+    every (PERIOD_US)us do
+        time_us = time_us + PERIOD_US;
+        _printf("%-15s | %ldms\n", &&this.url, time_us/1000);
+    end
+end
+
+class ImageMedia with
+    interface Media;
+do
+    // shows the image inside the rectangle
+
+    _printf("%-15s | START\n", &&this.url);
+    finalize with
+        _printf("%-15s | STOP\n", &&this.url);
+    end
+    await FOREVER;
+end

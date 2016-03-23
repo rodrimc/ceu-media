@@ -1,0 +1,9 @@
+par/or do
+    #include "app.ceu"
+with
+    async do
+        emit 20s;
+    end
+end
+
+escape 0;

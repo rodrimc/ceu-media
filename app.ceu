@@ -1,0 +1,26 @@
+// APPLICATION: pure Ceu, no external types, C, etc
+
+#include "media.ceu"
+
+var char[] url1  = [] .. "<file.mpg>";
+var Rect   rect1 = Rect(0,0,0,0);
+
+var char[] url2  = [] .. "<image.png>";
+var Rect   rect2 = Rect(0,0,0,0);
+
+loop do
+    _printf("===> RESTART\n");      // code in C, shouldn't be here
+    watching 2s do
+        var VideoMedia _ with       // starts only with the video
+            this.url  = &url1;
+            this.rect = &rect1;
+        end;
+        await 500ms;
+        var ImageMedia _ with       // image appears after 500ms
+            this.url  = &url2;
+            this.rect = &rect2;
+        end;
+        await FOREVER;
+    end
+    // after 10s, destroys everything and restarts
+end
