@@ -1,53 +1,132 @@
+#include "raw.ceu"
+native/pre do
+    ##include <play.h>
+    ##include <stdlib.h>
+    
+    lp_event_t *new_event_start ()
+    {
+      lp_event_t *evt = malloc (sizeof (lp_event_t));
+      evt->type = LP_EVENT_START;
+      return evt;
+    }
+end
+
 #define MEDIA_FRAME_RATE 2    // 1 fps
 
 #define PERIOD_US (1000000/MEDIA_FRAME_RATE)
 
-// INTERFACES: pure Ceu, no external types, C, etc
 
-data Rect with
+/****************     INTERFACES   *********************/
+data Rect_Z with
     var int x;
     var int y;
     var int width;
     var int height;
+    var int z;
 end
+
+class Scene with
+  var int width;
+  var int height;
+  function (void) => _lp_media_t && getptr;
+do
+  var _lp_media_t &?scene;
+  finalize
+    this.scene = &_lp_media_create (null);
+  with
+    _lp_media_destroy (&&scene!);
+  end
+    
+  var _lp_event_t &?evt;
+  finalize
+    evt = &_new_event_start ();
+  with
+    _free (&&evt!);
+  end
+  _lp_media_set_property_int (&&scene!, "width", this.width);
+  _lp_media_set_property_int (&&scene!, "height", this.height);
+  _lp_media_post (&&scene!, &&evt!);
+  
+  function (void) => _lp_media_t && getptr do
+    return &&scene!;
+  end
+
+  await FOREVER;
+end
+
 
 interface Media with
-    var char[]& url;
-    var Rect&   rect;
+    var char[]&   uri;
+    var Rect_Z&   region;
+    var Scene&    scene;
 end
-
-// IMPLEMENTATIONS
-// heavy code with C, finalization, etc
-// uses a single global clock controlled from Ceu
-
-native @nohold _printf();
 
 class VideoMedia with
     interface Media;
 do
-    // plays the video inside the rectangle
-    // respecting MEDIA_FRAME_RATE
+  var _lp_media_t &?m;
+  finalize
+    m = &_lp_media_create_for_parent (this.scene.getptr(), _UNSAFE(&&this.uri));
+  with
+    _lp_media_destroy (&&m!);
+  end
+  var _lp_event_t &?evt;
+  finalize
+    evt = &_new_event_start ();
+  with 
+    _free (&&evt!);
+  end
 
-    var u64 time_us = 0;
-
-    _printf("%-15s | START\n", &&this.url);
-    finalize with
-        _printf("%-15s | STOP\n", &&this.url);
-    end
-    every (PERIOD_US)us do
-        time_us = time_us + PERIOD_US;
-        _printf("%-15s | %ldms\n", &&this.url, time_us/1000);
-    end
+  _lp_media_set_property_int (&&m!, "width", region.width);
+  _lp_media_set_property_int (&&m!, "height", region.height);
+  _lp_media_set_property_int (&&m!, "z", region.z);
+    
+  _lp_media_post (&&m!, &&evt!);
+  finalize with
+    _lp_media_remove_child (this.scene.getptr(), &&m!);
+  end
+ 
+ await FOREVER;
 end
+
+/* _lp_media_set_property_int (&&m!, "z", 1); */
+
+/* _lp_media_set_property_int (&&m1!, "width", 100); */
+/* _lp_media_set_property_int (&&m1!, "height", 100); */
+/* _lp_media_set_property_int (&&m1!, "z", 2); */
+  
+/* _lp_media_post (&&m!, &&_evt); */
+/* _lp_media_post (&&m1!, &&_evt); */
 
 class ImageMedia with
     interface Media;
 do
     // shows the image inside the rectangle
 
-    _printf("%-15s | START\n", &&this.url);
+    _printf("%-15s | START\n", &&this.uri);
     finalize with
-        _printf("%-15s | STOP\n", &&this.url);
+        _printf("%-15s | STOP\n", &&this.uri);
     end
     await FOREVER;
+end
+
+/**************** GLOBAL VARIABLES *********************/
+/* var int argc; */
+/* var char && &&argv; */
+/* (argc, argv) = await OS_START; */
+
+/* if argc < 2 then */
+/*   _printf ("Usage: %s URI\n", _ELEM_N (argv, 0)); */
+/*   escape 0; */
+/* end */
+
+
+/****************       BODY       *********************/
+spawn do
+  watching 10s do
+    every 1s do
+      _printf ("1s\n");
+    end
+  end
+  await FOREVER;
 end

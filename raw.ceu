@@ -1,0 +1,40 @@
+input (int, char&& &&) OS_START;
+
+native/pre do
+##include <glib.h>
+
+##define UNSAFE(x) x
+##define ELEM_N(V,N) V[N]
+end
+
+native @pure _UNSAFE;
+native @pure _ELEM_N();
+
+native @nohold _printf ();
+native @nohold _free ();
+
+/*********** LibPlay functions *************/
+native @nohold _lp_media_destroy ();
+native @nohold _lp_event_init_start ();
+native @nohold _lp_media_post ();
+native @nohold _lp_media_set_property_int ();
+native @nohold _lp_media_add_child ();
+native @nohold _lp_media_create_for_parent ();
+native @nohold _lp_media_remove_child ();
+/***********    async block   *************/
+spawn do
+  async do 
+    var s64 base, current, tmp;
+    base = _g_get_monotonic_time ();
+    current = 0;
+    tmp = 0;
+    loop do
+      current = _g_get_monotonic_time ();
+      tmp = current - base;
+      
+      base = current;
+      emit (tmp)us;
+    end
+  end
+  await FOREVER;
+end
