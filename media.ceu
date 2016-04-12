@@ -77,6 +77,8 @@ do
     _free (&&evt!);
   end
 
+  _lp_media_set_property_int (&&m!, "x", region.x);
+  _lp_media_set_property_int (&&m!, "y", region.y);
   _lp_media_set_property_int (&&m!, "width", region.width);
   _lp_media_set_property_int (&&m!, "height", region.height);
   _lp_media_set_property_int (&&m!, "z", region.z);
@@ -88,15 +90,6 @@ do
  
  await FOREVER;
 end
-
-/* _lp_media_set_property_int (&&m!, "z", 1); */
-
-/* _lp_media_set_property_int (&&m1!, "width", 100); */
-/* _lp_media_set_property_int (&&m1!, "height", 100); */
-/* _lp_media_set_property_int (&&m1!, "z", 2); */
-  
-/* _lp_media_post (&&m!, &&_evt); */
-/* _lp_media_post (&&m1!, &&_evt); */
 
 class ImageMedia with
     interface Media;
