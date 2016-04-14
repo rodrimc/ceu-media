@@ -56,7 +56,7 @@ end
 
 
 interface Media with
-    var char[]&   uri;
+    var char&     uri;
     var Rect_Z&   region;
     var Scene&    scene;
 end

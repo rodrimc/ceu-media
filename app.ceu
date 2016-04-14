@@ -2,16 +2,16 @@
 
 #include "media.ceu"
 
-/* var int argc; */
-/* var char [] []argv; */
-/* (argc, argv) = await OS_START; */
+var int argc;
+var char && &&argv;
+(argc, argv) = await OS_START;
 
-/* if argc < 2 then */
-/*   _printf ("Usage: %s URI\n", _ELEM_N (argv, 0)); */
-/*   escape 0; */
-/* end */
+if argc < 2 then
+  _printf ("Usage: %s URI\n", _ELEM_N (argv, 0));
+  escape 0;
+end
 
-var char[] url1  = [] .. "file:///media/rodrigocosta/Data/media_test/big_buck_bunny_1080p_stereo.avi";
+var char& url1  = &_ELEM_N(argv, 1);
 var Rect_Z   rect1 = Rect_Z(0, 0, 1080, 720, 1);
 
 /* var char[] url2  = [] .. "<image.png>"; */
