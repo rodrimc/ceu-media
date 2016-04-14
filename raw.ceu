@@ -21,6 +21,11 @@ native @nohold _lp_media_set_property_int ();
 native @nohold _lp_media_add_child ();
 native @nohold _lp_media_create_for_parent ();
 native @nohold _lp_media_remove_child ();
+
+/***********  GLib functions  *************/
+native @nohold _g_thread_new;
+native @nohold _g_thread_unref;
+
 /***********    async block   *************/
 spawn do
   async do 

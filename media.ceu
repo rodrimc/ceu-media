@@ -3,6 +3,8 @@ native/pre do
     ##include <play.h>
     ##include <stdlib.h>
     
+    GMainLoop *glib_loop;
+    
     lp_event_t *new_event_start ()
     {
       lp_event_t *evt = malloc (sizeof (lp_event_t));
@@ -17,8 +19,10 @@ native/pre do
       return evt;
     }
 
-    gpointer run_main_loop (gpointer)
+    gpointer run_main_loop (gpointer ptr)
     {
+      glib_loop = g_main_loop_new (NULL, FALSE);
+      g_main_loop_run (glib_loop);
       return NULL;
     }
 end
@@ -87,7 +91,7 @@ do
   finalize
     m = &_lp_media_create_for_parent (this.scene.getptr(), _UNSAFE(&&this.uri));
   with
-    /* _lp_media_destroy (&&m!); */
+    _lp_media_destroy (&&m!);
   end
   var _lp_event_t &?start_evt;
   finalize
@@ -111,7 +115,6 @@ do
   _lp_media_post (&&m!, &&start_evt!);
   finalize with
     _lp_media_post (&&m!, &&stop_evt!); 
-    /* _lp_media_remove_child (this.scene.getptr(), &&m!); */
   end
  
  await FOREVER;
@@ -130,7 +133,7 @@ do
 end
 
 /****************       BODY       *********************/
-async do
-  
+spawn do
+  _g_thread_unref (_g_thread_new ("glib-loop", _run_main_loop, null));
   await FOREVER;
 end
