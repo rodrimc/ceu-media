@@ -17,28 +17,31 @@ var Scene s with
 end;
 
 var char& url1  = &_ELEM_N (argv, 1);
-var Rect_Z   rect1 = Rect_Z(0, 0, s.width / 2, s.height / 2, 1);
-
 var char& url2 = &_ELEM_N (argv, 2);
-var Rect_Z   rect2 = Rect_Z(s.width/2, s.height/2, 
-                            s.width/2, s.height/2, 2);
-
 
 watching 30s do
   loop do
+      var Rect_Z   rect1 = Rect_Z(0, 0, s.width / 2, s.height / 2, 1);
+      var Rect_Z   rect2 = Rect_Z(s.width/2, s.height/2, 
+                                  s.width/2, s.height/2, 2);
       _printf("===> RESTART\n");      // code in C, shouldn't be here
-      watching 5s do
+      watching 10s do
           var VideoMedia v1 with       // starts only with the video
               this.uri      = &url1;
               this.region   = &rect1;
               this.scene    = &s;
           end;
-          await 1s;
+          await 2s;
           var VideoMedia v2 with       // starts only with the video
               this.uri      = &url2;
               this.region   = &rect2;
               this.scene    = &s;
           end;
+
+          await 3s;
+
+          var Rect_Z r = Rect_Z (100, 100, 100, 100, 1);
+          v1.setRegion (r);
           /* var ImageMedia _ with       // image appears after 500ms */
           /*     this.url  = &url2; */
           /*     this.rect = &rect2; */

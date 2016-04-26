@@ -1,0 +1,92 @@
+#include "raw.ceu"
+
+native/pre do
+    ##include <play.h>
+    ##include <stdlib.h>
+end
+
+#define MEDIA_FRAME_RATE 2    // 1 fps
+
+#define PERIOD_US (1000000/MEDIA_FRAME_RATE)
+
+
+/****************     INTERFACES   *********************/
+data Rect_Z with
+    var int x;
+    var int y;
+    var int width;
+    var int height;
+    var int z;
+end
+
+class Scene with
+  var int width;
+  var int height;
+  function (void) => _lp_Scene && getptr;
+do
+  var _lp_Scene &?scene;
+  finalize
+    scene = &_lp_scene_new (width, height);
+  with
+    _g_object_unref (_G_OBJECT(&&scene!));
+  end
+    
+  function (void) => _lp_Scene && getptr do
+    return &&scene!;
+  end
+
+  await FOREVER;
+end
+
+
+interface Media with
+    var char&     uri;
+    var Rect_Z&   region;
+    var Scene&    scene;
+
+    function (Rect_Z r) => void setRegion;
+end
+
+class VideoMedia with
+    interface Media;
+do
+  var _lp_Media &?m;
+  finalize
+    m = &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri));
+  with
+    _g_object_unref (&&m!);
+  end
+
+
+  setRegion (region);
+  /* _g_object_set (&&m!, "x", region.x, "y", region.y, */
+  /*               "z", region.z, "width", region.width, */ 
+  /*               "height", region.height, null); */
+    
+  _lp_media_start (&&m!);
+
+  function (Rect_Z r) => void setRegion do
+    region = r;
+    _g_object_set (&&m!, "x", region.x, "y", region.y,
+        "z", region.z, "width", region.width, 
+        "height", region.height, null);
+  end
+ 
+ await FOREVER;
+end
+
+class ImageMedia with
+    interface Media;
+do
+    // shows the image inside the rectangle
+
+    _printf("%-15s | START\n", &&this.uri);
+    finalize with
+        _printf("%-15s | STOP\n", &&this.uri);
+    end
+    function (Rect_Z r) => void setRegion do
+      region = r;
+    end
+    await FOREVER;
+end
+

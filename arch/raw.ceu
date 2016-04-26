@@ -14,17 +14,16 @@ native @nohold _printf ();
 native @nohold _free ();
 
 /*********** LibPlay functions *************/
-native @nohold _lp_media_destroy ();
-native @nohold _lp_event_init_start ();
-native @nohold _lp_media_post ();
-native @nohold _lp_media_set_property_int ();
-native @nohold _lp_media_add_child ();
-native @nohold _lp_media_create_for_parent ();
-native @nohold _lp_media_remove_child ();
+native @nohold _lp_scene_new;
+native @nohold _lp_scene_pop;
+native @nohold _lp_media_new;
+native @nohold _lp_media_start;
+native @nohold _lp_media_stop;
 
 /***********  GLib functions  *************/
-native @nohold _g_thread_new;
-native @nohold _g_thread_unref;
+native @nohold _g_object_unref;
+native @nohold _g_object_set;
+native @pure _G_OBJECT;
 
 /***********    async block   *************/
 spawn do
@@ -43,3 +42,4 @@ spawn do
   end
   await FOREVER;
 end
+
