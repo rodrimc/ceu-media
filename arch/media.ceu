@@ -8,6 +8,8 @@ end
 #define MEDIA_FRAME_RATE 2    // 1 fps
 
 #define PERIOD_US (1000000/MEDIA_FRAME_RATE)
+#define NS 1000000
+#define FREQ 15
 
 
 /****************     INTERFACES   *********************/
@@ -30,38 +32,54 @@ do
   with
     _g_object_unref (_G_OBJECT(&&scene!));
   end
+
+  _g_object_set (&&scene!, "lockstep", true, null);
     
   function (void) => _lp_Scene && getptr do
     return &&scene!;
   end
 
-  await FOREVER;
+  spawn do
+    async (scene) do
+      loop do 
+        var _GObject &&obj = null;
+        var _lp_Event evt = 0;
+        if (_lp_scene_pop (&&scene!, false, &&obj, &&evt)) then
+          if _LP_IS_MEDIA (obj) then
+            emit MEDIA_EVENT => (_LP_MEDIA(obj), evt);
+          else/if _LP_IS_SCENE (obj) then
+            emit SCENE_EVENT => (_LP_SCENE(obj), evt);
+          end
+        end
+      end
+    end
+    await FOREVER;
+  end
+
+  every FREQ ms do
+    _lp_scene_advance (&&scene!, FREQ * NS);
+  end
 end
 
 
-interface Media with
+class Media with
     var char&     uri;
     var Rect_Z&   region;
     var Scene&    scene;
 
     function (Rect_Z r) => void setRegion;
-end
-
-class VideoMedia with
-    interface Media;
+    function (char && name, float value) => void setPropertyFloat;
+    function (char && name, int value) => void setPropertyInt;
 do
   var _lp_Media &?m;
   finalize
     m = &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri));
   with
-    _g_object_unref (&&m!);
+    _lp_media_stop (&&m!);
   end
-
+  _printf ("_lp_media_new: %p\n", &&m!);
 
   setRegion (region);
-  /* _g_object_set (&&m!, "x", region.x, "y", region.y, */
-  /*               "z", region.z, "width", region.width, */ 
-  /*               "height", region.height, null); */
     
   _lp_media_start (&&m!);
 
@@ -71,22 +89,15 @@ do
         "z", region.z, "width", region.width, 
         "height", region.height, null);
   end
+  
+  function (char&& name, float value) => void setPropertyFloat do
+    _g_object_set (&&m!, name, value, null);
+  end
+
+  function (char&& name, int value) => void setPropertyInt do
+    _g_object_set (&&m!, name, value, null);
+  end
  
- await FOREVER;
-end
-
-class ImageMedia with
-    interface Media;
-do
-    // shows the image inside the rectangle
-
-    _printf("%-15s | START\n", &&this.uri);
-    finalize with
-        _printf("%-15s | STOP\n", &&this.uri);
-    end
-    function (Rect_Z r) => void setRegion do
-      region = r;
-    end
-    await FOREVER;
+  await FOREVER;
 end
 
