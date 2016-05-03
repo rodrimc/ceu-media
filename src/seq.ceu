@@ -1,0 +1,31 @@
+// APPLICATION: pure Ceu, no external types, C, etc
+
+#include "media.ceu"
+
+var Scene s with
+  this.width = 1080;
+  this.height = 720;
+end;
+
+var Rect_Z rect = Rect_Z(0, 0, s.width, s.height, 1);
+
+var char [] url1 = [] .. "../../resources/misc.avi";
+var char [] url2 = [] .. "../../resources/bars.ogg";
+
+var Media v1 with       
+    this.uri      = &url1[0];
+    this.scene    = &s;
+end;
+v1.setRegion(rect);
+v1.doStart ();
+await v1.stop;
+
+var Media v2 with       
+    this.uri      = &url2[0];
+    this.scene    = &s;
+end;
+v2.setRegion(rect);
+v2.doStart ();
+await v2.stop;
+
+escape 0;
