@@ -11,8 +11,6 @@ end
 #define NS 1000000
 #define FREQ 15
 
-
-/****************     INTERFACES   *********************/
 data Rect_Z with
     var int x;
     var int y;
@@ -42,9 +40,10 @@ do
   spawn do
     async (scene) do
       loop do 
-        var _GObject &&obj = null;
-        var _lp_Event evt = 0;
-        if (_lp_scene_pop (&&scene!, false, &&obj, &&evt)) then
+        var _lp_Event &&evt;
+        evt = _UNSAFE(_lp_scene_receive (&&scene!, false)); 
+        if evt != null then
+          var _GObject &&obj = _UNSAFE(_lp_event_get_source(evt));
           if _LP_IS_MEDIA (obj) then
             emit MEDIA_EVENT => (_LP_MEDIA(obj), evt);
           else/if _LP_IS_SCENE (obj) then
@@ -64,12 +63,17 @@ end
 
 class Media with
     var char&     uri;
-    var Rect_Z&   region;
     var Scene&    scene;
 
     function (Rect_Z r) => void setRegion;
     function (char && name, float value) => void setPropertyFloat;
     function (char && name, int value) => void setPropertyInt;
+
+    function (void) => void doStart;
+    function (void) => void doStop;
+
+    event (void) start;
+    event (void) stop;
 do
   var _lp_Media &?m;
   finalize
@@ -77,17 +81,12 @@ do
   with
     _lp_media_stop (&&m!);
   end
-  _printf ("_lp_media_new: %p\n", &&m!);
 
-  setRegion (region);
-    
   _lp_media_start (&&m!);
 
   function (Rect_Z r) => void setRegion do
-    region = r;
-    _g_object_set (&&m!, "x", region.x, "y", region.y,
-        "z", region.z, "width", region.width, 
-        "height", region.height, null);
+    _g_object_set (&&m!, "x", r.x, "y", r.y, "z", r.z, 
+            "width", r.width, "height", r.height, null);
   end
   
   function (char&& name, float value) => void setPropertyFloat do
@@ -97,7 +96,26 @@ do
   function (char&& name, int value) => void setPropertyInt do
     _g_object_set (&&m!, name, value, null);
   end
- 
-  await FOREVER;
+
+  function (void) => void doStart do
+    _lp_media_start (&&m!); 
+  end
+
+  function (void) => void doStop do
+    _lp_media_stop (&&m!); 
+  end
+
+  loop do
+    var _lp_Media &&source;
+    var _lp_Event &&evt;
+    (source, evt) = await MEDIA_EVENT until (source == &&m!);
+    var _GType type = _G_OBJECT_TYPE (evt);
+    if type == _LP_TYPE_EVENT_START then
+      emit start;
+    else/if type == _LP_TYPE_EVENT_STOP then
+      emit stop;
+    end
+  end
+
 end
 

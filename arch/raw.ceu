@@ -1,6 +1,6 @@
 input (int, char&& &&) OS_START;
-input (_lp_Media&&, _lp_Event) MEDIA_EVENT;
-input (_lp_Scene&&, _lp_Event) SCENE_EVENT;
+input (_lp_Media&&, _lp_Event&&) MEDIA_EVENT;
+input (_lp_Scene&&, _lp_Event&&) SCENE_EVENT;
 
 native/pre do
 ##include <glib.h>
@@ -17,8 +17,7 @@ native @nohold _free ();
 
 /*********** LibPlay functions *************/
 native @nohold _lp_scene_new;
-native @nohold _lp_scene_pop;
-native @nohold _lp_scene_pop;
+native @nohold _lp_scene_receive;
 native @nohold _lp_scene_advance;
 native @nohold _lp_media_new;
 native @nohold _lp_media_start;
@@ -28,11 +27,13 @@ native @nohold _LP_IS_MEDIA;
 native @nohold _LP_IS_SCENE;
 native @nohold _LP_MEDIA;
 native @nohold _LP_SCENE;
+native @nohold _lp_event_get_source;
 
 /***********  GLib functions  *************/
 native @nohold _g_object_unref;
 native @nohold _g_object_set;
 native @pure _G_OBJECT;
+native @pure _G_OBJECT_TYPE;
 
 /***********    async block   *************/
 spawn do
