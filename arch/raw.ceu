@@ -1,6 +1,5 @@
 input (int, char&& &&) OS_START;
-input (_lp_Media&&, _lp_Event&&) MEDIA_EVENT;
-input (_lp_Scene&&, _lp_Event&&) SCENE_EVENT;
+input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 native/pre do
 ##include <glib.h>
@@ -23,15 +22,18 @@ native @nohold _lp_media_new;
 native @nohold _lp_media_start;
 native @nohold _lp_media_stop;
 native @nohold _lp_media_abort;
+native @nohold _lp_event_get_source;
 native @nohold _LP_IS_MEDIA;
 native @nohold _LP_IS_SCENE;
 native @nohold _LP_MEDIA;
 native @nohold _LP_SCENE;
-native @nohold _lp_event_get_source;
+native @nohold _LP_EVENT_MOUSE_BUTTON;
+native @nohold _LP_EVENT_KEY;
 
 /***********  GLib functions  *************/
 native @nohold _g_object_unref;
 native @nohold _g_object_set;
+native @nohold _g_object_get;
 native @pure _G_OBJECT;
 native @pure _G_OBJECT_TYPE;
 

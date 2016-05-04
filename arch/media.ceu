@@ -22,7 +22,12 @@ end
 class Scene with
   var int width;
   var int height;
+
+  /* Scene functions */
   function (void) => _lp_Scene && getptr;
+
+  /* Scene events */
+  event (f64, f64, int, int) mouse_button_event;
 do
   var _lp_Scene &?scene;
   finalize
@@ -43,13 +48,30 @@ do
         var _lp_Event &&evt;
         evt = _UNSAFE(_lp_scene_receive (&&scene!, false)); 
         if evt != null then
-          var _GObject &&obj = _UNSAFE(_lp_event_get_source(evt));
-          if _LP_IS_MEDIA (obj) then
-            emit MEDIA_EVENT => (_LP_MEDIA(obj), evt);
-          else/if _LP_IS_SCENE (obj) then
-            emit SCENE_EVENT => (_LP_SCENE(obj), evt);
-          end
+          emit LP_EVENT => (_UNSAFE(_lp_event_get_source(evt)), evt);
         end
+      end
+    end
+    await FOREVER;
+  end
+
+  spawn do
+    loop do
+      var _GObject &&source;
+      var _lp_Event &&evt;
+      (source, evt) = await LP_EVENT until (_LP_IS_SCENE(source) and 
+                                          _LP_SCENE(source) == &&scene!);
+      var _GType type = _G_OBJECT_TYPE (evt);
+      if type == _LP_TYPE_EVENT_MOUSE_BUTTON then
+        var _lp_EventMouseButton &&evtMouseButton = 
+                                      _UNSAFE(_LP_EVENT_MOUSE_BUTTON (evt));
+        var f64 x = 0, y = 0;
+        var int button = 0, evttype = 0;
+        
+        _g_object_get (_G_OBJECT(evtMouseButton), "x", &&x, "y", &&y,
+                      "button", &&button, "type", &&evttype, null);
+        
+        emit mouse_button_event => (x, y, button, evttype);
       end
     end
     await FOREVER;
@@ -59,7 +81,6 @@ do
     _lp_scene_advance (&&scene!, FREQ * NS);
   end
 end
-
 
 class Media with
     var char&     uri;
@@ -106,9 +127,10 @@ do
   end
 
   loop do
-    var _lp_Media &&source;
+    var _GObject &&source;
     var _lp_Event &&evt;
-    (source, evt) = await MEDIA_EVENT until (source == &&m!);
+    (source, evt) = await LP_EVENT 
+                  until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&m!);
     var _GType type = _G_OBJECT_TYPE (evt);
     if type == _LP_TYPE_EVENT_START then
       emit start;
