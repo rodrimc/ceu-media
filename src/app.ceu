@@ -31,15 +31,17 @@ watching 15s do
       watching 5s do
           var Media v1 with       // starts only with the video
               this.uri      = &url1;
-              this.region   = &rect1;
               this.scene    = &s;
           end;
+          v1.setRegion (rect1);
+          v1.doStart ();
           var Media v2 with       // starts only with the video
               this.uri      = &url2;
-              this.region   = &rect2;
               this.scene    = &s;
           end;
+          v2.setRegion (rect2);
           v2.setPropertyFloat ("volume", 0.0);
+          v2.doStart ();
           await FOREVER;
       end
       // after 10s, destroys everything and restarts
