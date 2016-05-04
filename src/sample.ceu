@@ -1,0 +1,41 @@
+// APPLICATION: pure Ceu, no external types, C, etc
+
+#include "media.ceu"
+
+var int argc;
+var char && &&argv;
+(argc, argv) = await OS_START;
+
+if argc < 2 then
+  _printf ("Usage: %s URI\n", _ELEM_N (argv, 0));
+  escape 0;
+end
+
+var Scene s with
+  this.width = 1080;
+  this.height = 720;
+end;
+
+var char& url1  = &_ELEM_N (argv, 1);
+
+var Rect_Z r = Rect_Z(0, 0, s.width, s.height, 1);
+var Media m with       
+  this.uri      = &url1;
+  this.scene    = &s;
+end;
+
+m.setRegion (r);
+m.doStart();
+
+var int value = 0;
+every (x, y, button, press) in s.mouse_button_event do
+  if (button == 1 and press == true) then
+    _printf ("(%.0f, %.0f)\n", x, y);
+    value = (value + 1) % 2;
+    m.setPropertyFloat ("volume", (float) value);
+  end
+end
+
+await m.stop;
+
+escape 0;
