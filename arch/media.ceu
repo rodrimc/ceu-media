@@ -3,7 +3,11 @@
 native/pre do
     ##include <play.h>
     ##include <stdlib.h>
+    
+    typedef char * charptr;
 end
+
+native @plain _charptr;
 
 #define MEDIA_FRAME_RATE 2    // 1 fps
 
@@ -27,6 +31,7 @@ class Scene with
 
   /* Scene events */
   event (f64, f64, int, int) mouse_button_event;
+  event (_charptr, int) key_event;
 do
   var _lp_Scene &?scene;
   finalize
@@ -71,6 +76,17 @@ do
                       "button", &&button, "press", &&press, null);
         
         emit mouse_button_event => (x, y, button, press);
+      else/if type == _LP_TYPE_EVENT_KEY then
+        var _lp_EventKey &&evtKey = _UNSAFE(_LP_EVENT_KEY(evt));
+        var _charptr key = null;
+        var int press = 0;
+        _g_object_get (_G_OBJECT(evtKey), "key", &&key, 
+                                          "press", &&press, null);
+        emit key_event => (key, press);
+
+        finalize with
+          _g_free (key);
+        end
       end
     end
   end
@@ -90,6 +106,8 @@ class Media with
     function (int, int, int, int) => void setBounds;
     function (char && name, float value) => void setPropertyFloat;
     function (char && name, int value) => void setPropertyInt;
+    function (char && name) => float getPropertyFloat;
+    function (char && name) => int getPropertyInt;
 
     event (void) start;
     event (void) stop;
@@ -133,6 +151,18 @@ do
 
   function (char&& name, int value) => void setPropertyInt do
     _g_object_set (&&this.m!, name, value, null);
+  end
+
+  function (char&& name) => int getPropertyInt do
+    var int value = 0;
+    _g_object_get (&&this.m!, name, &&value, null);
+    return value;
+  end
+
+  function (char&& name) => float getPropertyFloat do
+    var float value = 0.0;
+    _g_object_get (&&this.m!, name, &&value, null);
+    return value;
   end
 end
 
