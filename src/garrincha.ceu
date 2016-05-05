@@ -20,22 +20,22 @@ spawn do
 end
 
 var char [] backgroundUrl = [] .. "../../resources/background.png";
+var Rect_Z backgroundRect = Rect_Z (0, 0, s.width, s.height, 1);
 var Media background with
   this.uri    = &backgroundUrl[0];
   this.scene  = &s;
+  this.m      = &this.init();
+  this.setRegion (backgroundRect);
 end;
-var Rect_Z backgroundRect = Rect_Z (0, 0, s.width, s.height, 1);
-background.setRegion (backgroundRect);
-background.doStart ();
 
 var char [] animUrl = [] .. "../../resources/animGar.mp4";
+var Rect_Z animRect = Rect_Z (0, 0, s.width, s.height, 2);
 var Media anim with
   this.uri    = &animUrl[0];
   this.scene  = &s;
+  this.m      = &this.init();
+  this.setRegion (animRect);
 end;
-var Rect_Z animRect = Rect_Z (0, 0, s.width, s.height, 2);
-anim.setRegion (animRect);
-anim.doStart ();
 
 await 5s;
 
@@ -43,21 +43,20 @@ var char [] choroUrl = [] .. "../../resources/choro.mp4";
 var Media choro with
   this.uri    = &choroUrl[0];
   this.scene  = &s;
+  this.m      = &this.init();
 end;
-choro.doStart ();
 
 await 7s;
 
 var char [] dribleUrl = [] .. "../../resources/drible.mp4";
+var Rect_Z dribleRect = Rect_Z (0.05 * s.width, 0.067 * s.height, 
+                               0.185 * s.width, 0.185 * s.height,  3);
 var Media drible with
   this.uri    = &dribleUrl[0];
   this.scene  = &s;
+  this.m      = &this.init ();
+  this.setRegion (dribleRect);
 end;
-
-var Rect_Z dribleRect = Rect_Z (0.05 * s.width, 0.067 * s.height, 
-                               0.185 * s.width, 0.185 * s.height,  3);
-drible.setRegion (dribleRect);
-drible.doStart ();
 
 await 29s;
 animRect = Rect_Z (0.05 * s.width, 0.0667 * s.height, 
@@ -65,18 +64,18 @@ animRect = Rect_Z (0.05 * s.width, 0.0667 * s.height,
 anim.setRegion (animRect);
 
 var char [] shoesUrl = [] .. "../../resources/shoes.mp4";
+var Rect_Z shoesRect = Rect_Z (0.15 * s.width, 0.6 * s.height, 
+                               0.25 * s.width, 0.25 * s.height,  3);
 var Media shoes with
   this.uri    = &shoesUrl[0];
   this.scene  = &s;
+  this.m      = &this.init();
+  this.setRegion (shoesRect);
 end;
-var Rect_Z shoesRect = Rect_Z (0.15 * s.width, 0.6 * s.height, 
-                               0.25 * s.width, 0.25 * s.height,  3);
-shoes.setRegion (shoesRect);
-shoes.doStart ();
 
-await shoes.stop;
+await shoes;
 animRect = Rect_Z (0, 0, s.width, s.height, 2);
 anim.setRegion (animRect);
-await anim.stop;
+await anim;
 
 escape 0;

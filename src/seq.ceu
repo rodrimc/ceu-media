@@ -15,17 +15,17 @@ var char [] url2 = [] .. "../../resources/bars.ogg";
 var Media v1 with       
     this.uri      = &url1[0];
     this.scene    = &s;
+    this.m        = &this.init ();
+    this.setRegion (rect);
 end;
-v1.setRegion(rect);
-v1.doStart ();
-await v1.stop;
+await v1;
 
 var Media v2 with       
     this.uri      = &url2[0];
     this.scene    = &s;
+    this.m        = &this.init ();
+    this.setRegion (rect);
 end;
-v2.setRegion(rect);
-v2.doStart ();
-await v2.stop;
+await v2;
 
 escape 0;

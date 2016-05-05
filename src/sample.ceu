@@ -22,10 +22,9 @@ var Rect_Z r = Rect_Z(0, 0, s.width, s.height, 1);
 var Media m with       
   this.uri      = &url1;
   this.scene    = &s;
+  this.m        = &this.init();
+  this.setRegion (r);
 end;
-
-m.setRegion (r);
-m.doStart();
 
 var int value = 0;
 every (x, y, button, press) in s.mouse_button_event do
@@ -36,6 +35,6 @@ every (x, y, button, press) in s.mouse_button_event do
   end
 end
 
-await m.stop;
+await m;
 
 escape 0;

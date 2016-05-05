@@ -74,7 +74,6 @@ do
         emit mouse_button_event => (x, y, button, press);
       end
     end
-    await FOREVER;
   end
 
   every FREQ ms do
@@ -85,59 +84,50 @@ end
 class Media with
     var char&     uri;
     var Scene&    scene;
+    var _lp_Media &?m;
 
+    function (void) => _lp_Media& init;
     function (Rect_Z r) => void setRegion;
     function (char && name, float value) => void setPropertyFloat;
     function (char && name, int value) => void setPropertyInt;
 
-    function (void) => void doStart;
-    function (void) => void doStop;
-
     event (void) start;
     event (void) stop;
 do
-  var _lp_Media &?m;
-  finalize
-    m = &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri));
-  with
-    _lp_media_stop (&&m!);
-  end
-
-  _lp_media_start (&&m!);
-
-  function (Rect_Z r) => void setRegion do
-    _g_object_set (&&m!, "x", r.x, "y", r.y, "z", r.z, 
-            "width", r.width, "height", r.height, null);
-  end
-  
-  function (char&& name, float value) => void setPropertyFloat do
-    _g_object_set (&&m!, name, value, null);
-  end
-
-  function (char&& name, int value) => void setPropertyInt do
-    _g_object_set (&&m!, name, value, null);
-  end
-
-  function (void) => void doStart do
-    _lp_media_start (&&m!); 
-  end
-
-  function (void) => void doStop do
-    _lp_media_stop (&&m!); 
+  _lp_media_start (&&this.m!);
+  finalize with
+    _lp_media_stop (&&this.m!);
   end
 
   loop do
     var _GObject &&source;
     var _lp_Event &&evt;
     (source, evt) = await LP_EVENT 
-                  until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&m!);
+                  until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&this.m!);
     var _GType type = _G_OBJECT_TYPE (evt);
     if type == _LP_TYPE_EVENT_START then
       emit start;
     else/if type == _LP_TYPE_EVENT_STOP then
       emit stop;
+      break;
     end
   end
 
+  function (void) => _lp_Media& init do
+    return &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri));
+  end
+
+  function (Rect_Z r) => void setRegion do
+    _g_object_set (&&this.m!, "x", r.x, "y", r.y, "z", r.z, 
+            "width", r.width, "height", r.height, null);
+  end
+  
+  function (char&& name, float value) => void setPropertyFloat do
+    _g_object_set (&&this.m!, name, value, null);
+  end
+
+  function (char&& name, int value) => void setPropertyInt do
+    _g_object_set (&&this.m!, name, value, null);
+  end
 end
 
