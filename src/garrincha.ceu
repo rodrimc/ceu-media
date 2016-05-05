@@ -5,20 +5,6 @@ var Scene s with
   this.height = 720;
 end;
 
-spawn do
-  every (x, y, button, press) in s.mouse_button_event do
-    _printf ("(x, y): %.0f, %.0f\n", x, y);
-    _printf ("button: %d\n", button);
-    _printf ("type: ");
-    if (press == _TRUE) then
-      _printf ("press\n");
-    else
-      _printf ("release\n");
-    end
-  end
-  await FOREVER; 
-end
-
 var char [] backgroundUrl = [] .. "../../resources/background.png";
 var Rect backgroundRect = Rect (0, 0, s.width, s.height);
 var Media background with
@@ -39,47 +25,98 @@ var Media anim with
   this.setPropertyInt ("z", 2);
 end;
 
-await 5s;
-
-var char [] choroUrl = [] .. "../../resources/choro.mp4";
-var Media choro with
-  this.uri    = &choroUrl[0];
-  this.scene  = &s;
-  this.m      = &this.init();
-end;
-
-await 7s;
-
-var char [] dribleUrl = [] .. "../../resources/drible.mp4";
-var Rect dribleRect = Rect (0.05 * s.width, 0.067 * s.height, 
+var Rect frameRect = Rect (0.05 * s.width, 0.067 * s.height, 
                                0.185 * s.width, 0.185 * s.height);
-var Media drible with
-  this.uri    = &dribleUrl[0];
-  this.scene  = &s;
-  this.m      = &this.init ();
-  this.setRectBounds (dribleRect);
-  this.setPropertyInt ("z", 3);
-end;
 
-await 29s;
-animRect = Rect (0.05 * s.width, 0.0667 * s.height, 
-                   0.45 * s.width, 0.45 * s.height);
-anim.setRectBounds (animRect);
+watching anim do
+  par/and do
+    await 5s;
 
-var char [] shoesUrl = [] .. "../../resources/shoes.mp4";
-var Rect shoesRect = Rect (0.15 * s.width, 0.6 * s.height, 
-                               0.25 * s.width, 0.25 * s.height);
-var Media shoes with
-  this.uri    = &shoesUrl[0];
-  this.scene  = &s;
-  this.m      = &this.init();
-  this.setRectBounds (shoesRect);
-  this.setPropertyInt ("z", 3);
-end;
+    var char [] choroUrl = [] .. "../../resources/choro.mp4";
+    var Media choro with
+      this.uri    = &choroUrl[0];
+      this.scene  = &s;
+      this.m      = &this.init();
+    end;
+  with
+    await 12s;
 
-await shoes;
-animRect = Rect (0, 0, s.width, s.height);
-anim.setRectBounds (animRect);
-await anim;
+    var char [] dribleUrl = [] .. "../../resources/drible.mp4";
+    var Media drible with
+      this.uri    = &dribleUrl[0];
+      this.scene  = &s;
+      this.m      = &this.init ();
+      this.setRectBounds (frameRect);
+      this.setPropertyInt ("z", 3);
+    end;
+  with
+    await 41s;
+    var char [] photoUrl = [] .. "../../resources/photo.png";
+    var Media photo with
+      this.uri    = &photoUrl[0];
+      this.scene  = &s;
+      this.m      = &this.init ();
+      this.setRectBounds (frameRect);
+      this.setPropertyInt ("z", 3);
+      this.setPropertyFloat ("alpha", 0.6);
+    end;
+
+    watching 5s do
+      await 1s;
+
+      var int top = photo.getPropertyInt ("y");
+      var int diff = 290 - top;
+      var int amount = 1;
+      watching 3s do
+        every (3000.0/diff)ms do
+          photo.setPropertyInt ("y", top + amount);
+          amount = amount + 1;
+        end
+      end
+    end
+  with
+    await 45s;
+    var bool flag = false;
+    watching 6s do
+      var char [] iconUrl = [] .. "../../resources/icon.png";
+      var Media icon with
+        this.uri    = &iconUrl[0];
+        this.scene  = &s;
+        this.m      = &this.init();
+        this.setBounds (0.875 * s.width, 0.117 * s.height, 
+                                     0.0845 * s.width, 0.067 * s.height);
+        this.setPropertyInt ("z", 3);
+      end;
+      
+      var _charptr key;
+      var int press;
+
+      (key, press) = await s.key_event until _strcmp (key, "F1") == 0;
+      flag = true;
+    end
+
+    if (flag) then
+      anim.setBounds (0.05 * s.width, 0.0667 * s.height, 
+                         0.45 * s.width, 0.45 * s.height);
+
+      var char [] shoesUrl = [] .. "../../resources/shoes.mp4";
+      var Rect shoesRect = Rect (0.15 * s.width, 0.6 * s.height, 
+                                     0.25 * s.width, 0.25 * s.height);
+      var Media shoes with
+        this.uri    = &shoesUrl[0];
+        this.scene  = &s;
+        this.m      = &this.init();
+        this.setRectBounds (shoesRect);
+        this.setPropertyInt ("z", 3);
+      end;
+
+      await shoes;
+      animRect = Rect (0, 0, s.width, s.height);
+      anim.setRectBounds (animRect);
+    end
+  with
+    await anim;
+  end
+end
 
 escape 0;
