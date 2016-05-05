@@ -20,21 +20,23 @@ spawn do
 end
 
 var char [] backgroundUrl = [] .. "../../resources/background.png";
-var Rect_Z backgroundRect = Rect_Z (0, 0, s.width, s.height, 1);
+var Rect backgroundRect = Rect (0, 0, s.width, s.height);
 var Media background with
   this.uri    = &backgroundUrl[0];
   this.scene  = &s;
   this.m      = &this.init();
-  this.setRegion (backgroundRect);
+  this.setRectBounds (backgroundRect);
+  this.setPropertyInt ("z", 1);
 end;
 
 var char [] animUrl = [] .. "../../resources/animGar.mp4";
-var Rect_Z animRect = Rect_Z (0, 0, s.width, s.height, 2);
+var Rect animRect = Rect (0, 0, s.width, s.height);
 var Media anim with
   this.uri    = &animUrl[0];
   this.scene  = &s;
   this.m      = &this.init();
-  this.setRegion (animRect);
+  this.setRectBounds (animRect);
+  this.setPropertyInt ("z", 2);
 end;
 
 await 5s;
@@ -49,33 +51,35 @@ end;
 await 7s;
 
 var char [] dribleUrl = [] .. "../../resources/drible.mp4";
-var Rect_Z dribleRect = Rect_Z (0.05 * s.width, 0.067 * s.height, 
-                               0.185 * s.width, 0.185 * s.height,  3);
+var Rect dribleRect = Rect (0.05 * s.width, 0.067 * s.height, 
+                               0.185 * s.width, 0.185 * s.height);
 var Media drible with
   this.uri    = &dribleUrl[0];
   this.scene  = &s;
   this.m      = &this.init ();
-  this.setRegion (dribleRect);
+  this.setRectBounds (dribleRect);
+  this.setPropertyInt ("z", 3);
 end;
 
 await 29s;
-animRect = Rect_Z (0.05 * s.width, 0.0667 * s.height, 
-                   0.45 * s.width, 0.45 * s.height, 2);
-anim.setRegion (animRect);
+animRect = Rect (0.05 * s.width, 0.0667 * s.height, 
+                   0.45 * s.width, 0.45 * s.height);
+anim.setRectBounds (animRect);
 
 var char [] shoesUrl = [] .. "../../resources/shoes.mp4";
-var Rect_Z shoesRect = Rect_Z (0.15 * s.width, 0.6 * s.height, 
-                               0.25 * s.width, 0.25 * s.height,  3);
+var Rect shoesRect = Rect (0.15 * s.width, 0.6 * s.height, 
+                               0.25 * s.width, 0.25 * s.height);
 var Media shoes with
   this.uri    = &shoesUrl[0];
   this.scene  = &s;
   this.m      = &this.init();
-  this.setRegion (shoesRect);
+  this.setRectBounds (shoesRect);
+  this.setPropertyInt ("z", 3);
 end;
 
 await shoes;
-animRect = Rect_Z (0, 0, s.width, s.height, 2);
-anim.setRegion (animRect);
+animRect = Rect (0, 0, s.width, s.height);
+anim.setRectBounds (animRect);
 await anim;
 
 escape 0;

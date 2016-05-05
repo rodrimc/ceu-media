@@ -24,22 +24,24 @@ var int flag = 0;
 
 watching 15s do
   loop do
-      var Rect_Z   rect1 = Rect_Z(0, 0, s.width / 2, s.height / 2, 1);
-      var Rect_Z   rect2 = Rect_Z(s.width/2, s.height/2, 
-                                  s.width/2, s.height/2, 2);
+      var Rect   rect1 = Rect(0, 0, s.width / 2, s.height / 2);
+      var Rect   rect2 = Rect(s.width/2, s.height/2, 
+                                  s.width/2, s.height/2);
       _printf("===> RESTART\n");
       watching 5s do
           var Media v1 with       // starts only with the video
               this.uri      = &url1;
               this.scene    = &s;
               this.m        = &this.init();
-              this.setRegion (rect1);
+              this.setRectBounds (rect1);
+              this.setPropertyInt ("z", 1);
           end;
           var Media v2 with       // starts only with the video
               this.uri      = &url2;
               this.scene    = &s;
               this.m        = &this.init();
-              this.setRegion (rect2);
+              this.setRectBounds (rect2);
+              this.setPropertyInt ("z", 2);
               this.setPropertyFloat ("volume", 0.0);
           end;
           await FOREVER;
