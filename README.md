@@ -9,6 +9,11 @@ to match the application logic time with the presentation time.
 Project dependencies:
   * [CÉU] (https://github.com/fsantanna/ceu/)
   * [LibPlay] (https://github.com/TeleMidia/LibPlay)
+ 
+---
+The file arch/ceu_main.c and the folder arch/up should be both symbolic links to the following location:
+ * ceu_main.c: <ceu-dist>/arch/ceu_main.c
+ * up: <ceu-dist>/arch
 
 To compile and execute:
 ```
