@@ -9,23 +9,12 @@ end;
 
 var Rect rect = Rect(0, 0, s.width, s.height);
 
-var char [] url1 = [] .. "../../resources/misc.avi";
-var char [] url2 = [] .. "../../resources/bars.ogg";
+var Media m1 = Media ("../../resources/misc.avi", 0, 0, s.width, s.height,
+                      1, 1.0, 1.0);
+var Media m2 = Media ("../../resources/bars.ogg", 0, 0, s.width, s.height,
+                      1, 1.0, 1.0);
 
-var Media v1 with       
-    this.uri      = &url1[0];
-    this.scene    = &s;
-    this.m        = &this.init ();
-    this.setRectBounds (rect);
-end;
-await v1;
-
-var Media v2 with       
-    this.uri      = &url2[0];
-    this.scene    = &s;
-    this.m        = &this.init ();
-    this.setRectBounds (rect);
-end;
-await v2;
+do Player.play (m1, &s);
+do Player.play (m2, &s);
 
 escape 0;

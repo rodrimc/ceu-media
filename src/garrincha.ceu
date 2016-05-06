@@ -5,71 +5,60 @@ var Scene s with
   this.height = 720;
 end;
 
-var char [] backgroundUrl = [] .. "../../resources/background.png";
-var Rect backgroundRect = Rect (0, 0, s.width, s.height);
-var Media background with
-  this.uri    = &backgroundUrl[0];
-  this.scene  = &s;
-  this.m      = &this.init();
-  this.setRectBounds (backgroundRect);
-  this.setPropertyInt ("z", 1);
-end;
-
-var char [] animUrl = [] .. "../../resources/animGar.mp4";
-var Rect animRect = Rect (0, 0, s.width, s.height);
-var Media anim with
-  this.uri    = &animUrl[0];
-  this.scene  = &s;
-  this.m      = &this.init();
-  this.setRectBounds (animRect);
-  this.setPropertyInt ("z", 2);
-end;
-
-var Rect frameRect = Rect (0.05 * s.width, 0.067 * s.height, 
+var Rect frame = Rect (0.05 * s.width, 0.067 * s.height, 
                                0.185 * s.width, 0.185 * s.height);
 
-watching anim do
-  par/and do
-    await 5s;
+var Media back = Media ("../../resources/background.png", 0, 0, s.width, 
+                        s.height, 1, 1.0, 1.0);
+var Media anim = Media ("../../resources/animGar.mp4", 0, 0, s.width, 
+                        s.height, 2, 1.0, 1.0);
+var Media choro = Media ("../../resources/choro.mp4", 0, 0, 0, 
+                        0, 0, 0, 1.0);
+var Media drible = Media ("../../resources/drible.mp4", frame.x, frame.y, 
+                        frame.width, frame.height, 3, 1.0, 1.0);
+var Media photo = Media ("../../resources/photo.png", frame.x, frame.y, 
+                        frame.width, frame.height, 3, 0.6, 1.0);
+var Media icon = Media ("../../resources/icon.png", 
+                        0.875 * s.width, 0.117 * s.height, 
+                        0.0845 * s.width, 0.067 * s.height, 
+                        3, 1.0, 1.0);
+var Media shoes = Media ("../../resources/shoes.mp4", 
+                        0.15 * s.width, 0.6 * s.height, 
+                        0.25 * s.width, 0.25 * s.height, 
+                        3, 1.0, 1.0);
 
-    var char [] choroUrl = [] .. "../../resources/choro.mp4";
-    var Media choro with
-      this.uri    = &choroUrl[0];
-      this.scene  = &s;
-      this.m      = &this.init();
-    end;
+event (void) finish;
+event (int, int, int, int) resize;
+
+watching finish do
+  par/and do
+    do Player.play (back, &s);
+  with
+    var Player animPlayer = Player.play (anim, &s);
+    watching animPlayer do
+      every (x, y, width, height) in resize do
+        animPlayer.setBounds (x, y, width, height);
+      end
+    end
+    emit finish;
+  with
+    await 5s;
+    do Player.play (choro, &s);
   with
     await 12s;
-
-    var char [] dribleUrl = [] .. "../../resources/drible.mp4";
-    var Media drible with
-      this.uri    = &dribleUrl[0];
-      this.scene  = &s;
-      this.m      = &this.init ();
-      this.setRectBounds (frameRect);
-      this.setPropertyInt ("z", 3);
-    end;
+    do Player.play (drible, &s);
   with
     await 41s;
-    var char [] photoUrl = [] .. "../../resources/photo.png";
-    var Media photo with
-      this.uri    = &photoUrl[0];
-      this.scene  = &s;
-      this.m      = &this.init ();
-      this.setRectBounds (frameRect);
-      this.setPropertyInt ("z", 3);
-      this.setPropertyFloat ("alpha", 0.6);
-    end;
-
+    var Player photoPlayer = Player.play (photo, &s);
     watching 5s do
       await 1s;
 
-      var int top = photo.getPropertyInt ("y");
+      var int top = photoPlayer.getPropertyInt ("y");
       var int diff = 290 - top;
       var int amount = 1;
       watching 3s do
         every (3000.0/diff)ms do
-          photo.setPropertyInt ("y", top + amount);
+          photoPlayer.setPropertyInt ("y", top + amount);
           amount = amount + 1;
         end
       end
@@ -78,44 +67,20 @@ watching anim do
     await 45s;
     var bool flag = false;
     watching 6s do
-      var char [] iconUrl = [] .. "../../resources/icon.png";
-      var Media icon with
-        this.uri    = &iconUrl[0];
-        this.scene  = &s;
-        this.m      = &this.init();
-        this.setBounds (0.875 * s.width, 0.117 * s.height, 
-                                     0.0845 * s.width, 0.067 * s.height);
-        this.setPropertyInt ("z", 3);
-      end;
-      
+      var Player iconPlayer = Player.play (icon, &s);
       var _charptr key;
       var int press;
 
       (key, press) = await s.key_event until _strcmp (key, "F1") == 0;
       flag = true;
     end
-
     if (flag) then
-      anim.setBounds (0.05 * s.width, 0.0667 * s.height, 
-                         0.45 * s.width, 0.45 * s.height);
+      emit resize => (0.05 * s.width, 0.0667 * s.height, 
+                     0.45 * s.width, 0.45 * s.height);
 
-      var char [] shoesUrl = [] .. "../../resources/shoes.mp4";
-      var Rect shoesRect = Rect (0.15 * s.width, 0.6 * s.height, 
-                                     0.25 * s.width, 0.25 * s.height);
-      var Media shoes with
-        this.uri    = &shoesUrl[0];
-        this.scene  = &s;
-        this.m      = &this.init();
-        this.setRectBounds (shoesRect);
-        this.setPropertyInt ("z", 3);
-      end;
-
-      await shoes;
-      animRect = Rect (0, 0, s.width, s.height);
-      anim.setRectBounds (animRect);
+      do Player.play (shoes, &s);
+      emit resize => (0, 0, s.width, s.height);
     end
-  with
-    await anim;
   end
 end
 

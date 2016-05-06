@@ -16,34 +16,20 @@ var Scene s with
   this.height = 720;
 end;
 
-
-var char& url1  = &_ELEM_N (argv, 1);
 var char& url2 = &_ELEM_N (argv, 2);
 
 var int flag = 0;
+var Media m1 = Media (_ELEM_N(argv, 1), 0, 0, s.width/2, s.height/2, 
+                      1, 1.0, 1.0);
+var Media m2 = Media (_ELEM_N(argv, 2), s.width/2, s.height/2, s.width/2, 
+                      s.height/2, 1, 1.0, 0);
 
 watching 15s do
   loop do
-      var Rect   rect1 = Rect(0, 0, s.width / 2, s.height / 2);
-      var Rect   rect2 = Rect(s.width/2, s.height/2, 
-                                  s.width/2, s.height/2);
       _printf("===> RESTART\n");
       watching 5s do
-          var Media v1 with       // starts only with the video
-              this.uri      = &url1;
-              this.scene    = &s;
-              this.m        = &this.init();
-              this.setRectBounds (rect1);
-              this.setPropertyInt ("z", 1);
-          end;
-          var Media v2 with       // starts only with the video
-              this.uri      = &url2;
-              this.scene    = &s;
-              this.m        = &this.init();
-              this.setRectBounds (rect2);
-              this.setPropertyInt ("z", 2);
-              this.setPropertyFloat ("volume", 0.0);
-          end;
+          var Player p1 = Player.play (m1, &s);
+          var Player p2 = Player.play (m2, &s);
           await FOREVER;
       end
       // after 10s, destroys everything and restarts

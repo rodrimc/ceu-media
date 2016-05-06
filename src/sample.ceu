@@ -16,23 +16,18 @@ var Scene s with
   this.height = 720;
 end;
 
-var char& url1  = &_ELEM_N (argv, 1);
-
 var Rect r = Rect(0, 0, s.width, s.height);
-var Media m with       
-  this.uri      = &url1;
-  this.scene    = &s;
-  this.m        = &this.init();
-  this.setRectBounds (r);
-end;
+var Media m = Media (_ELEM_N(argv, 1), 0, 0, s.width, s.height, 1, 
+                    1.0, 1.0);
 
-watching m do
-  var int mute = _FALSE;
+var Player p = Player.play (m, &s);
+
+watching p do
+  var bool mute = _FALSE;
   every (x, y, button, press) in s.mouse_button_event do
     if (button == 1 and press == true) then
       _printf ("(%.0f, %.0f)\n", x, y);
-      /* value = (value + 1) % 2; */
-      m.setPropertyInt ("mute", mute);
+      p.setPropertyBool ("mute", mute);
       mute = not mute;
     end
   end

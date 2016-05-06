@@ -1,14 +1,5 @@
 #include "raw.ceu"
 
-native/pre do
-    ##include <play.h>
-    ##include <stdlib.h>
-    
-    typedef char * charptr;
-end
-
-native @plain _charptr;
-
 #define MEDIA_FRAME_RATE 2    // 1 fps
 
 #define PERIOD_US (1000000/MEDIA_FRAME_RATE)
@@ -16,10 +7,21 @@ native @plain _charptr;
 #define FREQ 15
 
 data Rect with
-    var int x;
-    var int y;
-    var int width;
-    var int height;
+  var int x;
+  var int y;
+  var int width;
+  var int height;
+end
+
+data Media with
+  var _charptr uri;
+  var int x;
+  var int y;
+  var int width;
+  var int height;
+  var int z;
+  var float alpha;
+  var float volume;
 end
 
 class Scene with
@@ -96,27 +98,38 @@ do
   end
 end
 
-class Media with
-    var char&     uri;
-    var Scene&    scene;
-    var _lp_Media &?m;
+class Player with
+  var Scene   &scene;
+  var Media   media;
 
-    function (void) => _lp_Media& init;
-    function (Rect r) => void setRectBounds;
-    function (int, int, int, int) => void setBounds;
-    function (char && name, float value) => void setPropertyFloat;
-    function (char && name, int value) => void setPropertyInt;
-    function (char && name) => float getPropertyFloat;
-    function (char && name) => int getPropertyInt;
+  /* functions */
+  function (Media m, Scene &s) => Player play;
+  function (Rect r) => void setRectBounds;
+  function (int, int, int, int) => void setBounds;
+  function (char && name, float value) => void setPropertyFloat;
+  function (char && name, int value) => void setPropertyInt;
+  function (char && name, bool value) => void setPropertyBool;
+  function (char && name) => float getPropertyFloat;
+  function (char && name) => int getPropertyInt;
+  function (char && name) => bool getPropertyBool;
 
-    event (void) start;
-    event (void) stop;
+  /* events */
+  event (void) start;
+  event (void) stop;
 do
-  _lp_media_start (&&this.m!);
-  finalize with
-    _lp_media_stop (&&this.m!);
+  var _lp_Media &?m;
+  finalize
+    m = &_lp_media_new (scene.getptr(), _UNSAFE(this.media.uri));
+  with
+    _lp_media_stop (&&m!);
   end
 
+  _g_object_set (_G_OBJECT(&&m!), "x", this.media.x, "y", this.media.y,
+                "width", this.media.width, "height", this.media.height,
+                "z", this.media.z, "alpha", this.media.alpha,
+                "volume", this.media.volume, null);
+
+  _lp_media_start (&&m!);
   loop do
     var _GObject &&source;
     var _lp_Event &&evt;
@@ -131,8 +144,10 @@ do
     end
   end
 
-  function (void) => _lp_Media& init do
-    return &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri));
+  /* function definitions */
+  function (Media m, Scene &s) => Player play do
+    this.scene = &s;
+    this.media = m;
   end
 
   function (Rect r) => void setRectBounds do
@@ -153,8 +168,18 @@ do
     _g_object_set (&&this.m!, name, value, null);
   end
 
+  function (char&& name, bool value) => void setPropertyBool do
+    _g_object_set (&&this.m!, name, value, null);
+  end
+
   function (char&& name) => int getPropertyInt do
     var int value = 0;
+    _g_object_get (&&this.m!, name, &&value, null);
+    return value;
+  end
+
+  function (char&& name) => bool getPropertyBool do
+    var bool value = false;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
   end
@@ -165,4 +190,74 @@ do
     return value;
   end
 end
+
+/* class Media with */
+/*     var char&     uri; */
+/*     var Scene&    scene; */
+/*     var _lp_Media &?m; */
+
+/*     function (void) => _lp_Media& init; */
+/*     function (Rect r) => void setRectBounds; */
+/*     function (int, int, int, int) => void setBounds; */
+/*     function (char && name, float value) => void setPropertyFloat; */
+/*     function (char && name, int value) => void setPropertyInt; */
+/*     function (char && name) => float getPropertyFloat; */
+/*     function (char && name) => int getPropertyInt; */
+
+/*     event (void) start; */
+/*     event (void) stop; */
+/* do */
+/*   _lp_media_start (&&this.m!); */
+/*   finalize with */
+/*     _lp_media_stop (&&this.m!); */
+/*   end */
+
+/*   loop do */
+/*     var _GObject &&source; */
+/*     var _lp_Event &&evt; */
+/*     (source, evt) = await LP_EVENT */ 
+/*                   until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&this.m!); */
+/*     var _GType type = _G_OBJECT_TYPE (evt); */
+/*     if type == _LP_TYPE_EVENT_START then */
+/*       emit start; */
+/*     else/if type == _LP_TYPE_EVENT_STOP then */
+/*       emit stop; */
+/*       break; */
+/*     end */
+/*   end */
+
+/*   function (void) => _lp_Media& init do */
+/*     return &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri)); */
+/*   end */
+
+/*   function (Rect r) => void setRectBounds do */
+/*     _g_object_set (&&this.m!, "x", r.x, "y", r.y, */ 
+/*             "width", r.width, "height", r.height, null); */
+/*   end */
+
+/*   function (int x, int y, int width, int height) => void setBounds do */
+/*     _g_object_set (&&this.m!, "x", x, "y", y, */ 
+/*             "width", width, "height", height, null); */
+/*   end */
+  
+/*   function (char&& name, float value) => void setPropertyFloat do */
+/*     _g_object_set (&&this.m!, name, value, null); */
+/*   end */
+
+/*   function (char&& name, int value) => void setPropertyInt do */
+/*     _g_object_set (&&this.m!, name, value, null); */
+/*   end */
+
+/*   function (char&& name) => int getPropertyInt do */
+/*     var int value = 0; */
+/*     _g_object_get (&&this.m!, name, &&value, null); */
+/*     return value; */
+/*   end */
+
+/*   function (char&& name) => float getPropertyFloat do */
+/*     var float value = 0.0; */
+/*     _g_object_get (&&this.m!, name, &&value, null); */
+/*     return value; */
+/*   end */
+/* end */
 

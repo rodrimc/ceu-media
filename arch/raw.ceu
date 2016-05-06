@@ -2,11 +2,16 @@ input (int, char&& &&) OS_START;
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 native/pre do
-##include <glib.h>
-
-##define UNSAFE(x) x
-##define ELEM_N(V,N) V[N]
+  ##include <glib.h>
+  ##include <play.h>
+  ##include <stdlib.h>
+  
+  ##define UNSAFE(x) x
+  ##define ELEM_N(V,N) V[N]
+  typedef char * charptr;
 end
+
+native @plain _charptr;
 
 native @pure _UNSAFE;
 native @pure _ELEM_N();
@@ -34,6 +39,7 @@ native @nohold _LP_EVENT_KEY;
 native @nohold _g_object_unref;
 native @nohold _g_object_set;
 native @nohold _g_object_get;
+native @nohold _g_list_free;
 native @pure _G_OBJECT;
 native @pure _G_OBJECT_TYPE;
 
