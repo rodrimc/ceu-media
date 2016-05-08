@@ -32,7 +32,7 @@ native @nohold _LP_IS_MEDIA;
 native @nohold _LP_IS_SCENE;
 native @nohold _LP_MEDIA;
 native @nohold _LP_SCENE;
-native @nohold _LP_EVENT_MOUSE_BUTTON;
+native @nohold _LP_EVENT_POINTER_CLICK;
 native @nohold _LP_EVENT_KEY;
 
 /***********  GLib functions  *************/
