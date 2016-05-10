@@ -9,9 +9,9 @@ end;
 
 var Rect rect = Rect(0, 0, s.width, s.height);
 
-var Media m1 = Media ("../../resources/misc.avi", 0, 0, s.width, s.height,
+var Media m1 = Media.VIDEO ("../../resources/misc.avi", 0, 0, s.width, s.height,
                       1, 1.0, 1.0);
-var Media m2 = Media ("../../resources/bars.ogg", 0, 0, s.width, s.height,
+var Media m2 = Media.VIDEO ("../../resources/bars.ogg", 0, 0, s.width, s.height,
                       1, 1.0, 1.0);
 
 do Player.play (m1, &s);

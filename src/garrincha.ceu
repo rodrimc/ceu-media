@@ -8,21 +8,20 @@ end;
 var Rect frame = Rect (0.05 * s.width, 0.067 * s.height, 
                                0.185 * s.width, 0.185 * s.height);
 
-var Media back = Media ("../../resources/background.png", 0, 0, s.width, 
-                        s.height, 1, 1.0, 1.0);
-var Media anim = Media ("../../resources/animGar.mp4", 0, 0, s.width, 
+var Media back = Media.IMAGE ("../../resources/background.png", 0, 0, s.width, 
+                        s.height, 1, 1.0);
+var Media anim = Media.VIDEO ("../../resources/animGar.mp4", 0, 0, s.width, 
                         s.height, 2, 1.0, 1.0);
-var Media choro = Media ("../../resources/choro.mp4", 0, 0, 0, 
-                        0, 0, 0, 1.0);
-var Media drible = Media ("../../resources/drible.mp4", frame.x, frame.y, 
+var Media choro = Media.AUDIO ("../../resources/choro.mp4", 1.0);
+var Media drible = Media.VIDEO ("../../resources/drible.mp4", frame.x, frame.y, 
                         frame.width, frame.height, 3, 1.0, 1.0);
-var Media photo = Media ("../../resources/photo.png", frame.x, frame.y, 
-                        frame.width, frame.height, 3, 0.6, 1.0);
-var Media icon = Media ("../../resources/icon.png", 
+var Media photo = Media.IMAGE ("../../resources/photo.png", frame.x, frame.y, 
+                        frame.width, frame.height, 3, 0.6);
+var Media icon = Media.IMAGE ("../../resources/icon.png", 
                         0.875 * s.width, 0.117 * s.height, 
                         0.0845 * s.width, 0.067 * s.height, 
-                        3, 1.0, 1.0);
-var Media shoes = Media ("../../resources/shoes.mp4", 
+                        3, 1.0);
+var Media shoes = Media.VIDEO ("../../resources/shoes.mp4", 
                         0.15 * s.width, 0.6 * s.height, 
                         0.25 * s.width, 0.25 * s.height, 
                         3, 1.0, 1.0);

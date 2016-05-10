@@ -14,14 +14,49 @@ data Rect with
 end
 
 data Media with
-  var _charptr uri;
-  var int x;
-  var int y;
-  var int width;
-  var int height;
-  var int z;
-  var float alpha;
-  var float volume;
+  tag VIDEO with
+    var _charptr uri;
+    var int x;
+    var int y;
+    var int width;
+    var int height;
+    var int z;
+    var float alpha;
+    var float volume;
+  end
+
+  or
+
+  tag IMAGE with
+    var _charptr uri;
+    var int x;
+    var int y;
+    var int width;
+    var int height;
+    var int z;
+    var float alpha;
+  end
+
+  or
+
+  tag AUDIO with
+    var _charptr uri;
+    var float volume;
+  end 
+
+  or
+
+  tag TEXT with
+    var _charptr text;
+    var _charptr font_desc;
+    var uint color;
+    var int x;
+    var int y;
+    var int width;
+    var int height;
+    var int z;
+    var float alpha;
+  end
 end
 
 class Scene with
@@ -42,6 +77,7 @@ do
     _g_object_unref (_G_OBJECT(&&scene!));
   end
 
+  _g_object_set (&&scene!, "slave-audio", true, null);
   _g_object_set (&&scene!, "lockstep", true, null);
     
   function (void) => _lp_Scene && getptr do
@@ -117,17 +153,51 @@ class Player with
   event (void) start;
   event (void) stop;
 do
-  var _lp_Media &?m;
-  finalize
-    m = &_lp_media_new (scene.getptr(), _UNSAFE(this.media.uri));
-  with
-    _lp_media_stop (&&m!);
+  var _charptr value = null;
+  if media.VIDEO then
+    value = media.VIDEO.uri;
+  else/if media.IMAGE then
+    value = media.IMAGE.uri;
+  else/if media.AUDIO then
+    value = media.AUDIO.uri;
+  else/if media.TEXT then
+    value = media.TEXT.text;
   end
 
-  _g_object_set (_G_OBJECT(&&m!), "x", this.media.x, "y", this.media.y,
-                "width", this.media.width, "height", this.media.height,
-                "z", this.media.z, "alpha", this.media.alpha,
-                "volume", this.media.volume, null);
+  var _lp_Media &?m;
+  if not media.TEXT then
+    finalize
+      m = &_lp_media_new (scene.getptr(), _UNSAFE(value));
+    with
+      _lp_media_stop (&&m!);
+    end
+  else
+    finalize
+      m = &_lp_media_text_new (scene.getptr(), _UNSAFE(value));
+    with
+      _lp_media_stop (&&m!);
+    end
+  end
+
+  if media.VIDEO then
+    _g_object_set (_G_OBJECT(&&m!), "x", media.VIDEO.x, "y", media.VIDEO.y,
+                  "width", media.VIDEO.width, "height", media.VIDEO.height,
+                  "z", media.VIDEO.z, "alpha", media.VIDEO.alpha,
+                  "volume", media.VIDEO.volume, null);
+  else/if media.IMAGE then
+    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.x, "y", media.IMAGE.y,
+                  "width", media.IMAGE.width, "height", media.IMAGE.height,
+                  "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
+  else/if media.AUDIO then
+    _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
+  else/if media.TEXT then
+    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.text, 
+                  "font-desc", media.TEXT.font_desc, 
+                  "text-color", media.TEXT.color,
+                  "x", media.TEXT.x, "y", media.TEXT.y,
+                  "width", media.TEXT.width, "height", media.TEXT.height,
+                  "z", media.TEXT.z, "alpha", media.TEXT.alpha, null);
+  end
 
   _lp_media_start (&&m!);
   loop do

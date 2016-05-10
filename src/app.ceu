@@ -19,9 +19,9 @@ end;
 var char& url2 = &_ELEM_N (argv, 2);
 
 var int flag = 0;
-var Media m1 = Media (_ELEM_N(argv, 1), 0, 0, s.width/2, s.height/2, 
+var Media m1 = Media.VIDEO (_ELEM_N(argv, 1), 0, 0, s.width/2, s.height/2, 
                       1, 1.0, 1.0);
-var Media m2 = Media (_ELEM_N(argv, 2), s.width/2, s.height/2, s.width/2, 
+var Media m2 = Media.VIDEO (_ELEM_N(argv, 2), s.width/2, s.height/2, s.width/2, 
                       s.height/2, 1, 1.0, 0);
 
 watching 15s do
