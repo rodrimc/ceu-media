@@ -66,7 +66,7 @@ class Scene with
   function (void) => _lp_Scene && getptr;
 
   /* Scene events */
-  event (f64, f64, int, int) mouse_button_event;
+  event (f64, f64, int, int) mouse_click_event;
   event (f64, f64) mouse_move_event;
   event (_charptr, int) key_event;
 do
@@ -113,7 +113,7 @@ do
         _g_object_get (_G_OBJECT(evtPointerClick), "x", &&x, "y", &&y,
                       "button", &&button, "press", &&press, null);
         
-        emit mouse_button_event => (x, y, button, press);
+        emit mouse_click_event => (x, y, button, press);
       else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
         var _lp_EventPointerMove &&evtPointerMove = 
                                       _UNSAFE(_LP_EVENT_POINTER_MOVE (evt));
