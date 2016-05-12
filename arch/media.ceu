@@ -55,7 +55,6 @@ data Media with
     var int width;
     var int height;
     var int z;
-    var float alpha;
   end
 end
 
@@ -68,6 +67,7 @@ class Scene with
 
   /* Scene events */
   event (f64, f64, int, int) mouse_button_event;
+  event (f64, f64) mouse_move_event;
   event (_charptr, int) key_event;
 do
   var _lp_Scene &?scene;
@@ -114,6 +114,14 @@ do
                       "button", &&button, "press", &&press, null);
         
         emit mouse_button_event => (x, y, button, press);
+      else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
+        var _lp_EventPointerMove &&evtPointerMove = 
+                                      _UNSAFE(_LP_EVENT_POINTER_MOVE (evt));
+        var f64 x = 0, y = 0;
+        
+        _g_object_get (_G_OBJECT(evtPointerMove), "x", &&x, "y", &&y, null);
+        
+        emit mouse_move_event => (x, y);
       else/if type == _LP_TYPE_EVENT_KEY then
         var _lp_EventKey &&evtKey = _UNSAFE(_LP_EVENT_KEY(evt));
         var _charptr key = null;
@@ -196,7 +204,7 @@ do
                   "text-color", media.TEXT.color,
                   "x", media.TEXT.x, "y", media.TEXT.y,
                   "width", media.TEXT.width, "height", media.TEXT.height,
-                  "z", media.TEXT.z, "alpha", media.TEXT.alpha, null);
+                  "z", media.TEXT.z,  null);
   end
 
   _lp_media_start (&&m!);
