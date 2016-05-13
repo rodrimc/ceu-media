@@ -61,14 +61,17 @@ end
 class Scene with
   var int width;
   var int height;
+  var bool auto_advance;
 
   /* Scene functions */
+  function (uint) => void advance_time;
   function (void) => _lp_Scene && getptr;
 
   /* Scene events */
   event (f64, f64, int, int) mouse_click_event;
   event (f64, f64) mouse_move_event;
   event (_charptr, int) key_event;
+  event (void) quit;
 do
   var _lp_Scene &?scene;
   finalize
@@ -80,10 +83,6 @@ do
   _g_object_set (&&scene!, "slave-audio", true, null);
   _g_object_set (&&scene!, "lockstep", true, null);
     
-  function (void) => _lp_Scene && getptr do
-    return &&scene!;
-  end
-
   spawn do
     async (scene) do
       loop do 
@@ -97,7 +96,7 @@ do
     await FOREVER;
   end
 
-  spawn do
+  par/or do
     loop do
       var _GObject &&source;
       var _lp_Event &&evt;
@@ -135,11 +134,28 @@ do
         end
       end
     end
+  with
+    if auto_advance == true then 
+      every FREQ ms do
+        _lp_scene_advance (&&scene!, FREQ * NS);
+      end
+    else
+      await FOREVER;
+    end
+  with
+    await quit;
   end
 
-  every FREQ ms do
-    _lp_scene_advance (&&scene!, FREQ * NS);
+  function (void) => _lp_Scene && getptr do
+    return &&scene!;
   end
+
+  function (uint value) => void advance_time do
+    if auto_advance == false then
+      _lp_scene_advance (&&scene!, value);
+    end
+  end
+
 end
 
 class Player with

@@ -5,6 +5,7 @@
 var Scene s with
   this.width = 1080;
   this.height = 720;
+  this.auto_advance = true;
 end;
 
 var Rect rect = Rect(0, 0, s.width, s.height);

@@ -3,6 +3,7 @@
 var Scene s with
   this.width = 1080;
   this.height = 720;
+  this.auto_advance = false;
 end;
 
 var Rect frame = Rect (0.05 * s.width, 0.067 * s.height, 
@@ -29,58 +30,66 @@ var Media shoes = Media.VIDEO ("../../resources/shoes.mp4",
 event (void) finish;
 event (int, int, int, int) resize;
 
-watching finish do
-  par/and do
-    do Player.play (back, &s);
-  with
-    var Player animPlayer = Player.play (anim, &s);
-    watching animPlayer do
-      every (x, y, width, height) in resize do
-        animPlayer.setBounds (x, y, width, height);
-      end
-    end
-    emit finish;
-  with
-    await 5s;
-    do Player.play (choro, &s);
-  with
-    await 12s;
-    do Player.play (drible, &s);
-  with
-    await 41s;
-    var Player photoPlayer = Player.play (photo, &s);
-    watching 5s do
-      await 1s;
-
-      var int top = photoPlayer.getPropertyInt ("y");
-      var int diff = 290 - top;
-      var int amount = 1;
-      watching 3s do
-        every (3000.0/diff)ms do
-          photoPlayer.setPropertyInt ("y", top + amount);
-          amount = amount + 1;
+par/or do
+  watching finish do
+    par/and do
+      do Player.play (back, &s);
+    with
+      var Player animPlayer = Player.play (anim, &s);
+      watching animPlayer do
+        every (x, y, width, height) in resize do
+          animPlayer.setBounds (x, y, width, height);
         end
       end
-    end
-  with
-    await 45s;
-    var bool flag = false;
-    watching 6s do
-      var Player iconPlayer = Player.play (icon, &s);
-      var _charptr key;
-      var int press;
+      emit finish;
+    with
+      await 5s;
+      do Player.play (choro, &s);
+    with
+      await 12s;
+      do Player.play (drible, &s);
+    with
+      await 41s;
+      var Player photoPlayer = Player.play (photo, &s);
+      watching 5s do
+        await 1s;
 
-      (key, press) = await s.key_event until _strcmp (key, "F1") == 0;
-      flag = true;
-    end
-    if (flag) then
-      emit resize => (0.05 * s.width, 0.0667 * s.height, 
-                     0.45 * s.width, 0.45 * s.height);
+        var int top = photoPlayer.getPropertyInt ("y");
+        var int diff = 290 - top;
+        var int amount = 1;
+        watching 3s do
+          every (3000.0/diff)ms do
+            photoPlayer.setPropertyInt ("y", top + amount);
+            amount = amount + 1;
+          end
+        end
+      end
+    with
+      await 45s;
+      var bool flag = false;
+      watching 6s do
+        var Player iconPlayer = Player.play (icon, &s);
+        var _charptr key;
+        var int press;
 
-      do Player.play (shoes, &s);
-      emit resize => (0, 0, s.width, s.height);
+        (key, press) = await s.key_event until _strcmp (key, "F1") == 0;
+        flag = true;
+      end
+      if (flag) then
+        emit resize => (0.05 * s.width, 0.0667 * s.height, 
+                       0.45 * s.width, 0.45 * s.height);
+
+        do Player.play (shoes, &s);
+        emit resize => (0, 0, s.width, s.height);
+      end
     end
   end
+with
+  every FREQ ms do
+    s.advance_time (FREQ * NS);
+  end
 end
+
+
 
 escape 0;
