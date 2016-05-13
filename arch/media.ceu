@@ -71,6 +71,8 @@ class Scene with
   event (f64, f64, int, int) mouse_click_event;
   event (f64, f64) mouse_move_event;
   event (_charptr, int) key_event;
+  event (_charptr) error_event;
+
   event (void) quit;
 do
   var _lp_Scene &?scene;
@@ -131,6 +133,19 @@ do
 
         finalize with
           _g_free (key);
+        end
+      else/if type == _LP_TYPE_EVENT_ERROR then
+        var _lp_EventError &&evtError = _UNSAFE(_LP_EVENT_ERROR(evt));
+        var _GError &&err = null;
+        var _charptr msg = null;
+
+        _g_object_get (_G_OBJECT(evtError), "error", &&err, null);
+        msg = _lp_event_to_string (_LP_EVENT(evtError));
+
+        emit error_event => (msg);
+
+        finalize with
+          _g_free (msg);
         end
       end
     end
