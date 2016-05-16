@@ -1,0 +1,58 @@
+#include "slideshow.ceu"
+
+[[
+rect = { 76, 74, 650, 440 }
+
+SLIDESHOW = {
+    width  = 800,
+    height = 585,
+    background = {
+        {
+            tag    = 'audio',
+            uri    = '../../resources/piano.ogg',
+            volume = 0.5,
+        },
+        {
+            tag   = 'image',
+            uri   = '../../resources/frame.png',
+            rect  = { 0, 0, 800, 585 },
+            z     = 1,
+            alpha = 1.0,
+        },
+    },
+    sequence = {
+        {
+            tag   = 'image',
+            uri   = '../../resources/img1.jpg',
+            rect  = rect,
+            z     = 2,
+            alpha = 1.0,
+        },
+        {
+            tag   = 'image',
+            uri   = '../../resources/img2.jpg',
+            rect  = rect,
+            z     = 2,
+            alpha = 1.0,
+        },
+        {
+            tag   = 'image',
+            uri   = '../../resources/img3.jpg',
+            rect  = rect,
+            z     = 2,
+            alpha = 1.0,
+        },
+        {
+            tag   = 'image',
+            uri   = '../../resources/img4.jpg',
+            rect  = rect,
+            z     = 2,
+            alpha = 1.0,
+        },
+    },
+}
+]];
+
+do LuaSlideshow;
+
+escape 0;
