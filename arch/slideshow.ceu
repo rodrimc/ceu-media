@@ -1,0 +1,142 @@
+#include "c.ceu"
+#include "media.ceu"
+
+data MediaList with
+    tag NIL;
+or
+    tag CONS with
+        var Media     media;
+        var MediaList next;
+    end
+end
+
+class Slideshow with
+    var int width;
+    var int height;
+    pool MediaList[]& background;   // these run in parallel in the "background"
+    pool MediaList[]& sequence;     // these run in sequence, one after the other
+do
+    var Scene s with
+      this.width  = outer.width;
+      this.height = outer.height;
+      this.auto_advance = true;
+    end;
+
+    par/or do
+        var _charptr key;
+        var int press;
+        (key, press) = await s.key_event 
+                       until (_strcmp(key,"q")==0 and press==0);
+    with
+        traverse list in &&this.background do
+            watching *list do
+                if list:CONS then
+                    spawn Player.play(list:CONS.media, &s);     // in parallel
+                    traverse &&list:CONS.next;
+                end
+            end
+        end
+        traverse list in &&this.sequence do
+            watching *list do
+                if list:CONS then
+                    watching 5s do
+                        do Player.play(list:CONS.media, &s);    // in sequence
+                    end
+                    traverse &&list:CONS.next;
+                end
+            end
+        end
+    end
+end
+
+class LuaSlideshowAdd with
+    pool MediaList[]&& list;
+do
+    [[ assert(media ~= nil) ]];
+    var bool is_video = [[ media.tag == 'video' ]];
+    var bool is_image = [[ media.tag == 'image' ]];
+    var bool is_audio = [[ media.tag == 'audio' ]];
+    var bool is_text  = [[ media.tag == 'text'  ]];
+
+    if is_video then
+        _assert(0); // TODO
+    else/if is_image then
+        var char[] uri    = [[ media.uri     ]];
+        var int    x      = [[ media.rect[1] ]];
+        var int    y      = [[ media.rect[2] ]];
+        var int    width  = [[ media.rect[3] ]];
+        var int    height = [[ media.rect[4] ]];
+        var int    z      = [[ media.z       ]];
+        var float  alpha  = [[ media.alpha   ]];
+        watching *list do
+            list:CONS.next =
+                new MediaList.CONS(
+                        Media.IMAGE([], x,y,width,height, z, alpha),
+                        MediaList.NIL());
+            _strncpy(&&list:CONS.next.CONS.media.IMAGE.uri, (_char&&)&&uri, 255);
+        end
+     else/if is_audio then
+        var char[] uri    = [[ media.uri    ]];
+        var float  volume = [[ media.volume ]];
+        watching *list do
+            list:CONS.next =
+                new MediaList.CONS(
+                        Media.AUDIO([], volume),
+                        MediaList.NIL());
+            _strncpy(&&list:CONS.next.CONS.media.AUDIO.uri, (_char&&)&&uri, 255);
+        end
+    else/if is_text then
+        _assert(0); // TODO
+    else
+        _assert(0);
+    end
+end
+
+class LuaSlideshow with
+do
+    [[ assert(type(SLIDESHOW) == 'table') ]];
+
+    var int width  = [[ SLIDESHOW.width  ]];
+    var int height = [[ SLIDESHOW.height ]];
+
+    pool MediaList[] background = new MediaList.CONS( Media.EMPTY(), MediaList.NIL());
+    var bool has_background = [[ SLIDESHOW.background ~= nil ]];
+    if has_background then
+        [[ assert(type(SLIDESHOW.background) == 'table') ]];
+        pool MediaList[]&& cur = &&background;
+        var int n = [[ #SLIDESHOW.background ]];
+watching *cur do // TODO: really required?
+        loop i in n do
+            [[ media = SLIDESHOW.background[@i+1] ]];
+            do LuaSlideshowAdd with
+                this.list = cur;
+            end;
+            cur = &&cur:CONS.next;
+        end
+end
+    end
+
+    pool MediaList[] sequence = new MediaList.CONS( Media.EMPTY(), MediaList.NIL());
+    var bool has_sequence = [[ SLIDESHOW.sequence ~= nil ]];
+    if has_sequence then
+        [[ assert(type(SLIDESHOW.sequence) == 'table') ]];
+        pool MediaList[]&& cur = &&sequence;
+        var int n = [[ #SLIDESHOW.sequence ]];
+watching *cur do // TODO: really required?
+        loop i in n do
+            [[ media = SLIDESHOW.sequence[@i+1] ]];
+            do LuaSlideshowAdd with
+                this.list = cur;
+            end;
+            cur = &&cur:CONS.next;
+        end
+end
+    end
+
+    do Slideshow with
+        this.width      = width;
+        this.height     = height;
+        this.background = &background;
+        this.sequence   = &sequence;
+    end;
+end

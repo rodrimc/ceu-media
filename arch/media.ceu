@@ -14,8 +14,12 @@ data Rect with
 end
 
 data Media with
+  tag EMPTY;
+
+  or
+
   tag VIDEO with
-    var _charptr uri;
+    var _char[255] uri;
     var int x;
     var int y;
     var int width;
@@ -28,7 +32,7 @@ data Media with
   or
 
   tag IMAGE with
-    var _charptr uri;
+    var _char[255] uri;
     var int x;
     var int y;
     var int width;
@@ -40,15 +44,15 @@ data Media with
   or
 
   tag AUDIO with
-    var _charptr uri;
+    var _char[255] uri;
     var float volume;
   end 
 
   or
 
   tag TEXT with
-    var _charptr text;
-    var _charptr font_desc;
+    var _char[255] text;
+    var _char[255] font_desc;
     var uint color;
     var int x;
     var int y;
@@ -84,7 +88,7 @@ do
 
   _g_object_set (&&scene!, "slave-audio", true, null);
   _g_object_set (&&scene!, "lockstep", true, null);
-    
+
   spawn do
     async (scene) do
       loop do 
@@ -201,6 +205,9 @@ do
     value = media.AUDIO.uri;
   else/if media.TEXT then
     value = media.TEXT.text;
+  else
+    _assert(media.EMPTY);
+    escape 0; // terminates immediately
   end
 
   var _lp_Media &?m;
