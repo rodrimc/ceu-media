@@ -1,3 +1,13 @@
+/*
+ * Instructions:
+ *  - clone `https://github.com/fsantanna/ceu-libuv`
+ *  - make `arch/up` point to `ceu-libuv/arch`
+ *  - make `arch/ceu_main.c` point to `ceu-libuv/arch/ceu_main.c`
+ *  - comment `arch/raw.ceu:62`
+ * Now `ceu-libuv` controls the main loop.
+ * The other examples show work fine.
+ */
+
 #include "srt.ceu"
 
 var Scene s with
