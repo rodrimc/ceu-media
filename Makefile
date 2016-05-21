@@ -2,22 +2,22 @@
 # EDIT
 ###############################################################################
 
-CEU_DIR ?= ~/workspace/ceu
+CEU_DIR ?= $(error set absolute path to "<ceu>" repository)
 
 ###############################################################################
 # DO NOT EDIT
 ###############################################################################
 
-SDL_DIR ?= .
-ARCH_DIR ?= $(SDL_DIR)/arch
+MEDIA_DIR ?= .
+ARCH_DIR ?= $(MEDIA_DIR)/arch
 include $(CEU_DIR)/Makefile
 
 ifneq ($(MAKECMDGOALS),link)
-ifeq ("$(wildcard $(SDL_DIR)/arch/up)","")
+ifeq ("$(wildcard $(MEDIA_DIR)/arch/up)","")
 $(error run "make link")
 endif
 endif
 
 link:
 	rm -f arch/up
-	ln -s `readlink -f $(CEU_DIR)/arch` $(SDL_DIR)/arch/up
+	ln -s `readlink -f $(CEU_DIR)/arch` $(MEDIA_DIR)/arch/up
