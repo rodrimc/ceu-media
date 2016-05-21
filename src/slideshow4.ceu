@@ -1,0 +1,50 @@
+#include "slideshow.ceu"
+#include "srt.ceu"
+
+var Scene scene with
+    this.width  = 800;
+    this.height = 585;
+    this.auto_advance = true;
+end;
+
+par/and do
+    var Rect r = Rect (76, 74, 650, 440);
+
+    pool MediaList[] background =
+        new MediaList.CONS(
+                Media.AUDIO("../../resources/piano.ogg", 0.5),
+                MediaList.CONS(
+                    Media.IMAGE("../../resources/frame.png",
+                                0, 0, 800, 585, 1, 1.0),
+                    MediaList.NIL()));
+
+    pool MediaList[] sequence =
+        new MediaList.CONS(
+                Media.IMAGE("../../resources/img1.jpg",
+                            r.x, r.y, r.width, r.height, 2, 1.0),
+                MediaList.CONS(
+                    Media.IMAGE("../../resources/img2.jpg",
+                            r.x, r.y, r.width, r.height, 2, 1.0),
+                    MediaList.CONS(
+                        Media.IMAGE("../../resources/img3.jpg",
+                                    r.x, r.y, r.width, r.height, 2, 1.0),
+                        MediaList.CONS(
+                            Media.IMAGE("../../resources/img4.jpg",
+                                        r.x, r.y, r.width, r.height, 2, 1.0),
+                            MediaList.NIL()))));
+
+    do Slideshow with
+        this.scene      = &scene;
+        this.background = &background;
+        this.sequence   = &sequence;
+    end;
+with
+    var char[] path = [].."../../resources/slideshow.srt";
+    do SRT with
+        this.scene = &scene;
+        this.path  = &path;
+        this.y     = 450;
+    end;
+end
+
+escape 0;
