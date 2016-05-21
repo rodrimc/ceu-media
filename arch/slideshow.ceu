@@ -71,9 +71,8 @@ do
         watching *list do
             list:CONS.next =
                 new MediaList.CONS(
-                        Media.IMAGE([], x,y,width,height, z, alpha),
+                        Media.IMAGE((_char&&)&&uri, x,y,width,height, z, alpha),
                         MediaList.NIL());
-            _strncpy(&&list:CONS.next.CONS.media.IMAGE.uri, (_char&&)&&uri, 255);
         end
      else/if is_audio then
         var char[] uri    = [[ media.uri    ]];
@@ -81,9 +80,8 @@ do
         watching *list do
             list:CONS.next =
                 new MediaList.CONS(
-                        Media.AUDIO([], volume),
+                        Media.AUDIO((_char&&)&&uri, volume),
                         MediaList.NIL());
-            _strncpy(&&list:CONS.next.CONS.media.AUDIO.uri, (_char&&)&&uri, 255);
         end
     else/if is_text then
         _assert(0); // TODO

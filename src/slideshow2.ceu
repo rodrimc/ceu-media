@@ -4,35 +4,21 @@ var Rect r = Rect (76, 74, 650, 440);
 
 pool MediaList[] background =
     new MediaList.CONS(
-            Media.AUDIO([], 0.5),
+            Media.AUDIO("../../resources/piano.ogg", 0.5),
             MediaList.CONS(
-                Media.IMAGE([], 0, 0, 800, 585, 1, 1.0),
+                Media.IMAGE("../../resources/frame.png", 0, 0, 800, 585, 1, 1.0),
                 MediaList.NIL()));
-
-_strncpy(&&background.CONS.media.AUDIO.uri,
-         "../../resources/piano.ogg", 255);
-_strncpy(&&background.CONS.next.CONS.media.IMAGE.uri,
-         "../../resources/frame.png", 255);
 
 pool MediaList[] sequence =
     new MediaList.CONS(
-            Media.IMAGE([], r.x, r.y, r.width, r.height, 2, 1.0),
+            Media.IMAGE("../../resources/img1.jpg", r.x, r.y, r.width, r.height, 2, 1.0),
             MediaList.CONS(
-                Media.IMAGE([], r.x, r.y, r.width, r.height, 2, 1.0),
+                Media.IMAGE("../../resources/img2.jpg", r.x, r.y, r.width, r.height, 2, 1.0),
                 MediaList.CONS(
-                    Media.IMAGE([], r.x, r.y, r.width, r.height, 2, 1.0),
+                    Media.IMAGE("../../resources/img3.jpg", r.x, r.y, r.width, r.height, 2, 1.0),
                     MediaList.CONS(
-                        Media.IMAGE([], r.x, r.y, r.width, r.height, 2, 1.0),
+                        Media.IMAGE("../../resources/img4.jpg", r.x, r.y, r.width, r.height, 2, 1.0),
                         MediaList.NIL()))));
-
-_strncpy(&&sequence.CONS.media.IMAGE.uri,
-         "../../resources/img1.jpg", 255);
-_strncpy(&&sequence.CONS.next.CONS.media.IMAGE.uri,
-         "../../resources/img2.jpg", 255);
-_strncpy(&&sequence.CONS.next.CONS.next.CONS.media.IMAGE.uri,
-         "../../resources/img3.jpg", 255);
-_strncpy(&&sequence.CONS.next.CONS.next.CONS.next.CONS.media.IMAGE.uri,
-         "../../resources/img4.jpg", 255);
 
 do Slideshow with
     this.width      = 800;
