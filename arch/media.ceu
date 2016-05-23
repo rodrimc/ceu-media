@@ -1,3 +1,6 @@
+#ifndef _CEU_MEDIA_MEDIA
+#define _CEU_MEDIA_MEDIA
+
 #include "raw.ceu"
 
 #define MEDIA_FRAME_RATE 2    // 1 fps
@@ -377,3 +380,4 @@ end
 /*   end */
 /* end */
 
+#endif
