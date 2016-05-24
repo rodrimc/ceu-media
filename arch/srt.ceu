@@ -84,7 +84,7 @@ do
 
             watching (to-fr)ms do
                 var Media text = Media.TEXT((_char&&)&&lines, "", 0xffff0000,
-                                            0, this.y, 800, 100, 3);
+                                            Region(0,this.y,800,100), 3);
                 do Player.play(text, &this.scene);
             end
 

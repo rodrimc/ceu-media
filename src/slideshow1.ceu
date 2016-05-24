@@ -1,17 +1,16 @@
 #include "media.ceu"
 
-var Rect r = Rect (76, 74, 650, 440);
+var Region region = Region (76, 74, 650, 440);
 
-var Media frame = Media.IMAGE ("../../resources/frame.png", 0, 0, 800, 585, 1, 1.0);
+var Media frame = Media.IMAGE ("../../resources/frame.png", Region(0,0,800,585), 1, 1.0);
 var Media piano = Media.AUDIO ("../../resources/piano.ogg", 0.5);
-var Media img1 = Media.IMAGE ("../../resources/img1.jpg", r.x, r.y, r.width, r.height, 2, 1.0);
-var Media img2 = Media.IMAGE ("../../resources/img2.jpg", r.x, r.y, r.width, r.height, 2, 1.0);
-var Media img3 = Media.IMAGE ("../../resources/img3.jpg", r.x, r.y, r.width, r.height, 2, 1.0);
-var Media img4 = Media.IMAGE ("../../resources/img4.jpg", r.x, r.y, r.width, r.height, 2, 1.0);
+var Media img1 = Media.IMAGE ("../../resources/img1.jpg", region, 2, 1.0);
+var Media img2 = Media.IMAGE ("../../resources/img2.jpg", region, 2, 1.0);
+var Media img3 = Media.IMAGE ("../../resources/img3.jpg", region, 2, 1.0);
+var Media img4 = Media.IMAGE ("../../resources/img4.jpg", region, 2, 1.0);
 
 var Scene s with
-  this.width = 800;
-  this.height = 585;
+  this.size = Size(800,585);
   this.auto_advance = true;
 end;
 
