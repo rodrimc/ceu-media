@@ -9,9 +9,14 @@
 #define NS 1000000
 #define FREQ 15
 
-data Rect with
+data Region with
   var int x;
   var int y;
+  var int width;
+  var int height;
+end
+
+data Size with
   var int width;
   var int height;
 end
@@ -23,10 +28,7 @@ data Media with
 
   tag VIDEO with
     var _char[255] uri;
-    var int x;
-    var int y;
-    var int width;
-    var int height;
+    var Region region;
     var int z;
     var float alpha;
     var float volume;
@@ -36,10 +38,7 @@ data Media with
 
   tag IMAGE with
     var _char[255] uri;
-    var int x;
-    var int y;
-    var int width;
-    var int height;
+    var Region region;
     var int z;
     var float alpha;
   end
@@ -57,17 +56,13 @@ data Media with
     var _char[255] text;
     var _char[255] font_desc;
     var uint color;
-    var int x;
-    var int y;
-    var int width;
-    var int height;
+    var Region region;
     var int z;
   end
 end
 
 class Scene with
-  var int width;
-  var int height;
+  var Size? size;
   var bool auto_advance;
 
   /* Scene functions */
@@ -82,9 +77,15 @@ class Scene with
 
   event (void) quit;
 do
+  var int w=0, h=0;
+  if this.size? then
+    w = this.size!.width;
+    h = this.size!.height;
+  end
+
   var _lp_Scene &?scene;
   finalize
-    scene = &_lp_scene_new (width, height);
+    scene = &_lp_scene_new (w, h);
   with
     _g_object_unref (_G_OBJECT(&&scene!));
   end
@@ -186,7 +187,7 @@ class Player with
 
   /* functions */
   function (Media m, Scene &s) => Player play;
-  function (Rect r) => void setRectBounds;
+  function (Region r) => void setRegionBounds;
   function (int, int, int, int) => void setBounds;
   function (char && name, float value) => void setPropertyFloat;
   function (char && name, int value) => void setPropertyInt;
@@ -229,13 +230,13 @@ do
   end
 
   if media.VIDEO then
-    _g_object_set (_G_OBJECT(&&m!), "x", media.VIDEO.x, "y", media.VIDEO.y,
-                  "width", media.VIDEO.width, "height", media.VIDEO.height,
+    _g_object_set (_G_OBJECT(&&m!), "x", media.VIDEO.region.x, "y", media.VIDEO.region.y,
+                  "width", media.VIDEO.region.width, "height", media.VIDEO.region.height,
                   "z", media.VIDEO.z, "alpha", media.VIDEO.alpha,
                   "volume", media.VIDEO.volume, null);
   else/if media.IMAGE then
-    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.x, "y", media.IMAGE.y,
-                  "width", media.IMAGE.width, "height", media.IMAGE.height,
+    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.region.x, "y", media.IMAGE.region.y,
+                  "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
                   "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
   else/if media.AUDIO then
     _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
@@ -243,8 +244,8 @@ do
     _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.text, 
                   "font-desc", media.TEXT.font_desc, 
                   "text-color", media.TEXT.color,
-                  "x", media.TEXT.x, "y", media.TEXT.y,
-                  "width", media.TEXT.width, "height", media.TEXT.height,
+                  "x", media.TEXT.region.x, "y", media.TEXT.region.y,
+                  "width", media.TEXT.region.width, "height", media.TEXT.region.height,
                   "z", media.TEXT.z,  null);
   end
 
@@ -269,7 +270,7 @@ do
     this.media = m;
   end
 
-  function (Rect r) => void setRectBounds do
+  function (Region r) => void setRegionBounds do
     _g_object_set (&&this.m!, "x", r.x, "y", r.y, 
             "width", r.width, "height", r.height, null);
   end
@@ -316,7 +317,7 @@ end
 /*     var _lp_Media &?m; */
 
 /*     function (void) => _lp_Media& init; */
-/*     function (Rect r) => void setRectBounds; */
+/*     function (Region r) => void setRegionBounds; */
 /*     function (int, int, int, int) => void setBounds; */
 /*     function (char && name, float value) => void setPropertyFloat; */
 /*     function (char && name, int value) => void setPropertyInt; */
@@ -349,7 +350,7 @@ end
 /*     return &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri)); */
 /*   end */
 
-/*   function (Rect r) => void setRectBounds do */
+/*   function (Region r) => void setRegionBounds do */
 /*     _g_object_set (&&this.m!, "x", r.x, "y", r.y, */ 
 /*             "width", r.width, "height", r.height, null); */
 /*   end */

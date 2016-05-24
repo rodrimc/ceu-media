@@ -64,7 +64,7 @@ do
         watching *list do
             list:CONS.next =
                 new MediaList.CONS(
-                        Media.IMAGE((_char&&)&&uri, x,y,width,height, z, alpha),
+                        Media.IMAGE((_char&&)&&uri, Region(x,y,width,height), z, alpha),
                         MediaList.NIL());
         end
      else/if is_audio then
@@ -125,8 +125,7 @@ end
     end
 
     var Scene scene with
-      this.width  = width;
-      this.height = height;
+      this.size = Size(width,height);
       this.auto_advance = true;
     end;
 
