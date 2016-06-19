@@ -1,0 +1,6 @@
+{
+  "name": "Ceu-media",
+  "tagline": "",
+  "body": "CÉU-Media\r\n===\r\nThis project aims to create a high-level API for developing multimedia applications using the [CÉU](http://www.ceu-lang.org/) language. The main goal is to explore the reactive/synchronous execution model of the language to create deterministic multimedia applications. \r\n\r\nOne of the advantages of our framework is the deterministic control of the passage of time, which makes enables one\r\nto match the application logic time with the presentation time. \r\n\r\n---\r\nProject dependencies:\r\n  * [CÉU] (https://github.com/fsantanna/ceu/)\r\n  * [LibPlay] (https://github.com/TeleMidia/LibPlay)\r\n \r\n---\r\nThe file arch/ceu_main.c and the folder arch/up should be both symbolic links to the following location:\r\n * ceu_main.c: <ceu-dist>/arch/ceu_main.c\r\n * up: <ceu-dist>/arch\r\n\r\nTo compile and execute:\r\n```\r\n$ make all SRC=<path-to-source>\r\n```\r\nThe make command outputs binaries to the folder src/build/.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
