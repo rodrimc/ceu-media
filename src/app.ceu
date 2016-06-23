@@ -1,29 +1,18 @@
-// APPLICATION: pure Ceu, no external types, C, etc
-
 #include "media.ceu"
 
-var int argc;
-var char && &&argv;
-(argc, argv) = await OS_START;
-
-if argc < 2 then
-  _printf ("Usage: %s URI\n", _ELEM_N (argv, 0));
-  escape 0;
-end
+var int width = 1080;
+var int height = 720;
 
 var Scene s with
-  this.width = 1080;
-  this.height = 720;
+  this.size = Size (width, height);
   this.auto_advance = true;
 end;
 
-var char& url2 = &_ELEM_N (argv, 2);
-
 var int flag = 0;
-var Media m1 = Media.VIDEO (_ELEM_N(argv, 1), 0, 0, s.width/2, s.height/2, 
-                      1, 1.0, 1.0);
-var Media m2 = Media.VIDEO (_ELEM_N(argv, 2), s.width/2, s.height/2, s.width/2, 
-                      s.height/2, 1, 1.0, 0);
+var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 
+        Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
+var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
+        Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
 
 watching 15s do
   loop do
