@@ -14,10 +14,10 @@ var Media m1 = Media.VIDEO ("../../resources/animGar.mp4",
 var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
         Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
 
-watching 15s do
+watching 30s do
   loop do
       _printf("===> RESTART\n");
-      watching 5s do
+      watching 10s do
           var Player p1 = Player.play (m1, &s);
           var Player p2 = Player.play (m2, &s);
           await FOREVER;
