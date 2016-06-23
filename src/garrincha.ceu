@@ -1,36 +1,35 @@
 #include "media.ceu"
 
+var int scene_width = 1080;
+var int scene_height = 720;
+
 var Scene s with
-  this.width = 1080;
-  this.height = 720;
+  this.size = Size (scene_width, scene_height);
   this.auto_advance = false;
 end;
 
-var Rect frame = Rect (0.05 * s.width, 0.067 * s.height, 
-                               0.185 * s.width, 0.185 * s.height);
+var Region frame = Region (0.05 * scene_width, 0.067 * scene_height, 
+                               0.185 * scene_width, 0.185 * scene_height);
 
-var Media back = Media.IMAGE ("../../resources/background.png", 0, 0, s.width, 
-                        s.height, 1, 1.0);
-var Media anim = Media.VIDEO ("../../resources/animGar.mp4", 0, 0, s.width, 
-                        s.height, 2, 1.0, 1.0);
+var Media back = Media.IMAGE ("../../resources/background.png", 
+          Region(0, 0, scene_width, scene_height), 1, 1.0);
+var Media anim = Media.VIDEO ("../../resources/animGar.mp4", 
+          Region(0, 0, scene_width, scene_height), 2, 1.0, 1.0);
 var Media choro = Media.AUDIO ("../../resources/choro.mp4", 1.0);
-var Media drible = Media.VIDEO ("../../resources/drible.mp4", frame.x, frame.y, 
-                        frame.width, frame.height, 3, 1.0, 1.0);
-var Media photo = Media.IMAGE ("../../resources/photo.png", frame.x, frame.y, 
-                        frame.width, frame.height, 3, 0.6);
+var Media drible = Media.VIDEO ("../../resources/drible.mp4", frame, 3, 1.0, 1.0);
+var Media photo = Media.IMAGE ("../../resources/photo.png", frame, 3, 0.6);
 var Media icon = Media.IMAGE ("../../resources/icon.png", 
-                        0.875 * s.width, 0.117 * s.height, 
-                        0.0845 * s.width, 0.067 * s.height, 
-                        3, 1.0);
+          Region(0.875 * scene_width, 0.117 * scene_height, 
+                  0.0845 * scene_width, 0.067 * scene_height), 3, 1.0);
 var Media shoes = Media.VIDEO ("../../resources/shoes.mp4", 
-                        0.15 * s.width, 0.6 * s.height, 
-                        0.25 * s.width, 0.25 * s.height, 
-                        3, 1.0, 1.0);
+          Region(0.15 * scene_width, 0.6 * scene_height, 
+                 0.25 * scene_width, 0.25 * scene_height), 3, 1.0, 1.0);
 
 event (void) finish;
 event (int, int, int, int) resize;
 
-par/or do
+par/or 
+do
   watching finish do
     par/and do
       do Player.play (back, &s);
@@ -76,20 +75,19 @@ par/or do
         flag = true;
       end
       if (flag) then
-        emit resize => (0.05 * s.width, 0.0667 * s.height, 
-                       0.45 * s.width, 0.45 * s.height);
+        emit resize => (0.05 * scene_width, 0.0667 * scene_height, 
+                       0.45 * scene_width, 0.45 * scene_height);
 
         do Player.play (shoes, &s);
-        emit resize => (0, 0, s.width, s.height);
+        emit resize => (0, 0, scene_width, scene_height);
       end
     end
   end
 with
   every FREQ ms do
-    s.advance_time (FREQ * NS);
+    s.advance_time (FREQ* NS);
   end
 end
-
 
 
 escape 0;

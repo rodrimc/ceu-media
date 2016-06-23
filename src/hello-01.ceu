@@ -8,7 +8,6 @@ var Scene s with
   this.auto_advance = true;
 end;
 
-var int flag = 0;
 var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 
         Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
 var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 

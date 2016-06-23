@@ -169,6 +169,8 @@ do
     await quit;
   end
 
+  escape 0;
+
   function (void) => _lp_Scene && getptr do
     return &&scene!;
   end
@@ -264,6 +266,8 @@ do
     end
   end
 
+  escape 0;
+
   /* function definitions */
   function (Media m, Scene &s) => Player play do
     this.scene = &s;
@@ -310,75 +314,5 @@ do
     return value;
   end
 end
-
-/* class Media with */
-/*     var char&     uri; */
-/*     var Scene&    scene; */
-/*     var _lp_Media &?m; */
-
-/*     function (void) => _lp_Media& init; */
-/*     function (Region r) => void setRegionBounds; */
-/*     function (int, int, int, int) => void setBounds; */
-/*     function (char && name, float value) => void setPropertyFloat; */
-/*     function (char && name, int value) => void setPropertyInt; */
-/*     function (char && name) => float getPropertyFloat; */
-/*     function (char && name) => int getPropertyInt; */
-
-/*     event (void) start; */
-/*     event (void) stop; */
-/* do */
-/*   _lp_media_start (&&this.m!); */
-/*   finalize with */
-/*     _lp_media_stop (&&this.m!); */
-/*   end */
-
-/*   loop do */
-/*     var _GObject &&source; */
-/*     var _lp_Event &&evt; */
-/*     (source, evt) = await LP_EVENT */ 
-/*                   until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&this.m!); */
-/*     var _GType type = _G_OBJECT_TYPE (evt); */
-/*     if type == _LP_TYPE_EVENT_START then */
-/*       emit start; */
-/*     else/if type == _LP_TYPE_EVENT_STOP then */
-/*       emit stop; */
-/*       break; */
-/*     end */
-/*   end */
-
-/*   function (void) => _lp_Media& init do */
-/*     return &_lp_media_new (this.scene.getptr(), _UNSAFE(&&this.uri)); */
-/*   end */
-
-/*   function (Region r) => void setRegionBounds do */
-/*     _g_object_set (&&this.m!, "x", r.x, "y", r.y, */ 
-/*             "width", r.width, "height", r.height, null); */
-/*   end */
-
-/*   function (int x, int y, int width, int height) => void setBounds do */
-/*     _g_object_set (&&this.m!, "x", x, "y", y, */ 
-/*             "width", width, "height", height, null); */
-/*   end */
-  
-/*   function (char&& name, float value) => void setPropertyFloat do */
-/*     _g_object_set (&&this.m!, name, value, null); */
-/*   end */
-
-/*   function (char&& name, int value) => void setPropertyInt do */
-/*     _g_object_set (&&this.m!, name, value, null); */
-/*   end */
-
-/*   function (char&& name) => int getPropertyInt do */
-/*     var int value = 0; */
-/*     _g_object_get (&&this.m!, name, &&value, null); */
-/*     return value; */
-/*   end */
-
-/*   function (char&& name) => float getPropertyFloat do */
-/*     var float value = 0.0; */
-/*     _g_object_get (&&this.m!, name, &&value, null); */
-/*     return value; */
-/*   end */
-/* end */
 
 #endif

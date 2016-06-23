@@ -2,44 +2,44 @@
 #include "media.ceu"
 
 data MediaList with
-    tag NIL;
+  tag NIL;
 or
-    tag CONS with
-        var Media     media;
-        var MediaList next;
-    end
+  tag CONS with
+    var Media     media;
+    var MediaList next;
+  end
 end
 
 class Slideshow with
-    var Scene& scene;
-    pool MediaList[]& background;   // these run in parallel in the "background"
-    pool MediaList[]& sequence;     // these run in sequence, one after the other
+  var Scene& scene;
+  pool MediaList[]& background;   // these run in parallel in the "background"
+  pool MediaList[]& sequence;     // these run in sequence, one after the other
 do
-    par/or do
-        var _charptr key;
-        var int press;
-        (key, press) = await this.scene.key_event 
-                       until (_strcmp(key,"q")==0 and press==0);
-    with
-        traverse list in &&this.background do
-            watching *list do
-                if list:CONS then
-                    spawn Player.play(list:CONS.media, &scene);     // in parallel
-                    traverse &&list:CONS.next;
-                end
-            end
+  par/or do
+    var _charptr key;
+    var int press;
+    (key, press) = await this.scene.key_event 
+                   until (_strcmp(key,"q")==0 and press==0);
+  with
+    traverse list in &&this.background do
+      watching *list do
+        if list:CONS then
+          spawn Player.play(list:CONS.media, &scene);     // in parallel
+          traverse &&list:CONS.next;
         end
-        traverse list in &&this.sequence do
-            watching *list do
-                if list:CONS then
-                    watching 5s do
-                        do Player.play(list:CONS.media, &scene);    // in sequence
-                    end
-                    traverse &&list:CONS.next;
-                end
-            end
-        end
+      end
     end
+    traverse list in &&this.sequence do
+      watching *list do
+        if list:CONS then
+          watching 5s do
+            do Player.play(list:CONS.media, &scene);    // in sequence
+          end
+          traverse &&list:CONS.next;
+        end
+      end
+    end
+  end
 end
 
 class LuaSlideshowAdd with
