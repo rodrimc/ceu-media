@@ -1,0 +1,23 @@
+#include "media.ceu"
+
+var int width = 1080;
+var int height = 720;
+
+var Scene s with
+  this.size = Size (width, height);
+  this.auto_advance = true;
+end;
+
+par/or do
+  loop do
+    var Media m = Media.VIDEO ("../../resources/clock.ogv", 
+            Region (0, 0, width, height), 1, 1.0, 1.0);
+    do Player.play (m, &s);
+  end
+with
+  await s.key_event;
+with
+  await s.mouse_click_event;
+end
+
+escape 0;
