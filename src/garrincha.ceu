@@ -37,7 +37,7 @@ do
       var Player animPlayer = Player.play (anim, &s);
       watching animPlayer do
         every (x, y, width, height) in resize do
-          animPlayer.setBounds (x, y, width, height);
+          animPlayer.set_bounds (x, y, width, height);
         end
       end
       emit finish;
@@ -53,12 +53,12 @@ do
       watching 5s do
         await 1s;
 
-        var int top = photoPlayer.getPropertyInt ("y");
+        var int top = photoPlayer.get_property_int ("y");
         var int diff = 290 - top;
         var int amount = 1;
         watching 3s do
           every (3000.0/diff)ms do
-            photoPlayer.setPropertyInt ("y", top + amount);
+            photoPlayer.set_property_int ("y", top + amount);
             amount = amount + 1;
           end
         end
