@@ -1,0 +1,31 @@
+#include "media.ceu"
+
+var int width = 800;
+var int height = 600;
+
+var Scene s with
+  this.size = Size (width, height);
+  this.auto_advance = true;
+end;
+
+var Media m1 = Media.VIDEO ("../../resources/muted-video.m4v", 
+        Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
+var Media m2 = Media.VIDEO ("../../resources/muted-video.m4v", 
+        Region (width/2, 0, width/2, height/2), 1, 1.0, 0);
+var Media m3 = Media.VIDEO ("../../resources/muted-video.m4v", 
+        Region (0, height/2, width/2, height/2), 1, 1.0, 0);
+var Media m4 = Media.VIDEO ("../../resources/muted-video.m4v", 
+        Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
+var Media audio = Media.AUDIO ("../../resources/audio.aac", 1.0);
+
+par/and do
+  spawn Player.play (m1, &s);
+  spawn Player.play (m2, &s);
+  spawn Player.play (m3, &s);
+  spawn Player.play (m4, &s);
+  spawn Player.play (audio, &s);
+with
+  await s.key_event;
+end
+
+escape 0;
