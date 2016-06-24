@@ -6,10 +6,10 @@ var Scene scene with
     this.auto_advance = true;
 end;
 
-par/and do
+par/or do
     var Region region = Region (76, 74, 650, 440);
 
-    pool MediaList[] background =
+    pool MediaList[] parallel =
         new MediaList.CONS(
                 Media.AUDIO("../../resources/piano.ogg", 0.5),
                 MediaList.CONS(
@@ -34,8 +34,10 @@ par/and do
 
     do Slideshow with
         this.scene      = &scene;
-        this.background = &background;
+        this.parallel   = &parallel;
         this.sequence   = &sequence;
+        this.time       = 5;
+        this.quit       = "q";
     end;
 with
     var char[] path = [].."../../resources/slideshow.srt";
