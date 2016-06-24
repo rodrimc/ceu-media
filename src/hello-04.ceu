@@ -1,0 +1,56 @@
+#include "media.ceu"
+
+var int width = 640;
+var int height = 480;
+
+var Scene s with
+  this.size = Size (width, height);
+  this.auto_advance = true;
+end;
+
+var Media back = Media.VIDEO ("../../resources/animGar.mp4", 
+                           Region(0, 0, width, height), 1.0, 1.0, 1.0);
+
+var Media video = Media.VIDEO ("../../resources/diode.mp4",                         
+                           Region(0, 0, 320, 240), 2,  0.75, 1.0);
+var Media audio = Media.AUDIO ("../../resources/choro.mp4", 0.5);
+
+var Player pBack = Player.play (back, &s);
+var Player pVideo = Player.play (video, &s);
+
+watching pVideo do
+  par/or do
+    loop do
+      var _charptr key;
+      var int press, x, y;
+      x = pVideo.get_property_int ("x");
+      y = pVideo.get_property_int ("y");
+      (key, press) = await s.key_event;
+      if _strcmp (key, "Left") == 0 then
+        pVideo.set_property_int ("x", x - 10);
+      else/if _strcmp (key, "Right") == 0 then
+        pVideo.set_property_int ("x", x + 10);
+      else/if _strcmp (key, "Up") == 0 then
+        pVideo.set_property_int ("y", y - 10);
+      else/if _strcmp (key, "Down") == 0 then
+        pVideo.set_property_int ("y", y + 10);
+      end
+    end
+  with
+    loop do
+      var _charptr key;
+      var int press;
+      (key, press) = await s.key_event until (_strcmp (key, "space") == 0 and
+                                              press == 1);
+      var Player p = Player.play (audio, &s);
+      (key, press) = await s.key_event until (_strcmp (key, "space") == 0 and
+                                              press == 1);
+    end
+  with
+    var _charptr key;
+    var int press;
+    (key, press) = await s.key_event until (_strcmp (key, "q") == 0);
+  end
+end
+
+escape 0;
