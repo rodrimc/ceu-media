@@ -194,6 +194,7 @@ class Player with
   function (char && name, float value) => void set_property_float;
   function (char && name, int value) => void set_property_int;
   function (char && name, bool value) => void set_property_bool;
+  function (char && name, char && value) => void set_property_char;
   function (char && name) => float get_property_float;
   function (char && name) => int get_property_int;
   function (char && name) => bool get_property_bool;
@@ -293,6 +294,10 @@ do
   end
 
   function (char&& name, bool value) => void set_property_bool do
+    _g_object_set (&&this.m!, name, value, null);
+  end
+
+  function (char&& name, char&& value) => void set_property_char do
     _g_object_set (&&this.m!, name, value, null);
   end
 
