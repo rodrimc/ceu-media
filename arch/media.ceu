@@ -189,14 +189,14 @@ class Player with
 
   /* functions */
   function (Media m, Scene &s) => Player play;
-  function (Region r) => void setRegionBounds;
-  function (int, int, int, int) => void setBounds;
-  function (char && name, float value) => void setPropertyFloat;
-  function (char && name, int value) => void setPropertyInt;
-  function (char && name, bool value) => void setPropertyBool;
-  function (char && name) => float getPropertyFloat;
-  function (char && name) => int getPropertyInt;
-  function (char && name) => bool getPropertyBool;
+  function (Region r) => void set_region_bounds;
+  function (int, int, int, int) => void set_bounds;
+  function (char && name, float value) => void set_property_float;
+  function (char && name, int value) => void set_property_int;
+  function (char && name, bool value) => void set_property_bool;
+  function (char && name) => float get_property_float;
+  function (char && name) => int get_property_int;
+  function (char && name) => bool get_property_bool;
 
   /* events */
   event (void) start;
@@ -274,41 +274,41 @@ do
     this.media = m;
   end
 
-  function (Region r) => void setRegionBounds do
+  function (Region r) => void set_region_bounds do
     _g_object_set (&&this.m!, "x", r.x, "y", r.y, 
             "width", r.width, "height", r.height, null);
   end
 
-  function (int x, int y, int width, int height) => void setBounds do
+  function (int x, int y, int width, int height) => void set_bounds do
     _g_object_set (&&this.m!, "x", x, "y", y, 
             "width", width, "height", height, null);
   end
   
-  function (char&& name, float value) => void setPropertyFloat do
+  function (char&& name, float value) => void set_property_float do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name, int value) => void setPropertyInt do
+  function (char&& name, int value) => void set_property_int do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name, bool value) => void setPropertyBool do
+  function (char&& name, bool value) => void set_property_bool do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name) => int getPropertyInt do
+  function (char&& name) => int get_property_int do
     var int value = 0;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
   end
 
-  function (char&& name) => bool getPropertyBool do
+  function (char&& name) => bool get_property_bool do
     var bool value = false;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
   end
 
-  function (char&& name) => float getPropertyFloat do
+  function (char&& name) => float get_property_float do
     var float value = 0.0;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
