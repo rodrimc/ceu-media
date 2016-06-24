@@ -8,7 +8,7 @@ var Scene s with
   this.auto_advance = true;
 end;
 
-var Media text = Media.TEXT ("", "sans 40", 0xffff0048,
+var Media text = Media.TEXT ("one", "sans 40", 0xffff0048,
                            Region(0, 400, width, 80), 2.0);
 
 var Media video = Media.VIDEO ("../../resources/night.avi",                         
@@ -19,13 +19,13 @@ var Player pText = Player.play (text, &s);
 par/or do
   loop do
     await 1s;
-    pText.set_property_char ("text", "one");
-    await 1s;
     pText.set_property_char ("text", "two");
+    await 1s;
+    pText.set_property_char ("text", "one");
   end
 with
   loop do
-    spawn Player.play (video, &s);
+    var Player p =Player.play (video, &s);
     await 2s;
   end
 with 

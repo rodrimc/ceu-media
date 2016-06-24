@@ -12,16 +12,18 @@ end
 
 class Slideshow with
   var Scene& scene;
-  pool MediaList[]& background;   // these run in parallel in the "background"
+  pool MediaList[]& parallel;   // these run in parallel in the "parallel"
   pool MediaList[]& sequence;     // these run in sequence, one after the other
+  var int           time;
+  var _charptr      quit;
 do
   par/or do
     var _charptr key;
     var int press;
     (key, press) = await this.scene.key_event 
-                   until (_strcmp(key,"q")==0 and press==0);
+                   until (_strcmp(key, quit)==0 and press==0);
   with
-    traverse list in &&this.background do
+    traverse list in &&this.parallel do
       watching *list do
         if list:CONS then
           spawn Player.play(list:CONS.media, &scene);     // in parallel
@@ -32,7 +34,7 @@ do
     traverse list in &&this.sequence do
       watching *list do
         if list:CONS then
-          watching 5s do
+          watching (time)s do
             do Player.play(list:CONS.media, &scene);    // in sequence
           end
           traverse &&list:CONS.next;
@@ -87,24 +89,26 @@ class LuaSlideshow with
 do
     [[ assert(type(SLIDESHOW) == 'table') ]];
 
-    var int width  = [[ SLIDESHOW.width  ]];
-    var int height = [[ SLIDESHOW.height ]];
+    var int width      = [[ SLIDESHOW.width  ]];
+    var int height     = [[ SLIDESHOW.height ]];
+    var int time       = [[ SLIDESHOW.time   ]];
+    var char [] quit   = [[ SLIDESHOW.quit   ]];
 
-    pool MediaList[] background = new MediaList.CONS( Media.EMPTY(), MediaList.NIL());
-    var bool has_background = [[ SLIDESHOW.background ~= nil ]];
-    if has_background then
-        [[ assert(type(SLIDESHOW.background) == 'table') ]];
-        pool MediaList[]&& cur = &&background;
-        var int n = [[ #SLIDESHOW.background ]];
-watching *cur do // TODO: really required?
-        loop i in n do
-            [[ media = SLIDESHOW.background[@i+1] ]];
-            do LuaSlideshowAdd with
-                this.list = cur;
-            end;
-            cur = &&cur:CONS.next;
+    pool MediaList[] parallel = new MediaList.CONS( Media.EMPTY(), MediaList.NIL());
+    var bool has_parallel = [[ SLIDESHOW.parallel ~= nil ]];
+    if has_parallel then
+        [[ assert(type(SLIDESHOW.parallel) == 'table') ]];
+        pool MediaList[]&& cur = &&parallel;
+        var int n = [[ #SLIDESHOW.parallel ]];
+        watching *cur do // TODO: really required?
+          loop i in n do
+              [[ media = SLIDESHOW.parallel[@i+1] ]];
+              do LuaSlideshowAdd with
+                  this.list = cur;
+              end;
+              cur = &&cur:CONS.next;
+          end
         end
-end
     end
 
     pool MediaList[] sequence = new MediaList.CONS( Media.EMPTY(), MediaList.NIL());
@@ -113,15 +117,15 @@ end
         [[ assert(type(SLIDESHOW.sequence) == 'table') ]];
         pool MediaList[]&& cur = &&sequence;
         var int n = [[ #SLIDESHOW.sequence ]];
-watching *cur do // TODO: really required?
-        loop i in n do
-            [[ media = SLIDESHOW.sequence[@i+1] ]];
-            do LuaSlideshowAdd with
-                this.list = cur;
-            end;
-            cur = &&cur:CONS.next;
+        watching *cur do // TODO: really required?
+          loop i in n do
+              [[ media = SLIDESHOW.sequence[@i+1] ]];
+              do LuaSlideshowAdd with
+                  this.list = cur;
+              end;
+              cur = &&cur:CONS.next;
+          end
         end
-end
     end
 
     var Scene scene with
@@ -131,7 +135,9 @@ end
 
     do Slideshow with
         this.scene      = &scene;
-        this.background = &background;
+        this.parallel   = &parallel;
         this.sequence   = &sequence;
+        this.time       = 5;
+        this.quit       = "q";
     end;
 end

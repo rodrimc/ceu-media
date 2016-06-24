@@ -6,7 +6,9 @@ rect = { 76, 74, 650, 440 }
 SLIDESHOW = {
     width  = 800,
     height = 585,
-    background = {
+    time = 5,
+    quit = 'q',
+    parallel = {
         {
             tag    = 'audio',
             uri    = '../../resources/piano.ogg',
