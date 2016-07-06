@@ -53,7 +53,7 @@ data Media with
   or
 
   tag TEXT with
-    var _char[255] text;
+    var _char[255] uri; 
     var _char[255] font_desc;
     var uint color;
     var Region region;
@@ -211,26 +211,18 @@ do
   else/if media.AUDIO then
     value = media.AUDIO.uri;
   else/if media.TEXT then
-    value = media.TEXT.text;
+    value = media.TEXT.uri;
   else
     _assert(media.EMPTY);
     escape 0; // terminates immediately
   end
 
   var _lp_Media &?m;
-  if not media.TEXT then
     finalize
       m = &_lp_media_new (scene.getptr(), _UNSAFE(value));
     with
       _lp_media_stop (&&m!);
     end
-  else
-    finalize
-      m = &_lp_media_text_new (scene.getptr(), _UNSAFE(value));
-    with
-      _lp_media_stop (&&m!);
-    end
-  end
 
   if media.VIDEO then
     _g_object_set (_G_OBJECT(&&m!), "x", media.VIDEO.region.x, "y", media.VIDEO.region.y,
@@ -244,7 +236,7 @@ do
   else/if media.AUDIO then
     _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
-    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.text, 
+    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
                   "font-desc", media.TEXT.font_desc, 
                   "text-color", media.TEXT.color,
                   "x", media.TEXT.region.x, "y", media.TEXT.region.y,
