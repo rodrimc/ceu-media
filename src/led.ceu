@@ -1,0 +1,66 @@
+
+#include "media.ceu"
+
+var Scene s with
+  this.size = Size (600, 600);
+end;
+
+var Media on1 = Media.IMAGE ("../../resources/on.png", 
+            Region(0, 0, 300, 300), 1, 1.0);
+var Media off1 = Media.IMAGE ("../../resources/off.png", 
+            Region(0, 0, 300, 300), 1, 1.0);
+var Media on2 = Media.IMAGE ("../../resources/on.png", 
+            Region(300, 0, 300, 300), 1, 1.0);
+var Media off2 = Media.IMAGE ("../../resources/off.png", 
+            Region(300, 0, 300, 300), 1, 1.0);
+var Media on3 = Media.IMAGE ("../../resources/on.png", 
+            Region(0, 300, 300, 300), 1, 1.0);
+var Media off3 = Media.IMAGE ("../../resources/off.png", 
+            Region(0, 300, 300, 300), 1, 1.0);
+var Media on4 = Media.IMAGE ("../../resources/on.png", 
+            Region(300, 300, 300, 300), 1, 1.0);
+var Media off4 = Media.IMAGE ("../../resources/off.png", 
+            Region(300, 300, 300, 300), 1, 1.0);
+
+/* It seems that bellow this value LibPlay starts to drop a lot of buffers  */
+var int freq = 500; 
+
+par/or do
+  var _charptr key;
+  var int press;
+  (key, press) = await s.key_event until _strcmp (key, "q") == 0;
+with
+  loop do
+    par/or do
+      watching (freq)ms do
+        do Player.play (on1, &s);
+      end
+      watching (freq)ms do
+        do Player.play (off1, &s);
+      end
+    with
+      watching (freq)ms do
+        do Player.play (on2, &s);
+      end
+      watching (freq)ms do
+        do Player.play (off2, &s);
+      end
+    with
+      watching (freq)ms do
+        do Player.play (on3, &s);
+      end
+      watching (freq)ms do
+        do Player.play (off3, &s);
+      end
+    with
+      watching (freq)ms do
+        do Player.play (on4, &s);
+      end
+      watching (freq)ms do
+        do Player.play (off4, &s);
+      end
+    end
+  end
+end
+
+escape 0;
