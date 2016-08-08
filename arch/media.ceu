@@ -211,7 +211,7 @@ do
   else/if media.AUDIO then
     value = media.AUDIO.uri;
   else/if media.TEXT then
-    value = media.TEXT.uri;
+    /* nothing to do */
   else
     _assert(media.EMPTY);
     escape 0; // terminates immediately
@@ -236,8 +236,8 @@ do
   else/if media.AUDIO then
     _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
-    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
-                  "font-desc", media.TEXT.font_desc, 
+    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri,
+                  "text-font", media.TEXT.font_desc,
                   "text-color", media.TEXT.color,
                   "x", media.TEXT.region.x, "y", media.TEXT.region.y,
                   "width", media.TEXT.region.width, "height", media.TEXT.region.height,
