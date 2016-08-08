@@ -1,25 +1,11 @@
-// APPLICATION: pure Ceu, no external types, C, etc
-
 #include "media.ceu"
 
-var int argc;
-var char && &&argv;
-(argc, argv) = await OS_START;
-
-if argc < 2 then
-  _printf ("Usage: %s URI\n", _ELEM_N (argv, 0));
-  escape 0;
-end
-
 var Scene s with
-  this.width = 1080;
-  this.height = 720;
-  this.auto_advance = true;
+  this.size = Size (300, 200);
 end;
 
-var Rect r = Rect(0, 0, s.width, s.height);
-var Media m = Media.VIDEO (_ELEM_N(argv, 1), 0, 0, s.width, s.height, 1, 
-                    1.0, 1.0);
+var Media m = Media.VIDEO ("../../resources/clock.ogv",                         
+                           Region(0, 0, 320, 240), 2,  0.75, 1.0);
 
 var Player p = Player.play (m, &s);
 
@@ -28,7 +14,7 @@ watching p do
   every (x, y, button, press) in s.mouse_click_event do
     if (button == 1 and press == true) then
       _printf ("(%.0f, %.0f)\n", x, y);
-      p.setPropertyBool ("mute", mute);
+      p.set_property_bool ("mute", mute);
       mute = not mute;
     end
   end

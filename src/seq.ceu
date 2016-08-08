@@ -3,16 +3,12 @@
 #include "media.ceu"
 
 var Scene s with
-  this.width = 1080;
-  this.height = 720;
-  this.auto_advance = true;
+  this.size = Size (1080, 720);
 end;
 
-var Rect rect = Rect(0, 0, s.width, s.height);
-
-var Media m1 = Media.VIDEO ("../../resources/misc.avi", 0, 0, s.width, s.height,
+var Media m1 = Media.VIDEO ("../../resources/misc.avi", Region (0, 0, s.size!.width, s.size!.height),
                       1, 1.0, 1.0);
-var Media m2 = Media.VIDEO ("../../resources/bars.ogg", 0, 0, s.width, s.height,
+var Media m2 = Media.VIDEO ("../../resources/bars.ogg", Region (0, 0, s.size!.width, s.size!.height),
                       1, 1.0, 1.0);
 
 do Player.play (m1, &s);

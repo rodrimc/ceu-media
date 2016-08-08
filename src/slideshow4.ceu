@@ -3,7 +3,6 @@
 
 var Scene scene with
     this.size = Size(800,585);
-    this.auto_advance = true;
 end;
 
 par/or do

@@ -12,7 +12,6 @@
 
 var Scene s with
     this.size = Size(800,585);
-    this.auto_advance = true;
 end;
 
 var char[] path = [].."../../resources/slideshow.srt";

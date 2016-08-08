@@ -5,7 +5,6 @@ var int height = 720;
 
 var Scene s with
   this.size = Size (width, height);
-  this.auto_advance = true;
 end;
 
 var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 

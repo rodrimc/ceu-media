@@ -102,10 +102,10 @@ end
 
 class Scene with
   var Size? size;
-  var bool auto_advance;
 
   /* Scene functions */
   function (uint) => void advance_time;
+  function (bool) => void set_auto_advance;
   function (void) => _lp_Scene && getptr;
 
   /* Scene events */
@@ -116,6 +116,7 @@ class Scene with
 
   event (void) quit;
 do
+  var bool auto_advance = true;
   var int w=0, h=0;
   if this.size? then
     w = this.size!.width;
@@ -197,12 +198,10 @@ do
       end
     end
   with
-    if auto_advance == true then 
-      every FREQ ms do
+    every FREQ ms do
+      if auto_advance == true then
         _lp_scene_advance (&&scene!, FREQ * NS);
       end
-    else
-      await FOREVER;
     end
   with
     await quit;
@@ -218,6 +217,10 @@ do
     if auto_advance == false then
       _lp_scene_advance (&&scene!, value);
     end
+  end
+
+  function (bool value) => void set_auto_advance do
+    auto_advance = value;
   end
 
 end
