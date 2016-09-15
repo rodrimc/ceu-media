@@ -1,14 +1,53 @@
 #ifndef _CEU_MEDIA_MEDIA
 #define _CEU_MEDIA_MEDIA
 
-#include "raw.ceu"
-
-#define MEDIA_FRAME_RATE 2    // 1 fps
-
-#define PERIOD_US (1000000/MEDIA_FRAME_RATE)
 #define NS 1000000
 #define FREQ 15
 
+input (_GObject&&, _lp_Event&&) LP_EVENT;
+
+native/pre do
+  ##include <glib.h>
+  ##include <play.h>
+  ##include <stdlib.h>
+  
+  ##define UNSAFE(x) x
+  ##define ELEM_N(V,N) V[N]
+  typedef char * charptr;
+end
+
+native @plain _charptr;
+
+native @pure _UNSAFE;
+native @pure _ELEM_N();
+
+/*********** LibPlay functions *************/
+native @nohold _lp_scene_new;
+native @nohold _lp_scene_receive;
+native @nohold _lp_scene_advance;
+native @nohold _lp_media_new;
+native @nohold _lp_media_start;
+native @nohold _lp_media_stop;
+native @nohold _lp_event_get_source;
+native @nohold _lp_event_to_string;
+native @pure _LP_IS_MEDIA;
+native @pure _LP_IS_SCENE;
+native @pure _LP_MEDIA;
+native @pure _LP_SCENE;
+native @pure _LP_EVENT;
+native @pure _LP_EVENT_POINTER_CLICK;
+native @pure _LP_EVENT_POINTER_MOVE;
+native @pure _LP_EVENT_KEY;
+native @pure _LP_EVENT_ERROR;
+
+/***********  GLib functions  *************/
+native @nohold _g_object_unref;
+native @nohold _g_object_set;
+native @nohold _g_object_get;
+native @pure _G_OBJECT;
+native @pure _G_OBJECT_TYPE;
+
+/*********  Library Public API ***********/
 data Region with
   var int x;
   var int y;
@@ -63,10 +102,10 @@ end
 
 class Scene with
   var Size? size;
-  var bool auto_advance;
 
   /* Scene functions */
   function (uint) => void advance_time;
+  function (bool) => void set_auto_advance;
   function (void) => _lp_Scene && getptr;
 
   /* Scene events */
@@ -77,6 +116,7 @@ class Scene with
 
   event (void) quit;
 do
+  var bool auto_advance = true;
   var int w=0, h=0;
   if this.size? then
     w = this.size!.width;
@@ -158,12 +198,10 @@ do
       end
     end
   with
-    if auto_advance == true then 
-      every FREQ ms do
+    every FREQ ms do
+      if auto_advance == true then
         _lp_scene_advance (&&scene!, FREQ * NS);
       end
-    else
-      await FOREVER;
     end
   with
     await quit;
@@ -179,6 +217,10 @@ do
     if auto_advance == false then
       _lp_scene_advance (&&scene!, value);
     end
+  end
+
+  function (bool value) => void set_auto_advance do
+    auto_advance = value;
   end
 
 end
@@ -212,7 +254,7 @@ do
   else/if media.AUDIO then
     value = media.AUDIO.uri;
   else/if media.TEXT then
-    value = media.TEXT.uri;
+    /* nothing to do */
   else
     _assert(media.EMPTY);
     escape 0; // terminates immediately
@@ -237,8 +279,8 @@ do
   else/if media.AUDIO then
     _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
-    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
-                  "font-desc", media.TEXT.font_desc, 
+    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri,
+                  "text-font", media.TEXT.font_desc,
                   "text-color", media.TEXT.color,
                   "x", media.TEXT.region.x, "y", media.TEXT.region.y,
                   "width", media.TEXT.region.width, "height", media.TEXT.region.height,
@@ -315,6 +357,24 @@ do
   function (u64 offset, bool relative) => void seek do
     _lp_media_seek(&&this.m!, relative, offset);
   end
+end
+
+/***********    async clock block   *************/
+spawn do
+  async do 
+    var s64 base, current, tmp;
+    base = _g_get_monotonic_time ();
+    current = 0;
+    tmp = 0;
+    loop do
+      current = _g_get_monotonic_time ();
+      tmp = current - base;
+      
+      base = current;
+      emit (tmp)us;
+    end
+  end
+  await FOREVER;
 end
 
 #endif

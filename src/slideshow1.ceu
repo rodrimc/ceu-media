@@ -11,7 +11,6 @@ var Media img4 = Media.IMAGE ("../../resources/img4.jpg", region, 2, 1.0);
 
 var Scene s with
   this.size = Size(800,585);
-  this.auto_advance = true;
 end;
 
 par/or do

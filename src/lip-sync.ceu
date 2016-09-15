@@ -5,7 +5,6 @@ var int height = 600;
 
 var Scene s with
   this.size = Size (width, height);
-  this.auto_advance = true;
 end;
 
 var Media m1 = Media.VIDEO ("../../resources/muted-video.m4v", 

@@ -5,8 +5,9 @@ var int scene_height = 720;
 
 var Scene s with
   this.size = Size (scene_width, scene_height);
-  this.auto_advance = false;
 end;
+
+s.set_auto_advance (false);
 
 var Region frame = Region (0.05 * scene_width, 0.067 * scene_height, 
                                0.185 * scene_width, 0.185 * scene_height);
@@ -85,7 +86,7 @@ do
   end
 with
   every FREQ ms do
-    s.advance_time (FREQ* NS);
+    s.advance_time (FREQ * NS);
   end
 end
 
