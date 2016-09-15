@@ -188,16 +188,17 @@ class Player with
   var Media   media;
 
   /* functions */
-  function (Media m, Scene &s) => Player play;
-  function (Region r) => void set_region_bounds;
+  function (Media, Scene &) => Player play;
+  function (Region) => void set_region_bounds;
   function (int, int, int, int) => void set_bounds;
-  function (char && name, float value) => void set_property_float;
-  function (char && name, int value) => void set_property_int;
-  function (char && name, bool value) => void set_property_bool;
-  function (char && name, char && value) => void set_property_char;
-  function (char && name) => float get_property_float;
-  function (char && name) => int get_property_int;
-  function (char && name) => bool get_property_bool;
+  function (char &&, float) => void set_property_float;
+  function (char &&, int) => void set_property_int;
+  function (char &&, bool) => void set_property_bool;
+  function (char &&, char &&) => void set_property_char;
+  function (char &&) => float get_property_float;
+  function (char &&) => int get_property_int;
+  function (char &&) => bool get_property_bool;
+  function (u64, bool) => void seek;
 
   /* events */
   event (void) start;
@@ -309,6 +310,10 @@ do
     var float value = 0.0;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
+  end
+
+  function (u64 offset, bool relative) => void seek do
+    _lp_media_seek(&&this.m!, relative, offset);
   end
 end
 

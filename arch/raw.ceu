@@ -24,6 +24,7 @@ native @nohold _lp_scene_new;
 native @nohold _lp_scene_receive;
 native @nohold _lp_scene_advance;
 native @nohold _lp_media_new;
+native @nohold _lp_media_seek;
 native @nohold _lp_media_start;
 native @nohold _lp_media_stop;
 native @nohold _lp_media_abort;
