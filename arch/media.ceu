@@ -18,34 +18,39 @@ end
 
 native @plain _charptr;
 
-native @pure _UNSAFE;
-native @pure _ELEM_N();
+native @pure _UNSAFE,
+             _ELEM_N();
 
 /*********** LibPlay functions *************/
-native @nohold _lp_scene_new;
-native @nohold _lp_scene_receive;
-native @nohold _lp_scene_advance;
-native @nohold _lp_media_new;
-native @nohold _lp_media_start;
-native @nohold _lp_media_stop;
-native @nohold _lp_event_get_source;
-native @nohold _lp_event_to_string;
-native @pure _LP_IS_MEDIA;
-native @pure _LP_IS_SCENE;
-native @pure _LP_MEDIA;
-native @pure _LP_SCENE;
-native @pure _LP_EVENT;
-native @pure _LP_EVENT_POINTER_CLICK;
-native @pure _LP_EVENT_POINTER_MOVE;
-native @pure _LP_EVENT_KEY;
-native @pure _LP_EVENT_ERROR;
+native @nohold _lp_event_get_source,
+               _lp_event_to_string,
+               _lp_media_new,
+               _lp_media_seek,
+               _lp_media_start,
+               _lp_media_stop,
+               _lp_scene_advance,
+               _lp_scene_pause,
+               _lp_scene_receive,
+               _lp_scene_resume,
+               _lp_scene_new;
+
+native @pure _LP_IS_MEDIA,
+             _LP_IS_SCENE,
+             _LP_MEDIA,
+             _LP_SCENE,
+             _LP_EVENT,
+             _LP_EVENT_POINTER_CLICK,
+             _LP_EVENT_POINTER_MOVE,
+             _LP_EVENT_KEY,
+             _LP_EVENT_ERROR;
 
 /***********  GLib functions  *************/
-native @nohold _g_object_unref;
-native @nohold _g_object_set;
-native @nohold _g_object_get;
-native @pure _G_OBJECT;
-native @pure _G_OBJECT_TYPE;
+native @nohold _g_object_unref,
+               _g_object_set,
+               _g_object_get;
+
+native @pure _G_OBJECT,
+             _G_OBJECT_TYPE;
 
 /*********  Library Public API ***********/
 data Region with
@@ -107,6 +112,8 @@ class Scene with
   function (uint) => void advance_time;
   function (bool) => void set_auto_advance;
   function (void) => _lp_Scene && getptr;
+  function (void) => void freeze;
+  function (void) => void resume;
 
   /* Scene events */
   event (f64, f64, int, int) mouse_click_event;
@@ -223,6 +230,13 @@ do
     auto_advance = value;
   end
 
+  function (void) => void freeze do
+    _lp_scene_pause (&&scene!);
+  end
+
+  function (void) => void resume do
+    _lp_scene_resume (&&scene!);
+  end
 end
 
 class Player with
