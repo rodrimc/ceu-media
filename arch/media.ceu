@@ -255,12 +255,13 @@ class Player with
   function (char &&) => float get_property_float;
   function (char &&) => int get_property_int;
   function (char &&) => bool get_property_bool;
-  function (u64, bool) => void seek;
+  function (u64, bool) => void request_seek;
   function (void) => u64 get_running_time;
 
   /* events */
   event (void) start;
   event (void) stop;
+  event (void) seek;
 do
   var _charptr value = null;
   if media.VIDEO then
@@ -330,6 +331,8 @@ do
     else/if type == _LP_TYPE_EVENT_STOP then
       emit stop;
       break;
+    else/if type == _LP_TYPE_EVENT_SEEK then
+      emit seek;
     end
   end
 
@@ -385,7 +388,7 @@ do
     return value;
   end
 
-  function (u64 offset, bool relative) => void seek do
+  function (u64 offset, bool relative) => void request_seek do
     _lp_media_seek(&&this.m!, relative, offset);
   end
 
