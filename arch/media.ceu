@@ -43,7 +43,8 @@ native @pure _LP_IS_MEDIA,
              _LP_EVENT_POINTER_CLICK,
              _LP_EVENT_POINTER_MOVE,
              _LP_EVENT_KEY,
-             _LP_EVENT_ERROR;
+             _LP_EVENT_ERROR,
+             _LP_EVENT_TICK;
 
 /***********  GLib functions  *************/
 native @nohold _g_object_unref,
@@ -108,6 +109,7 @@ end
 
 class Scene with
   var Size? size;
+  var u64? interval;
 
   /* Scene functions */
   function (uint) => void advance_time;
@@ -117,6 +119,7 @@ class Scene with
   function (void) => void resume;
 
   /* Scene events */
+  event (u64) tick;
   event (f64, f64, int, int) mouse_click_event;
   event (f64, f64) mouse_move_event;
   event (_charptr, int) key_event;
@@ -131,6 +134,10 @@ do
     h = this.size!.height;
   end
 
+  if not this.interval? then
+    this.interval = 10 * NS;
+  end
+
   var _lp_Scene &?scene;
   finalize
     scene = &_lp_scene_new (w, h);
@@ -138,8 +145,11 @@ do
     _g_object_unref (_G_OBJECT(&&scene!));
   end
 
-  _g_object_set (&&scene!, "slave-audio", true, null);
-  _g_object_set (&&scene!, "lockstep", true, null);
+  _g_object_set (&&scene!,
+                 "slave-audio", true,
+                 "lockstep", true,
+                 "interval", this.interval!,
+                 null);
 
   spawn do
     async (scene) do
@@ -203,6 +213,11 @@ do
         finalize with
           _g_free (msg);
         end
+      else/if type == _LP_TYPE_EVENT_TICK then
+        var _lp_EventTick &&evtTick = _UNSAFE(_LP_EVENT_TICK(evt));
+        var u64 ticks = 0;
+        _g_object_get (_G_OBJECT(evtTick), "serial", &&ticks, null);
+        emit tick => (ticks);
       end
     end
   with
