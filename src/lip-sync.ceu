@@ -5,32 +5,32 @@ var int width = 640;
 var int height = 480;
 
 var Media.Video m1 = val Media.Video([].."resources/muted-video.m4v",
-                                     Region(0,0,1,width/2,height/2),
-                                     1.0,
-                                     1.0);
+                                   Region(0,0,1,width/2,height/2),
+                                   1.0,
+                                   1.0);
 var Media.Video m2 = val Media.Video([].."resources/muted-video.m4v",
-                                     Region(width/2,0,1,width/2,height/2),
-                                     1.0,
-                                     0);
+                                   Region(width/2,0,1,width/2,height/2),
+                                   1.0,
+                                   0);
 var Media.Video m3 = val Media.Video([].."resources/muted-video.m4v",
-                                     Region(0,height/2,1,width/2,height/2),
-                                     1.0,
-                                     0);
+                                   Region(0,height/2,1,width/2,height/2),
+                                   1.0,
+                                   0);
 var Media.Video m4 = val Media.Video([].."resources/muted-video.m4v",
-                                     Region(width/2,height/2,1,width/2,height/2),
-                                     1.0,
-                                     0);
+                                   Region(width/2,height/2,1,width/2,height/2),
+                                   1.0,
+                                   0);
 var Media.Audio audio = val Media.Audio([].."resources/audio.aac", 1.0);
 
 var& IScene scene;
-watching Scene(Size(width,height),true) => (scene)
+watching Scene(Size(width,height)) => (scene)
 do
     spawn Play(&scene, &m1);
     spawn Play(&scene, &m2);
     spawn Play(&scene, &m3);
     spawn Play(&scene, &m4);
     spawn Play(&scene, &audio);
-    await scene.ok_keyed;
+    await scene.key;
 end
 
 escape 0;

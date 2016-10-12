@@ -5,42 +5,43 @@ var int width = 640;
 var int height = 480;
 
 var Media.Text text = val Media.Text (
-                            [].."one",
-                            [].."sans 40",
-                            Region(0, 400, 2, width, 80),
-                            0xffff0048,
-                          );
+                          [].."one",
+                          [].."sans 40",
+                          Region(0, 400, 2, width, 80),
+                          0xffff0048,
+                        );
 
 var Media.Video video = val Media.Video (
-                                [].."resources/night.avi",
-                                Region(0, 0, 1, width, height),
-                                1.0,
-                                1.0,
-                            );
+                          [].."resources/night.avi",
+                          Region(0, 0, 1, width, height),
+                          1.0,
+                          1.0,
+                        );
 
 var& IScene scene;
-watching Scene(Size(width,height),true) => (scene) do
-    var& IPlay text_play;
-    watching Play(&scene, &text) => (text_play) do
-        par/or do
-            loop do
-                await 1s;
-                call Play_Set_Char(&text_play, "text", "two");
-                await 1s;
-                call Play_Set_Char(&text_play, "text", "one");
-            end
-        with
-            loop do
-                spawn Play(&scene, &video);
-                await 2s;
-            end
-        with 
-            var _char_ptr_ext k;
-            (k,_) = await scene.ok_keyed until (_strcmp(k,"q") == 0);
-        with
-            await 12s;
+watching Scene(Size(width,height)) => (scene) do
+  var& IPlay text_play;
+  watching Play(&scene, &text) => (text_play) do
+    par/or do
+      loop do
+        await 1s;
+        call Play_Set_Char(&text_play, "text", "two");
+        await 1s;
+        call Play_Set_Char(&text_play, "text", "one");
+      end
+    with
+      loop do
+        watching 12s do   
+          await Play(&scene, &video);
         end
+      end
+    with 
+      var _char_ptr_ext k;
+      (k,_) = await scene.key until (_strcmp(k,"q") == 0);
+    with
+      await 12s;
     end
+  end
 end
 
 escape 0;

@@ -122,6 +122,20 @@ do
 end
 
 code/tight
+Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) => void
+do
+  _g_object_set(&&play.ref, name, value, null);
+end
+
+code/tight
+Play_Get_Bool (var& IPlay play, var _char&& name) => bool 
+do
+  var bool value = _;
+  _g_object_get (&&play.ref, name, &&value, null);
+  escape value;
+end
+
+code/tight
 Play_Set_Region (var& IPlay play, var Region region) => void
 do
   _g_object_set(

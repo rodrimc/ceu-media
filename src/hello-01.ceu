@@ -5,21 +5,21 @@ var int width = 1080;
 var int height = 720;
 
 var Media.Video m1 = val Media.Video (
-                            [].."resources/animGar.mp4",
-                            Region(0, 0, 1, width/2, height/2),
-                            1.0,
-                            1.0,
+                          [].."resources/animGar.mp4",
+                          Region(0, 0, 1, width/2, height/2),
+                          1.0,
+                          1.0,
                          );
 
 var Media.Video m2 = val Media.Video (
-                            [].."resources/animGar.mp4",
-                            Region(width/2, height/2, 1, width/2, height/2),
-                            1.0,
-                            0
+                          [].."resources/animGar.mp4",
+                          Region(width/2, height/2, 1, width/2, height/2),
+                          1.0,
+                          0
                          );
 
 var& IScene scene;
-watching Scene(Size(width,height),true) => (scene) do
+watching Scene(Size(width,height)) => (scene) do
   watching 30s do
     loop do
       _printf("===> RESTART\n");

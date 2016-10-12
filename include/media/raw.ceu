@@ -2,18 +2,20 @@
 #define _CEU_MEDIA_RAW
 
 native/const
+  _LP_TYPE_EVENT_KEY,
   _LP_TYPE_EVENT_POINTER_CLICK,
   _LP_TYPE_EVENT_POINTER_MOVE,
-  _LP_TYPE_EVENT_KEY,
   _LP_TYPE_EVENT_START,
   _LP_TYPE_EVENT_STOP,
+  _LP_TYPE_EVENT_TICK,
 ;
 
 native/plain
   _char_ptr_ext,
+  _lp_EventKey,
   _lp_EventPointerClick,
   _lp_EventPointerMove,
-  _lp_EventKey,
+  _lp_EventTick,
 ;
 
 native/pure
@@ -22,6 +24,7 @@ native/pure
   _LP_EVENT_KEY,
   _LP_EVENT_POINTER_CLICK,
   _LP_EVENT_POINTER_MOVE,
+  _LP_EVENT_TICK,
   _LP_IS_MEDIA,
   _LP_IS_SCENE,
   _LP_MEDIA,

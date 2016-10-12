@@ -8,6 +8,8 @@
 #define NS 1000000
 #define FREQ 15
 
+             
+
 /*********  Library Public API ***********/
 data Region with
   var int x;
@@ -52,9 +54,12 @@ end
 data IScene with
   var&  _lp_Scene              ref;
   var&  Size?                  size;
+  var   int                    tick_interval;
+  var   bool                   auto_advance;
   event (int, int, int, bool)  mouse_clicked;
   event (int, int)             mouse_moved;
   event (_char_ptr_ext, bool)  key;
+  event (u64)                  tick;
 #if 0
   event (_char_ptr_ext) error_event;
   event (void) quit;
@@ -63,11 +68,11 @@ end
 
 
 /* SCENE */
-code/await Scene (var Size? size, var bool auto_advance)
-                  => (var& IScene scene)
-                      => void
+code/await Scene (var Size? size)
+              => (var& IScene scene)
+                  => void
 do
-  var int w=0, h=0;
+  var int w=0, h=0, tick_interval = 10 * NS;
   if size? then
     w = size!.width;
     h = size!.height;
@@ -80,12 +85,13 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var IScene scene_ = val IScene(&ref_!,&size,_,_,_);
+  var IScene scene_ = val IScene(&ref_!,&size, tick_interval, true,_,_,_,_);
   scene = &scene_;
 
   _g_object_set (&&ref, 
                   "slave-audio", true, 
                   "lockstep", true,
+                  "interval", tick_interval,
                   null);
 
  spawn do
@@ -102,7 +108,7 @@ do
   end
 
   par do
-    if auto_advance == true then
+    if scene_.auto_advance == true then
       every FREQ ms do
         _lp_scene_advance(&&ref, FREQ * NS);
       end
@@ -163,6 +169,18 @@ do
         end
 
         emit scene_.key(key, pressed as bool);
+
+      /* TICK */
+
+      else/if type == _LP_TYPE_EVENT_TICK then
+        var _lp_EventTick&& evt_ = _LP_EVENT_TICK(evt);
+
+        var u64 ticks = _;
+        _g_object_get (_G_OBJECT(evt_), 
+            "serial", &&ticks, 
+            null);
+
+        emit scene_.tick (ticks);
       end
     end
   end
@@ -205,6 +223,12 @@ Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void;
 
 code/tight
 Play_Get_Int (var& IPlay play, var _char&& name) => int;
+
+code/tight
+Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) => void;
+
+code/tight
+Play_Get_Bool (var& IPlay play, var _char&& name) => bool;
 
 #include "media/aux.ceu"
 
