@@ -1,0 +1,247 @@
+#ifndef _CEU_MEDIA_MEDIA
+#define _CEU_MEDIA_MEDIA
+
+#include "c.ceu"
+#include "uv/uv.ceu"
+#include "media/raw.ceu"
+
+#define NS 1000000
+#define FREQ 15
+
+/*********  Library Public API ***********/
+data Region with
+  var int x;
+  var int y;
+  var int z;
+  var int width;
+  var int height;
+end
+
+data Size with
+  var int width;
+  var int height;
+end
+
+data Media;
+
+data Media.Text with
+  vector[] byte   text;
+  vector[] byte   font;
+  var      Region region;
+  var      uint   color;
+end
+
+data Media.Image with
+  vector[] byte   uri;
+  var      Region region;
+  var      float  alpha;
+end
+
+data Media.Audio with
+  vector[] byte  uri;
+  var      float volume;
+end
+
+data Media.Video with
+  vector[] byte   uri;
+  var      Region region;
+  var      float  alpha;
+  var      float  volume;
+end
+
+data IScene with
+  var&  _lp_Scene              ref;
+  var&  Size?                  size;
+  event (int, int, int, bool)  mouse_clicked;
+  event (int, int)             mouse_moved;
+  event (_char_ptr_ext, bool)  key;
+#if 0
+  event (_char_ptr_ext) error_event;
+  event (void) quit;
+#endif
+end
+
+
+/* SCENE */
+code/await Scene (var Size? size, var bool auto_advance)
+                  => (var& IScene scene)
+                      => void
+do
+  var int w=0, h=0;
+  if size? then
+    w = size!.width;
+    h = size!.height;
+  end
+
+  var&? _lp_Scene ref_ = &_lp_scene_new(w, h)
+    finalize (ref_) with
+      _g_object_unref (_G_OBJECT(&&ref_!));
+    end;
+
+  var& _lp_Scene ref = &ref_!;
+
+  var IScene scene_ = val IScene(&ref_!,&size,_,_,_);
+  scene = &scene_;
+
+  _g_object_set (&&ref, 
+                  "slave-audio", true, 
+                  "lockstep", true,
+                  null);
+
+ spawn do
+    await async (ref) do
+      loop do
+        var _lp_Event &&evt;
+        evt = _lp_scene_receive (&&ref, false);
+        if evt != null then
+          emit LP_EVENT(_lp_event_get_source(evt), evt);
+        end
+      end
+    end
+    await FOREVER;
+  end
+
+  par do
+    if auto_advance == true then
+      every FREQ ms do
+        _lp_scene_advance(&&ref, FREQ * NS);
+      end
+    end
+  with
+    loop do
+      var _GObject&&  source;
+      var _lp_Event&& evt;
+      (source, evt) = await LP_EVENT until ((_LP_IS_SCENE(source) as bool) and
+                                            _LP_SCENE(source) == &&ref);
+
+      var _GType type = _G_OBJECT_TYPE (evt);
+
+      /* MOUSE */
+
+      if type == _LP_TYPE_EVENT_POINTER_CLICK then
+        var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
+
+// TODO: (x,y) sao "float"?
+//  - mudei os eventos internos p/ "int"
+
+        var f64 x=_, y=_;
+        var int button=_, pressed=_;
+        _g_object_get(
+            _G_OBJECT(evt_),
+            "x", &&x,
+            "y", &&y,
+            "button", &&button,
+            "press", &&pressed,
+            null,
+        );
+
+        emit scene_.mouse_clicked(x as int, y as int,
+                                     button, pressed as bool);
+      else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
+        var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
+
+        var f64 x=_, y=_;
+        _g_object_get(_G_OBJECT(evt_), "x", &&x, "y",&&y, null);
+
+        emit scene_.mouse_moved(x as int, y as int);
+
+      /* KEY */
+
+      else/if type == _LP_TYPE_EVENT_KEY then
+        var _lp_EventKey&& evt_ = _LP_EVENT_KEY(evt);
+
+        var _char_ptr_ext key     = _;
+        var int           pressed = _;
+        _g_object_get(
+            _G_OBJECT(evt_),
+            "key",   &&key,
+            "press", &&pressed,
+            null
+        );
+        do finalize with
+          _g_free (key);
+        end
+
+        emit scene_.key(key, pressed as bool);
+      end
+    end
+  end
+
+#if 0
+      else/if type == _LP_TYPE_EVENT_ERROR then
+        var _lp_EventError &&evtError = _UNSAFE(_LP_EVENT_ERROR(evt));
+        var _GError &&err = null;
+        var _charptr msg = null;
+
+        _g_object_get (_G_OBJECT(evtError), "error", &&err, null);
+        msg = _lp_event_to_string (_LP_EVENT(evtError));
+
+        emit error_event => (msg);
+
+        finalize with
+          _g_free (msg);
+        end
+      end
+    end
+#endif 
+end
+
+data IPlay with
+  event void      ok;
+  var&  _lp_Media ref;
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media&&;
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media media) => void;
+
+code/tight
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void;
+
+code/tight
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void;
+
+code/tight
+Play_Get_Int (var& IPlay play, var _char&& name) => int;
+
+#include "media/aux.ceu"
+
+/* PLAYER */
+code/await Play (var& IScene scene, var& Media media)
+                  => (var& IPlay play)
+                      => void
+do
+  var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
+    finalize (ref) with
+        // TODO: who destroys?
+    end;
+
+  var IPlay play_ = val IPlay(_, &ref!);
+  play = &play_;
+
+  call/dynamic Play_Set_Media(&play_, &media);
+
+  do
+    _lp_media_start(&&play_.ref);
+  finalize (play_.ref) with
+    _lp_media_stop(&&play_.ref);
+  end
+
+  loop do
+    var _GObject&&  source;
+    var _lp_Event&& evt;
+    (source, evt) = await LP_EVENT until ((_LP_IS_MEDIA(source) as bool) and
+                                        _LP_MEDIA(source) == &&play_.ref);
+
+    var _GType type = _G_OBJECT_TYPE(evt);
+    if type == _LP_TYPE_EVENT_START then
+      emit play_.ok;
+    else/if type == _LP_TYPE_EVENT_STOP then
+      break;
+    end
+  end
+end
+
+#endif

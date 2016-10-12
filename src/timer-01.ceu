@@ -1,0 +1,13 @@
+#include "c.ceu"
+#include "uv/uv.ceu"
+
+_printf(">>>\n");
+
+loop i in [0 -> 10[ do
+    await 1s;
+    _printf("hello %d\n", i);
+end
+
+_printf("<<<\n");
+
+escape 0;

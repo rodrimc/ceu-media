@@ -1,17 +1,24 @@
-// APPLICATION: pure Ceu, no external types, C, etc
+#include "c.ceu"
+#include "media/media.ceu"
 
-#include "media.ceu"
+var& IScene scene;
+watching Scene(Size(1080,720),true) => (scene)
+do
+    var Media.Video m1 = val Media.Video (
+                                [].."resources/misc.avi",
+                                Region(0, 0, 1, scene.size!.width, scene.size!.height),
+                                1.0,
+                                1.0,
+                         );
+    var Media.Video m2 = val Media.Video (
+                                [].."resources/bars.ogg",
+                                Region(0, 0, 1, scene.size!.width, scene.size!.height),
+                                1.0,
+                                1.0,
+                         );
 
-var Scene s with
-  this.size = Size (1080, 720);
-end;
-
-var Media m1 = Media.VIDEO ("../../resources/misc.avi", Region (0, 0, s.size!.width, s.size!.height),
-                      1, 1.0, 1.0);
-var Media m2 = Media.VIDEO ("../../resources/bars.ogg", Region (0, 0, s.size!.width, s.size!.height),
-                      1, 1.0, 1.0);
-
-do Player.play (m1, &s);
-do Player.play (m2, &s);
+    await Play(&scene, &m1);
+    await Play(&scene, &m2);
+end
 
 escape 0;

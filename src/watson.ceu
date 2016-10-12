@@ -1,0 +1,18 @@
+#include "media.ceu"
+
+var Region region = Region (0, 0, 800, 585);
+
+var Media img1 = Media.IMAGE ("../../resources/img1.jpg", region, 1, 1.0);
+
+var Scene s with
+  this.size = Size(800,585);
+end;
+
+par do
+  do Player.play (img1, &s);
+with
+  var Media text = Media.TEXT ("bird", "sans 50", 0xffffffff,
+                           Region(250, 500, 300, 80), 2);
+  do Player.play (text, &s);
+end
+

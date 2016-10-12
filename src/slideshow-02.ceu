@@ -1,0 +1,50 @@
+#include "c.ceu"
+#include "media/media.ceu"
+#include "media/srt.ceu"
+
+var Region region = val Region(76, 74, 2, 650, 440);
+
+var Media.Image frame = val Media.Image([].."resources/frame.png",
+                                        Region(0,0,1,800,585),
+                                        1.0);
+var Media.Audio piano = val Media.Audio([].."resources/piano.ogg", 0.5);
+var Media.Image img1  = val Media.Image([].."resources/img1.jpg", region, 1.0);
+var Media.Image img2  = val Media.Image([].."resources/img2.jpg", region, 1.0);
+var Media.Image img3  = val Media.Image([].."resources/img3.jpg", region, 1.0);
+var Media.Image img4  = val Media.Image([].."resources/img4.jpg", region, 1.0);
+
+var& IScene scene;
+watching Scene(Size(800,585),true) => (scene)
+do
+    spawn Play(&scene, &frame);
+    spawn Srt(&scene,
+              "resources/slideshow.srt",
+              Region(0, 450, 3, 800, 80),
+          );
+
+    par/or do
+        watching 5s do
+            await Play(&scene, &img1);
+        end
+        watching 5s do
+            await Play(&scene, &img2);
+        end
+        watching 5s do
+            await Play(&scene, &img3);
+        end
+        watching 5s do
+            await Play(&scene, &img4);
+        end
+    with
+        loop do
+            await Play(&scene, &piano);
+        end
+    with
+        var _char_ptr_ext key;
+        var bool pressed;
+        (key, pressed) = await scene.ok_keyed
+                         until (not pressed) and _strcmp(key,"q")==0;
+    end
+end
+
+escape 0;

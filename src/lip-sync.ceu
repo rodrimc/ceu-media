@@ -1,30 +1,36 @@
-#include "media.ceu"
+#include "c.ceu"
+#include "media/media.ceu"
 
-var int width = 800;
-var int height = 600;
+var int width = 640;
+var int height = 480;
 
-var Scene s with
-  this.size = Size (width, height);
-end;
+var Media.Video m1 = val Media.Video([].."resources/muted-video.m4v",
+                                     Region(0,0,1,width/2,height/2),
+                                     1.0,
+                                     1.0);
+var Media.Video m2 = val Media.Video([].."resources/muted-video.m4v",
+                                     Region(width/2,0,1,width/2,height/2),
+                                     1.0,
+                                     0);
+var Media.Video m3 = val Media.Video([].."resources/muted-video.m4v",
+                                     Region(0,height/2,1,width/2,height/2),
+                                     1.0,
+                                     0);
+var Media.Video m4 = val Media.Video([].."resources/muted-video.m4v",
+                                     Region(width/2,height/2,1,width/2,height/2),
+                                     1.0,
+                                     0);
+var Media.Audio audio = val Media.Audio([].."resources/audio.aac", 1.0);
 
-var Media m1 = Media.VIDEO ("../../resources/muted-video.m4v", 
-        Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
-var Media m2 = Media.VIDEO ("../../resources/muted-video.m4v", 
-        Region (width/2, 0, width/2, height/2), 1, 1.0, 0);
-var Media m3 = Media.VIDEO ("../../resources/muted-video.m4v", 
-        Region (0, height/2, width/2, height/2), 1, 1.0, 0);
-var Media m4 = Media.VIDEO ("../../resources/muted-video.m4v", 
-        Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
-var Media audio = Media.AUDIO ("../../resources/audio.aac", 1.0);
-
-par/and do
-  spawn Player.play (m1, &s);
-  spawn Player.play (m2, &s);
-  spawn Player.play (m3, &s);
-  spawn Player.play (m4, &s);
-  spawn Player.play (audio, &s);
-with
-  await s.key_event;
+var& IScene scene;
+watching Scene(Size(width,height),true) => (scene)
+do
+    spawn Play(&scene, &m1);
+    spawn Play(&scene, &m2);
+    spawn Play(&scene, &m3);
+    spawn Play(&scene, &m4);
+    spawn Play(&scene, &audio);
+    await scene.ok_keyed;
 end
 
 escape 0;

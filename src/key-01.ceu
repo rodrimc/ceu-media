@@ -1,0 +1,16 @@
+#include "c.ceu"
+#include "media/media.ceu"
+
+var int width = 1080;
+var int height = 720;
+
+var& IScene scene;
+watching Scene(Size(width,height),true) => (scene) do
+    var _char_ptr_ext key;
+    var bool pressed;
+    every (key,pressed) in scene.ok_keyed do
+        _printf("KEY: %s %d\n", key, pressed as int);
+    end
+end
+
+escape 0;
