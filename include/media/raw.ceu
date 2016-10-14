@@ -2,6 +2,7 @@
 #define _CEU_MEDIA_RAW
 
 native/const
+  _LP_TYPE_EVENT_ERROR,
   _LP_TYPE_EVENT_KEY,
   _LP_TYPE_EVENT_POINTER_CLICK,
   _LP_TYPE_EVENT_POINTER_MOVE,
@@ -12,15 +13,19 @@ native/const
 
 native/plain
   _char_ptr_ext,
+  _lp_EventError,
   _lp_EventKey,
   _lp_EventPointerClick,
   _lp_EventPointerMove,
   _lp_EventTick,
+  _lp_Event_ptr_ext,
 ;
 
 native/pure
   _G_OBJECT,
   _G_OBJECT_TYPE,
+  _LP_EVENT,
+  _LP_EVENT_ERROR,
   _LP_EVENT_KEY,
   _LP_EVENT_POINTER_CLICK,
   _LP_EVENT_POINTER_MOVE,
@@ -36,6 +41,7 @@ native/nohold
   _g_object_get,
   _g_object_set,
   _g_object_unref,
+  _lp_event_to_string,
   _lp_event_get_source,
   _lp_media_new,
   _lp_media_stop,
@@ -44,6 +50,7 @@ native/nohold
 ;
 
 native
+  _GError,
   _GObject,
   _GType,
   _lp_Event,
@@ -59,6 +66,7 @@ native/pre do
   ##include <glib.h>
   ##include <play.h>
   typedef char* char_ptr_ext;
+  typedef lp_Event* lp_Event_ptr_ext;
 end
 
 #if 0

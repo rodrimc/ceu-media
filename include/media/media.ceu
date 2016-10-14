@@ -60,10 +60,8 @@ data IScene with
   event (int, int)             mouse_moved;
   event (_char_ptr_ext, bool)  key;
   event (u64)                  tick;
-#if 0
-  event (_char_ptr_ext) error_event;
+  event (_char_ptr_ext)        error;
   event (void) quit;
-#endif
 end
 
 
@@ -85,7 +83,7 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var IScene scene_ = val IScene(&ref_!,&size, tick_interval, true,_,_,_,_);
+  var IScene scene_ = val IScene(&ref_!,&size, tick_interval, true,_,_,_,_,_,_);
   scene = &scene_;
 
   _g_object_set (&&ref, 
@@ -95,10 +93,17 @@ do
                   null);
 
  spawn do
-    await async (ref) do
-      loop do
-        var _lp_Event &&evt;
-        evt = _lp_scene_receive (&&ref, false);
+    loop do
+      var _lp_Event_ptr_ext evt = null;
+      do finalize with
+        if (evt != null) then
+          _g_object_unref(_G_OBJECT(evt));
+        end
+      end
+      await async/thread (ref, evt) do
+        evt = _lp_scene_receive (&&ref, true);
+      end
+      await async (evt) do 
         if evt != null then
           emit LP_EVENT(_lp_event_get_source(evt), evt);
         end
@@ -107,7 +112,7 @@ do
     await FOREVER;
   end
 
-  par do
+  par/or do
     if scene_.auto_advance == true then
       every FREQ ms do
         _lp_scene_advance(&&ref, FREQ * NS);
@@ -126,9 +131,6 @@ do
 
       if type == _LP_TYPE_EVENT_POINTER_CLICK then
         var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
-
-// TODO: (x,y) sao "float"?
-//  - mudei os eventos internos p/ "int"
 
         var f64 x=_, y=_;
         var int button=_, pressed=_;
@@ -181,27 +183,27 @@ do
             null);
 
         emit scene_.tick (ticks);
+
+      /* ERROR */
+
+      else/if type == _LP_TYPE_EVENT_ERROR then
+        var _lp_EventError&& evt_ = _LP_EVENT_ERROR(evt);
+        var _GError&& err = null;
+        var _char_ptr_ext msg = null;
+
+        _g_object_get (_G_OBJECT(evt_), "error", &&err, null);
+        msg = _lp_event_to_string (_LP_EVENT(evt));
+
+        emit scene_.error (msg);
+
+        do finalize with
+          _g_free (msg);
+        end
+
+        break;
       end
     end
   end
-
-#if 0
-      else/if type == _LP_TYPE_EVENT_ERROR then
-        var _lp_EventError &&evtError = _UNSAFE(_LP_EVENT_ERROR(evt));
-        var _GError &&err = null;
-        var _charptr msg = null;
-
-        _g_object_get (_G_OBJECT(evtError), "error", &&err, null);
-        msg = _lp_event_to_string (_LP_EVENT(evtError));
-
-        emit error_event => (msg);
-
-        finalize with
-          _g_free (msg);
-        end
-      end
-    end
-#endif 
 end
 
 data IPlay with
