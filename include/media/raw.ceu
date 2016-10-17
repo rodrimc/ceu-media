@@ -6,6 +6,7 @@ native/const
   _LP_TYPE_EVENT_KEY,
   _LP_TYPE_EVENT_POINTER_CLICK,
   _LP_TYPE_EVENT_POINTER_MOVE,
+  _LP_TYPE_EVENT_SEEK,
   _LP_TYPE_EVENT_START,
   _LP_TYPE_EVENT_STOP,
   _LP_TYPE_EVENT_TICK,
@@ -41,12 +42,16 @@ native/nohold
   _g_object_get,
   _g_object_set,
   _g_object_unref,
-  _lp_event_to_string,
   _lp_event_get_source,
+  _lp_event_to_string,
+  _lp_media_get_running_time,
   _lp_media_new,
+  _lp_media_seek,
   _lp_media_stop,
   _lp_scene_advance,
+  _lp_scene_pause,
   _lp_scene_receive,
+  _lp_scene_resume,
 ;
 
 native

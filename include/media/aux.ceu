@@ -1,6 +1,20 @@
 #ifndef _CEU_MEDIA_AUX
 #define _CEU_MEDIA_AUX
 
+/* Scene_Pause */
+code/tight
+Scene_Pause (var& IScene scene) => void
+do
+  _lp_scene_pause (&&scene.ref);
+end
+
+/* Scene_Resume */
+code/tight
+Scene_Resume (var& IScene scene) => void
+do
+  _lp_scene_resume(&&scene.ref);
+end
+
 /* Play_New */
 
 code/tight/dynamic
@@ -147,6 +161,18 @@ do
       "height", region.height,
       null
   );
+end
+
+code/tight
+Play_Seek (var& IPlay play, var u64 time, var bool relative) => void
+do
+  _lp_media_seek(&&play.ref, relative, time);
+end
+
+code/tight
+Play_Get_Running_Time (var& IPlay play) => u64 
+do
+  escape _lp_media_get_running_time (&&play.ref);
 end
 
 #endif

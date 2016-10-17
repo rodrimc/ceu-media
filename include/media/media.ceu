@@ -61,9 +61,14 @@ data IScene with
   event (_char_ptr_ext, bool)  key;
   event (u64)                  tick;
   event (_char_ptr_ext)        error;
-  event (void) quit;
+  event (void)                 quit;
 end
 
+code/tight
+Scene_Pause (var& IScene scene) => void;
+
+code/tight
+Scene_Resume (var& IScene scene) => void;
 
 /* SCENE */
 code/await Scene (var Size? size)
@@ -208,6 +213,7 @@ end
 
 data IPlay with
   event void      ok;
+  event void      sought;
   var&  _lp_Media ref;
 end
 
@@ -232,6 +238,12 @@ Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) => void;
 code/tight
 Play_Get_Bool (var& IPlay play, var _char&& name) => bool;
 
+code/tight
+Play_Seek (var& IPlay play, var u64 time, var bool relative) => void;
+
+code/tight
+Play_Get_Running_Time (var& IPlay play) => u64; 
+
 #include "media/aux.ceu"
 
 /* PLAYER */
@@ -244,7 +256,7 @@ do
         // TODO: who destroys?
     end;
 
-  var IPlay play_ = val IPlay(_, &ref!);
+  var IPlay play_ = val IPlay(_, _, &ref!);
   play = &play_;
 
   call/dynamic Play_Set_Media(&play_, &media);
@@ -264,6 +276,8 @@ do
     var _GType type = _G_OBJECT_TYPE(evt);
     if type == _LP_TYPE_EVENT_START then
       emit play_.ok;
+    else/if type == _LP_TYPE_EVENT_SEEK then
+      emit play_.sought;
     else/if type == _LP_TYPE_EVENT_STOP then
       break;
     end
