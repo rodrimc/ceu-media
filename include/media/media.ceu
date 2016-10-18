@@ -8,8 +8,6 @@
 #define NS 1000000
 #define FREQ 15
 
-             
-
 /*********  Library Public API ***********/
 data Region with
   var int x;
@@ -51,10 +49,10 @@ data Media.Video with
   var      float  volume;
 end
 
+/* SCENE */
 data IScene with
   var&  _lp_Scene              ref;
   var&  Size?                  size;
-  var   int                    tick_interval;
   var   bool                   auto_advance;
   event (int, int, int, bool)  mouse_clicked;
   event (int, int)             mouse_moved;
@@ -70,12 +68,15 @@ Scene_Pause (var& IScene scene) => void;
 code/tight
 Scene_Resume (var& IScene scene) => void;
 
-/* SCENE */
+code/tight
+Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) => void;
+
+
 code/await Scene (var Size? size)
               => (var& IScene scene)
                   => void
 do
-  var int w=0, h=0, tick_interval = 10 * NS;
+  var int w=0, h=0, tick_interval = 30 * NS;
   if size? then
     w = size!.width;
     h = size!.height;
@@ -88,7 +89,7 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var IScene scene_ = val IScene(&ref_!,&size, tick_interval, true,_,_,_,_,_,_);
+  var IScene scene_ = val IScene(&ref_!,&size, true,_,_,_,_,_,_);
   scene = &scene_;
 
   _g_object_set (&&ref, 

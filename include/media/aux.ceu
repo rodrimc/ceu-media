@@ -1,18 +1,25 @@
 #ifndef _CEU_MEDIA_AUX
 #define _CEU_MEDIA_AUX
 
-/* Scene_Pause */
 code/tight
 Scene_Pause (var& IScene scene) => void
 do
   _lp_scene_pause (&&scene.ref);
 end
 
-/* Scene_Resume */
 code/tight
 Scene_Resume (var& IScene scene) => void
 do
   _lp_scene_resume(&&scene.ref);
+end
+
+code/tight
+Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) => void
+do
+  _g_object_set (&&scene.ref,
+                "interval",
+                interval,
+                null);
 end
 
 /* Play_New */
