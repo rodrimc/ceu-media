@@ -1,5 +1,5 @@
-CEU_DIR    = /home/rodrigocosta/workspace/ceu
-CEU_UV_DIR = /home/rodrigocosta/workspace/ceu-libuv
+CEU_DIR    = $(error set absolute path to "<ceu>" repository)
+CEU_UV_DIR = $(error set absolute path to "<ceu-libuv>" repository)
 
 CFLAGS = `pkg-config play lua5.3 libuv --libs --cflags` -l pthread
 
