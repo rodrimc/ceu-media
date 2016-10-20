@@ -3,6 +3,7 @@
 
 _printf(">>>\n");
 
+var int i;
 loop i in [0 -> 10[ do
     await 1s;
     _printf("hello %d\n", i);

@@ -1,96 +1,99 @@
 #ifndef _CEU_MEDIA_SRT
 #define _CEU_MEDIA_SRT
 
-#include "c.ceu"
-#include "uv.ceu"
-#include "media.ceu"
+#include "uv/fs.ceu"
+#include "media/media.ceu"
 
-class SRT with
-    var Scene&  scene;
-    var char[]& path;
-    var int     y;
+code/await Srt (var& IScene scene, var _char&& path, var Region region) -> void
 do
-    var UV_FS_open o = UV_FS_open.build(&this.path, _O_RDONLY, 0);
-    await o.ok;
-    if o.fd < 0 then
-        _fprintf(_stderr, "uv-error: %s\n", _uv_strerror(o.fd));
-    end
-    _assert(o.fd >= 0);
+  var& UV_FS_File file;
+  watching UV_FS_Open(path, _O_RDONLY, 0) -> (file) do
+    await file.ok;
+    _ceu_dbg_assert(file.fd >= 0);
 
-    var u32 now = 0;
-    var u32 off = 0;
+    var int   now = 0;
+    var usize off = 0;
+    var int i;
     loop i do
-        var u32 fr = 0;
-        var u32 to = 0;
+      var int fr = 0;
+      var int to = 0;
 
-        // N
-        do
-            var char[] line;
-            var int ret = do UV_FS_Read_Line.run(&o,&line,&off);
-            if ret == _UV_EOF then
-                break;
-            end
-            _assert(ret == 0);
+      // N
+      do
+        vector[] byte line;
+        var ssize n = await UV_FS_ReadLine(&file,&line,off);
+        if n == 0 then
+          break;
+        end
+        _ceu_dbg_assert(n > 0);
+        off = off + (n as usize);
 
-            var int cur = 0;
-            var int n = _sscanf((_char&&)&&line, "%d", &&cur);
-            _assert(n == 1);
-            _assert(cur == i+1);
-            _printf("SUBTITLE = %d\n", cur);
+        var int cur = _;
+        var ssize n = _sscanf(&&line[0], "%d", &&cur);
+        _ceu_dbg_assert(n == 1);
+        _ceu_dbg_assert(cur == i+1);
+        _printf("SUBTITLE = %d\n", cur);
+      end
+
+      // 00:00:01,000 --> 00:00:00,000
+      do
+        vector[] byte line;
+        var ssize n = await UV_FS_ReadLine(&file,&line,off);
+        _ceu_dbg_assert(n > 0);
+        _ceu_dbg_assert(n == 30);
+        off = off + (n as usize);
+
+        var int fr_h=0, fr_m=0, fr_s=0, fr_ms=0;
+        var int to_h=0, to_m=0, to_s=0, to_ms=0;
+        var int n = _sscanf(&&line[0], "%d:%d:%d,%d --> %d:%d:%d,%d",
+                    &&fr_h, &&fr_m, &&fr_s, &&fr_ms,
+                    &&to_h, &&to_m, &&to_s, &&to_ms);
+        _ceu_dbg_assert(n == 8);
+
+        _printf("%d:%d:%d,%d --> %d:%d:%d,%d\n",
+                    fr_h, fr_m, fr_s, fr_ms,
+                    to_h, to_m, to_s, to_ms);
+
+        fr = fr_ms + fr_s*1000 + fr_m*1000*60 + fr_h*1000*60*60;
+        to = to_ms + to_s*1000 + to_m*1000*60 + to_h*1000*60*60;
+      end
+
+      // subtitles
+      vector[] byte lines;
+      loop do
+        vector[] byte line;
+        var ssize n = await UV_FS_ReadLine(&file,&line,off);
+        if n == 0 then
+          break;
+        end
+        _ceu_dbg_assert(n > 0);
+        off = off + (n as usize);
+
+        if $line == 0 then
+          break;
+        end
+        lines = lines..[{'\n'}]..line;
+        _printf("%s\n", &&line[0]);
+      end
+
+      // Player.play()
+      do
+        await (fr-now)ms;
+
+        watching (to-fr)ms do
+          var Media.Text text = val Media.Text (
+                                    []..lines,
+                                    [].."",
+                                    region,
+                                    0xffff0000,
+                                  );
+          await Play(&scene, &text);
         end
 
-        // 00:00:01,000 --> 00:00:00,000
-        do
-            var char[] line;
-            var int ret = do UV_FS_Read_Line.run(&o,&line,&off);
-            _assert(ret == 0);
-            _assert($line == 29);
-
-            var int fr_h=0, fr_m=0, fr_s=0, fr_ms=0;
-            var int to_h=0, to_m=0, to_s=0, to_ms=0;
-            var int n = _sscanf((_char&&)&&line, "%d:%d:%d,%d --> %d:%d:%d,%d",
-                            &&fr_h, &&fr_m, &&fr_s, &&fr_ms,
-                            &&to_h, &&to_m, &&to_s, &&to_ms);
-            _assert(n == 8);
-
-            _printf("%d:%d:%d,%d --> %d:%d:%d,%d\n",
-                            fr_h, fr_m, fr_s, fr_ms,
-                            to_h, to_m, to_s, to_ms);
-
-            fr = fr_ms + fr_s*1000 + fr_m*1000*60 + fr_h*1000*60*60;
-            to = to_ms + to_s*1000 + to_m*1000*60 + to_h*1000*60*60;
-        end
-
-        // subtitles
-        var char[] lines;
-        loop do
-            var char[] line;
-            var int ret = do UV_FS_Read_Line.run(&o,&line,&off);
-            if ret == _UV_EOF then
-                break;
-            end
-            _assert(ret == 0);
-
-            if $line == 0 then
-                break;
-            end
-            lines = []..lines..['\n']..line;
-            _printf("%s\n", (_char&&)&&line);
-        end
-
-        // Player.play()
-        do
-            await (fr-now)ms;
-
-            watching (to-fr)ms do
-                var Media text = Media.TEXT((_char&&)&&lines, "", 0xffff0000,
-                                            Region(0,this.y,800,100), 3);
-                do Player.play(text, &this.scene);
-            end
-
-            now = to;
-        end
+        now = to;
+      end
     end
+  end
 end
 
 #endif

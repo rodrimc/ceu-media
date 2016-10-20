@@ -11,7 +11,7 @@ var Media.Video m = val Media.Video (
                         );
 
 var& IScene scene;
-watching Scene(Size(width,height)) => (scene) do
+watching Scene(Size(width,height)) -> (scene) do
   watching scene.key, scene.mouse_clicked do
     loop do
       await Play(&scene, &m);

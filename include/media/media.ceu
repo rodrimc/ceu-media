@@ -63,18 +63,18 @@ data IScene with
 end
 
 code/tight
-Scene_Pause (var& IScene scene) => void;
+Scene_Pause (var& IScene scene) -> void;
 
 code/tight
-Scene_Resume (var& IScene scene) => void;
+Scene_Resume (var& IScene scene) -> void;
 
 code/tight
-Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) => void;
+Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) -> void;
 
 
 code/await Scene (var Size? size)
-              => (var& IScene scene)
-                  => void
+              -> (var& IScene scene)
+                  -> void
 do
   var int w=0, h=0, tick_interval = 30 * NS;
   if size? then
@@ -219,38 +219,38 @@ data IPlay with
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media&&;
+Play_New (var& IScene scene, dynamic var& Media media) -> _lp_Media&&;
 
 code/tight/dynamic
-Play_Set_Media (var& IPlay play, dynamic var& Media media) => void;
+Play_Set_Media (var& IPlay play, dynamic var& Media media) -> void;
 
 code/tight
-Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void;
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
 
 code/tight
-Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void;
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> void;
 
 code/tight
-Play_Get_Int (var& IPlay play, var _char&& name) => int;
+Play_Get_Int (var& IPlay play, var _char&& name) -> int;
 
 code/tight
-Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) => void;
+Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) -> void;
 
 code/tight
-Play_Get_Bool (var& IPlay play, var _char&& name) => bool;
+Play_Get_Bool (var& IPlay play, var _char&& name) -> bool;
 
 code/tight
-Play_Seek (var& IPlay play, var u64 time, var bool relative) => void;
+Play_Seek (var& IPlay play, var u64 time, var bool relative) -> void;
 
 code/tight
-Play_Get_Running_Time (var& IPlay play) => u64; 
+Play_Get_Running_Time (var& IPlay play) -> u64; 
 
 #include "media/aux.ceu"
 
 /* PLAYER */
 code/await Play (var& IScene scene, var& Media media)
-                  => (var& IPlay play)
-                      => void
+                  -> (var& IPlay play)
+                      -> void
 do
   var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
     finalize (ref) with

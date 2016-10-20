@@ -2,7 +2,7 @@
 #include "media/media.ceu"
 
 var& IScene scene;
-watching Scene(Size(1080,720)) => (scene)
+watching Scene(Size(1080,720)) -> (scene)
 do
   var Media.Video m1 = val Media.Video (
                         [].."resources/misc.avi",

@@ -19,10 +19,10 @@ var Media.Video m2 = val Media.Video (
                          );
 
 var& IScene scene;
-watching Scene(Size(width,height)) => (scene) do
+watching Scene(Size(width,height)) -> (scene) do
   watching 30s do
     loop do
-      _printf("===> RESTART\n");
+      _printf("==-> RESTART\n");
       watching 10s do
         spawn Play(&scene, &m1);
         spawn Play(&scene, &m2);

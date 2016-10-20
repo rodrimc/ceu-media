@@ -13,33 +13,33 @@ var Media.Image img3  = val Media.Image([].."resources/img3.jpg", region, 1.0);
 var Media.Image img4  = val Media.Image([].."resources/img4.jpg", region, 1.0);
 
 var& IScene scene;
-watching Scene(Size(800,585),true) => (scene)
+watching Scene(Size(800,585)) -> (scene)
 do
-    spawn Play(&scene, &frame);
+  spawn Play(&scene, &frame);
 
-    par/or do
-        watching 5s do
-            await Play(&scene, &img1);
-        end
-        watching 5s do
-            await Play(&scene, &img2);
-        end
-        watching 5s do
-            await Play(&scene, &img3);
-        end
-        watching 5s do
-            await Play(&scene, &img4);
-        end
-    with
-        loop do
-            await Play(&scene, &piano);
-        end
-    with
-        var _char_ptr_ext key;
-        var bool pressed;
-        (key, pressed) = await scene.ok_keyed
-                         until (not pressed) and _strcmp(key,"q")==0;
+  par/or do
+    watching 5s do
+      await Play(&scene, &img1);
     end
+    watching 5s do
+      await Play(&scene, &img2);
+    end
+    watching 5s do
+      await Play(&scene, &img3);
+    end
+    watching 5s do
+      await Play(&scene, &img4);
+    end
+  with
+    loop do
+      await Play(&scene, &piano);
+    end
+  with
+    var _char_ptr_ext key;
+    var bool pressed;
+    (key, pressed) = await scene.key
+                     until (not pressed) and _strcmp(key,"q")==0;
+  end
 end
 
 escape 0;

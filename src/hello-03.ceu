@@ -19,9 +19,9 @@ var Media.Video video = val Media.Video (
                         );
 
 var& IScene scene;
-watching Scene(Size(width,height)) => (scene) do
+watching Scene(Size(width,height)) -> (scene) do
   var& IPlay text_play;
-  watching Play(&scene, &text) => (text_play) do
+  watching Play(&scene, &text) -> (text_play) do
     par/or do
       loop do
         await 1s;

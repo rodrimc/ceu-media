@@ -63,11 +63,11 @@ var Media.Video shoes = val Media.Video (
 event (int, int, int, int) resize;
 
 var& IScene scene;
-watching Scene(Size(scene_width,scene_height)) => (scene)
+watching Scene(Size(scene_width,scene_height)) -> (scene)
 do
   spawn Play(&scene, &back);
   var& IPlay play_anim;
-  watching Play(&scene, &anim) => (play_anim) do
+  watching Play(&scene, &anim) -> (play_anim) do
     par do
       var int x, y, width, height;
       every (x, y, width, height) in resize do
@@ -83,7 +83,7 @@ do
     with
       await 41s;
       var& IPlay play_photo;
-      watching Play(&scene,&photo) => (play_photo) do
+      watching Play(&scene,&photo) -> (play_photo) do
         watching 5s do
           await 1s;
           var int top = call Play_Get_Int(&play_photo,"y");

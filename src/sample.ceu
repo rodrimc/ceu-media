@@ -7,9 +7,9 @@ var Media.Video m = val Media.Video (
                          );
 
 var& IScene scene;
-watching Scene (Size (300, 200)) => (scene) do 
+watching Scene (Size (300, 200)) -> (scene) do 
   var& IPlay player;
-  watching Play (&scene, &m) => (player) do
+  watching Play (&scene, &m) -> (player) do
     var bool mute = true;
     var int x;
     var int y;
