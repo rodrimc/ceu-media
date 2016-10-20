@@ -1,54 +1,66 @@
-#include "media.ceu"
+#include "c.ceu"
+#include "media/media.ceu"
 
 var int width = 640;
 var int height = 480;
 
-var Scene s with
-  this.size = Size (width, height);
-end;
+var Media.Video back = val Media.Video (
+                            [].."resources/animGar.mp4",
+                            Region(0, 0, 1, width, height),
+                            1.0,
+                            1.0,
+                          );
 
-var Media back = Media.VIDEO ("../../resources/animGar.mp4", 
-                           Region(0, 0, width, height), 1.0, 1.0, 1.0);
+var Media.Video video = val Media.Video (
+                            [].."resources/diode.mp4",
+                            Region(0, 0, 2, 320, 240),
+                            0.75,
+                            1.0,
+                          );
 
-var Media video = Media.VIDEO ("../../resources/diode.mp4",                         
-                           Region(0, 0, 320, 240), 2,  0.75, 1.0);
-var Media audio = Media.AUDIO ("../../resources/choro.mp4", 0.5);
+var Media.Audio audio = val Media.Audio (
+                            [].."resources/choro.mp4",
+                            0.5,
+                          );
 
-var Player pBack = Player.play (back, &s);
-var Player pVideo = Player.play (video, &s);
+var& IScene scene;
+watching Scene(Size(width,height)) => (scene)
+do
+  spawn Play(&scene, &back);
 
-watching pVideo do
-  par/or do
-    loop do
-      var _charptr key;
-      var int press, x, y;
-      x = pVideo.get_property_int ("x");
-      y = pVideo.get_property_int ("y");
-      (key, press) = await s.key_event;
-      if _strcmp (key, "Left") == 0 then
-        pVideo.set_property_int ("x", x - 10);
-      else/if _strcmp (key, "Right") == 0 then
-        pVideo.set_property_int ("x", x + 10);
-      else/if _strcmp (key, "Up") == 0 then
-        pVideo.set_property_int ("y", y - 10);
-      else/if _strcmp (key, "Down") == 0 then
-        pVideo.set_property_int ("y", y + 10);
+  var& IPlay play_video;
+  watching Play(&scene, &video) => (play_video) do
+    par/or do
+      var _char_ptr_ext key;
+      (key,_) = await scene.key until (_strcmp(key,"q") == 0);
+    with
+      loop do
+        var int x = call Play_Get_Int(&play_video, "x");
+        var int y = call Play_Get_Int(&play_video, "y");
+
+        var _char_ptr_ext key;
+        (key, _) = await scene.key;
+        if _strcmp (key, "Left") == 0 or _strcmp (key, "h") == 0 then
+          call Play_Set_Int(&play_video, "x", x-10);
+        else/if _strcmp (key, "Right") == 0 or _strcmp (key, "l") == 0 then
+          call Play_Set_Int(&play_video, "x", x+10);
+        else/if _strcmp (key, "Up") == 0 or _strcmp (key, "k") == 0 then
+          call Play_Set_Int(&play_video, "y", y-10);
+        else/if _strcmp (key, "Down") == 0 or _strcmp (key, "j") == 0 then
+          call Play_Set_Int(&play_video, "y", y+10);
+        end
+      end
+    with
+      loop do
+        var _char_ptr_ext key;
+        var bool pressed;
+        (key, pressed) = await scene.key
+                       until pressed and _strcmp(key,"space")==0;
+        spawn Play(&scene, &audio);
+        (key, pressed) = await scene.key
+                     until pressed and _strcmp (key,"space")==0;
       end
     end
-  with
-    loop do
-      var _charptr key;
-      var int press;
-      (key, press) = await s.key_event until (_strcmp (key, "space") == 0 and
-                                              press == 1);
-      var Player p = Player.play (audio, &s);
-      (key, press) = await s.key_event until (_strcmp (key, "space") == 0 and
-                                              press == 1);
-    end
-  with
-    var _charptr key;
-    var int press;
-    (key, press) = await s.key_event until (_strcmp (key, "q") == 0);
   end
 end
 

@@ -1,28 +1,37 @@
-#include "media.ceu"
+#include "c.ceu"
+#include "media/media.ceu"
 
 var int width = 1080;
 var int height = 720;
 
-var Scene s with
-  this.size = Size (width, height);
-end;
+var Media.Video m1 = val Media.Video (
+                          [].."resources/animGar.mp4",
+                          Region(0, 0, 1, width/2, height/2),
+                          1.0,
+                          1.0,
+                         );
 
-var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 
-        Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
-var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
-        Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
+var Media.Video m2 = val Media.Video (
+                          [].."resources/animGar.mp4",
+                          Region(width/2, height/2, 1, width/2, height/2),
+                          1.0,
+                          0
+                         );
 
-watching 30s do
-  loop do
+var& IScene scene;
+watching Scene(Size(width,height)) => (scene) do
+  watching 30s do
+    loop do
       _printf("===> RESTART\n");
       watching 10s do
-          var Player p1 = Player.play (m1, &s);
-          var Player p2 = Player.play (m2, &s);
-          await FOREVER;
+        spawn Play(&scene, &m1);
+        spawn Play(&scene, &m2);
+        await FOREVER;
       end
       // after 10s, destroys everything and restarts
+    end
   end
 end
-
+_printf ("here");
 
 escape 0;

@@ -1,23 +1,30 @@
-#include "media.ceu"
+#include "media/media.ceu"
 
-var Scene s with
-  this.size = Size (300, 200);
-end;
+var Media.Video m = val Media.Video (
+                           [] .. "resources/clock.ogv",                         
+                           Region(0, 0, 320, 240, 2),  0.75, 
+                           1.0
+                         );
 
-var Media m = Media.VIDEO ("../../resources/clock.ogv",                         
-                           Region(0, 0, 320, 240), 2,  0.75, 1.0);
-
-var Player p = Player.play (m, &s);
-
-watching p do
-  var bool mute = true;
-  every (x, y, button, press) in s.mouse_click_event do
-    if (button == 1 and press == true) then
-      _printf ("(%.0f, %.0f)\n", x, y);
-      p.set_property_bool ("mute", mute);
-      mute = not mute;
+var& IScene scene;
+watching Scene (Size (300, 200)) => (scene) do 
+  var& IPlay player;
+  watching Play (&scene, &m) => (player) do
+    var bool mute = true;
+    var int x;
+    var int y;
+    var int button;
+    var bool press;
+    every (x, y, button, press) in scene.mouse_clicked do
+      if (press) then
+        call Play_Set_Region(&player,
+                           Region(x, y, m.region.width, 
+                                  m.region.height, m.region.z));
+        call Play_Set_Bool (&player, "mute", mute);
+        mute = not mute;
+      end
     end
   end
-end
+end;
 
 escape 0;

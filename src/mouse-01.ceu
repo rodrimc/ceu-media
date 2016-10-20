@@ -1,0 +1,24 @@
+#include "c.ceu"
+#include "media/media.ceu"
+
+var int width = 1080;
+var int height = 720;
+
+var& IScene scene;
+watching Scene(Size(width,height)) => (scene) do
+  par do
+    var int x, y;
+    var int but;
+    var bool pressed;
+    every (x,y,but,pressed) in scene.mouse_clicked do
+        _printf("CLICK: %d %d %d %d\n", x,y,but,pressed as int);
+    end
+  with
+    var int x, y;
+    every (x,y) in scene.mouse_moved do
+      _printf("MOVE: %d %d\n", x,y);
+    end
+  end
+end
+
+escape 0;

@@ -1,22 +1,22 @@
-#include "media.ceu"
+#include "media/media.ceu"
 
 var int width = 1080;
 var int height = 720;
 
-var Scene s with
-  this.size = Size (width, height);
-end;
+var Media.Video m = val Media.Video (
+                          [].."resources/clock.ogv",
+                          Region(0, 0, 1, width, height),
+                          1.0,
+                          1.0
+                        );
 
-par/or do
-  loop do
-    var Media m = Media.VIDEO ("../../resources/clock.ogv", 
-            Region (0, 0, width, height), 1, 1.0, 1.0);
-    do Player.play (m, &s);
+var& IScene scene;
+watching Scene(Size(width,height)) => (scene) do
+  watching scene.key, scene.mouse_clicked do
+    loop do
+      await Play(&scene, &m);
+    end
   end
-with
-  await s.key_event;
-with
-  await s.mouse_click_event;
 end
 
 escape 0;

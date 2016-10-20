@@ -1,39 +1,47 @@
-#include "media.ceu"
+#include "c.ceu"
+#include "media/media.ceu"
 
 var int width = 640;
 var int height = 480;
 
-var Scene s with
-  this.size = Size (width, height);
-end;
+var Media.Text text = val Media.Text (
+                          [].."one",
+                          [].."sans 40",
+                          Region(0, 400, 2, width, 80),
+                          0xffff0048,
+                        );
 
-var Media text = Media.TEXT ("one", "sans 40", 0xffff0048,
-                           Region(0, 400, width, 80), 2.0);
+var Media.Video video = val Media.Video (
+                          [].."resources/night.avi",
+                          Region(0, 0, 1, width, height),
+                          1.0,
+                          1.0,
+                        );
 
-var Media video = Media.VIDEO ("../../resources/night.avi",                         
-                           Region(0, 0, width, height), 1,  1.0, 1.0);
-
-var Player pText = Player.play (text, &s);
-
-par/or do
-  loop do
-    await 1s;
-    pText.set_property_char ("text", "two");
-    await 1s;
-    pText.set_property_char ("text", "one");
+var& IScene scene;
+watching Scene(Size(width,height)) => (scene) do
+  var& IPlay text_play;
+  watching Play(&scene, &text) => (text_play) do
+    par/or do
+      loop do
+        await 1s;
+        call Play_Set_Char(&text_play, "text", "two");
+        await 1s;
+        call Play_Set_Char(&text_play, "text", "one");
+      end
+    with
+      loop do
+        watching 12s do   
+          await Play(&scene, &video);
+        end
+      end
+    with 
+      var _char_ptr_ext k;
+      (k,_) = await scene.key until (_strcmp(k,"q") == 0);
+    with
+      await 12s;
+    end
   end
-with
-  loop do
-    var Player p =Player.play (video, &s);
-    await 2s;
-  end
-with 
-  var _charptr k;
-  var int press;
-  (k, press) = await s.key_event until (_strcmp (k, "q") == 0);
-with
-  await 12s;
 end
 
 escape 0;
-

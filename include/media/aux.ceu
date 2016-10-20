@@ -1,0 +1,185 @@
+#ifndef _CEU_MEDIA_AUX
+#define _CEU_MEDIA_AUX
+
+code/tight
+Scene_Pause (var& IScene scene) => void
+do
+  _lp_scene_pause (&&scene.ref);
+end
+
+code/tight
+Scene_Resume (var& IScene scene) => void
+do
+  _lp_scene_resume(&&scene.ref);
+end
+
+code/tight
+Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) => void
+do
+  _g_object_set (&&scene.ref,
+                "interval",
+                interval,
+                null);
+end
+
+/* Play_New */
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media&&
+do
+  _ceu_dbg_assert(0);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Text media) => _lp_Media&&
+do
+  escape _lp_media_new(&&scene.ref, null);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Image media) => _lp_Media&&
+do
+  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Video media) => _lp_Media&&
+do
+  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Audio media) => _lp_Media&&
+do
+  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
+end
+
+/* Play_Set_Media */
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media media) => void
+do
+  _ceu_dbg_assert(0);
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Text text) => void
+do
+  _g_object_set (
+      _G_OBJECT(&&play.ref),
+      "text",       &&text.text[0],
+      "text-font",  &&text.font[0],
+      "text-color", text.color,
+      "x",          text.region.x,
+      "y",          text.region.y,
+      "z",          text.region.z,
+      "width",      text.region.width,
+      "height",     text.region.height,
+      null
+  );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Image image) => void
+do
+  _g_object_set (
+      _G_OBJECT(&&play.ref),
+      "x",      image.region.x,
+      "y",      image.region.y,
+      "z",      image.region.z,
+      "width",  image.region.width,
+      "height", image.region.height,
+      "alpha",  image.alpha,
+      null
+  );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Audio audio) => void
+do
+  _g_object_set (
+    _G_OBJECT(&&play.ref),
+    "volume", audio.volume,
+    null
+  );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Video video) => void
+do
+  _g_object_set (
+    _G_OBJECT(&&play.ref),
+    "x",      video.region.x,
+    "y",      video.region.y,
+    "z",      video.region.z,
+    "width",  video.region.width,
+    "height", video.region.height,
+    "alpha",  video.alpha,
+    "volume", video.volume,
+    null
+  );
+end
+
+/* Play_Set_* */
+
+code/tight
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void
+do
+  _g_object_set(&&play.ref, name, value, null);
+end
+
+code/tight
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void
+do
+  _g_object_set(&&play.ref, name, value, null);
+end
+
+code/tight
+Play_Get_Int (var& IPlay play, var _char&& name) => int
+do
+  var int value = 0;
+  _g_object_get (&&play.ref, name, &&value, null);
+  escape value;
+end
+
+code/tight
+Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) => void
+do
+  _g_object_set(&&play.ref, name, value, null);
+end
+
+code/tight
+Play_Get_Bool (var& IPlay play, var _char&& name) => bool 
+do
+  var bool value = _;
+  _g_object_get (&&play.ref, name, &&value, null);
+  escape value;
+end
+
+code/tight
+Play_Set_Region (var& IPlay play, var Region region) => void
+do
+  _g_object_set(
+      _G_OBJECT(&&play.ref),
+      "x", region.x,
+      "y", region.y,
+      "z", region.z,
+      "width", region.width,
+      "height", region.height,
+      null
+  );
+end
+
+code/tight
+Play_Seek (var& IPlay play, var u64 time, var bool relative) => void
+do
+  _lp_media_seek(&&play.ref, relative, time);
+end
+
+code/tight
+Play_Get_Running_Time (var& IPlay play) => u64 
+do
+  escape _lp_media_get_running_time (&&play.ref);
+end
+
+#endif
