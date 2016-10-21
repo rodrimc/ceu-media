@@ -47,7 +47,7 @@ var Media.Image off4 = val Media.Image (
 var int freq = 500; 
 
 var& IScene scene;
-watching Scene (Size (600, 600)) -> (scene) do
+watching Scene (Size (600, 600)) -> (&scene) do
   par/or do
     var _char_ptr_ext key;
     var bool pressed;

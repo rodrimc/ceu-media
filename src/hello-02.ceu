@@ -5,13 +5,13 @@ var int height = 720;
 
 var Media.Video m = val Media.Video (
                           [].."resources/clock.ogv",
-                          Region(0, 0, 1, width, height),
+                          Region(0, 0, width, height, 1),
                           1.0,
                           1.0
                         );
 
 var& IScene scene;
-watching Scene(Size(width,height)) -> (scene) do
+watching Scene(Size(width,height)) -> (&scene) do
   watching scene.key, scene.mouse_clicked do
     loop do
       await Play(&scene, &m);

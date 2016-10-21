@@ -5,7 +5,7 @@ var int width = 1080;
 var int height = 720;
 
 var& IScene scene;
-watching Scene(Size(width,height)) -> (scene) do
+watching Scene(Size(width,height)) -> (&scene) do
   par do
     var int x, y;
     var int but;

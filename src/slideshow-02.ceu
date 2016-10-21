@@ -2,10 +2,10 @@
 #include "media/media.ceu"
 #include "media/srt.ceu"
 
-var Region region = val Region(76, 74, 2, 650, 440);
+var Region region = val Region(76, 74, 650, 440, 2);
 
 var Media.Image frame = val Media.Image([].."resources/frame.png",
-                                        Region(0,0,1,800,585),
+                                        Region(0,0,800,585,1),
                                         1.0);
 var Media.Audio piano = val Media.Audio([].."resources/piano.ogg", 0.5);
 var Media.Image img1  = val Media.Image([].."resources/img1.jpg", region, 1.0);
@@ -14,12 +14,12 @@ var Media.Image img3  = val Media.Image([].."resources/img3.jpg", region, 1.0);
 var Media.Image img4  = val Media.Image([].."resources/img4.jpg", region, 1.0);
 
 var& IScene scene;
-watching Scene(Size(800,585)) -> (scene)
+watching Scene(Size(800,585)) -> (&scene)
 do
   spawn Play(&scene, &frame);
   spawn Srt(&scene,
             "resources/slideshow.srt",
-            Region(0, 450, 3, 800, 80),
+            Region(0, 450, 800, 80, 3),
         );
 
   par/or do

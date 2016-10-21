@@ -7,21 +7,21 @@ var int height = 480;
 var Media.Text text = val Media.Text (
                           [].."one",
                           [].."sans 40",
-                          Region(0, 400, 2, width, 80),
+                          Region(0, 400, width, 80, 2),
                           0xffff0048,
                         );
 
 var Media.Video video = val Media.Video (
                           [].."resources/night.avi",
-                          Region(0, 0, 1, width, height),
+                          Region(0, 0, width, height, 1),
                           1.0,
                           1.0,
                         );
 
 var& IScene scene;
-watching Scene(Size(width,height)) -> (scene) do
+watching Scene(Size(width,height)) -> (&scene) do
   var& IPlay text_play;
-  watching Play(&scene, &text) -> (text_play) do
+  watching Play(&scene, &text) -> (&text_play) do
     par/or do
       loop do
         await 1s;

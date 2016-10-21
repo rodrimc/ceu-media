@@ -6,20 +6,20 @@ var int scene_height = 720;
 var Region frame = val Region (
                       (0.05 * scene_width) as int,
                       (0.067 * scene_height) as int,
-                      3,
                       (0.185 * scene_width) as int,
                       (0.185 * scene_height) as int,
+                      3,
                    );
 
 var Media.Image back = val Media.Image (
                     [].."resources/background.png",
-                    Region(0, 0, 1, scene_width, scene_height),
+                    Region(0, 0, scene_width, scene_height, 0),
                     1.0,
                    );
 
 var Media.Video anim = val Media.Video (
                     [].."resources/animGar.mp4",
-                    Region(0, 0, 2, scene_width, scene_height),
+                    Region(0, 0, scene_width, scene_height, 2),
                     1.0,
                     1.0,
                    );
@@ -40,9 +40,9 @@ var Media.Image icon = val Media.Image (
                   Region(
                       (0.875 * scene_width) as int,
                       (0.117 * scene_height) as int,
-                      3,
                       (0.0845 * scene_width) as int,
-                      (0.067 * scene_height) as int
+                      (0.067 * scene_height) as int,
+                      3,
                   ),
                   1.0,
                  );
@@ -52,9 +52,9 @@ var Media.Video shoes = val Media.Video (
                     Region(
                         (0.15 * scene_width) as int,
                         (0.6 * scene_height) as int,
-                        3,
                         (0.25 * scene_width) as int,
-                        (0.25 * scene_height) as int
+                        (0.25 * scene_height) as int,
+                        3,
                     ),
                     1.0,
                     1.0,
@@ -63,16 +63,16 @@ var Media.Video shoes = val Media.Video (
 event (int, int, int, int) resize;
 
 var& IScene scene;
-watching Scene(Size(scene_width,scene_height)) -> (scene)
+watching Scene(Size(scene_width,scene_height)) -> (&scene)
 do
   spawn Play(&scene, &back);
   var& IPlay play_anim;
-  watching Play(&scene, &anim) -> (play_anim) do
+  watching Play(&scene, &anim) -> (&play_anim) do
     par do
       var int x, y, width, height;
       every (x, y, width, height) in resize do
         call Play_Set_Region(&play_anim,
-                           Region(x, y, anim.region.z, width, height));
+                           Region(x, y, width, height, anim.region.z));
       end
     with
       await 5s;
@@ -83,7 +83,7 @@ do
     with
       await 41s;
       var& IPlay play_photo;
-      watching Play(&scene,&photo) -> (play_photo) do
+      watching Play(&scene,&photo) -> (&play_photo) do
         watching 5s do
           await 1s;
           var int top = call Play_Get_Int(&play_photo,"y");

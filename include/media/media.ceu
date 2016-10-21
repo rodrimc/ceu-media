@@ -12,9 +12,9 @@
 data Region with
   var int x;
   var int y;
-  var int z;
   var int width;
   var int height;
+  var int z;
 end
 
 data Size with
@@ -209,6 +209,8 @@ do
         break;
       end
     end
+  with
+    await scene_.quit;
   end
 end
 

@@ -4,7 +4,7 @@ var& IScene scene;
 watching Scene(Size(640,480)) -> (scene) do
   await Srt(&scene,
           "resources/slideshow.srt",
-          Region(0, 400, 3, 640, 80),
+          Region(0, 400, 640, 80, 3),
       );
 end
 

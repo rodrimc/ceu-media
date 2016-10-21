@@ -6,14 +6,14 @@ var int height = 480;
 
 var Media.Video back = val Media.Video (
                             [].."resources/animGar.mp4",
-                            Region(0, 0, 1, width, height),
+                            Region(0, 0, width, height, 1),
                             1.0,
                             1.0,
                           );
 
 var Media.Video video = val Media.Video (
                             [].."resources/diode.mp4",
-                            Region(0, 0, 2, 320, 240),
+                            Region(0, 0, 320, 240, 2),
                             0.75,
                             1.0,
                           );
@@ -24,12 +24,12 @@ var Media.Audio audio = val Media.Audio (
                           );
 
 var& IScene scene;
-watching Scene(Size(width,height)) -> (scene)
+watching Scene(Size(width,height)) -> (&scene)
 do
   spawn Play(&scene, &back);
 
   var& IPlay play_video;
-  watching Play(&scene, &video) -> (play_video) do
+  watching Play(&scene, &video) -> (&play_video) do
     par/or do
       var _char_ptr_ext key;
       (key,_) = await scene.key until (_strcmp(key,"q") == 0);
