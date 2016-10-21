@@ -1,0 +1,34 @@
+#include "media/media.ceu"
+
+var int width = 1080;
+var int height = 720;
+
+var Media.Video v1 = val Media.Video (
+                          [].."resources/clock.ogv",
+                          Region(0, 0, 1, width, height),
+                          1.0,
+                          1.0
+                        );
+
+var& IScene scene;
+var& IPlay play;
+watching Scene(Size(width,height)) -> (scene),
+         Play (&scene, &v1) -> (play)
+do
+  var _char_ptr_ext key;
+  var bool press, paused = false;
+  every (key, press) in scene.key do
+    if press then
+      if _strcmp (key, "space") == 0  then
+        if (paused) then
+          call Scene_Resume (&scene);
+        else
+          call Scene_Pause (&scene);
+        end
+        paused = not paused;
+      end
+    end
+  end
+end
+
+escape 0;
