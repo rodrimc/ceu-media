@@ -270,6 +270,8 @@ do
     _lp_media_stop(&&play_.ref);
   end
 
+  _g_object_ref (&&play_.ref);
+
   loop do
     var _GObject&&  source;
     var _lp_Event&& evt;
