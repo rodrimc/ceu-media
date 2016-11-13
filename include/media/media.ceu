@@ -8,70 +8,6 @@
 #define NS 1000000
 #define FREQ 15
 
-/*********  Library Public API ***********/
-data Region with
-  var int x;
-  var int y;
-  var int width;
-  var int height;
-  var int z;
-end
-
-data Size with
-  var int width;
-  var int height;
-end
-
-data Media;
-
-data Media.Text with
-  vector[] byte   text;
-  vector[] byte   font;
-  var      Region region;
-  var      uint   color;
-end
-
-data Media.Image with
-  vector[] byte   uri;
-  var      Region region;
-  var      float  alpha;
-end
-
-data Media.Audio with
-  vector[] byte  uri;
-  var      float volume;
-end
-
-data Media.Video with
-  vector[] byte   uri;
-  var      Region region;
-  var      float  alpha;
-  var      float  volume;
-end
-
-/* SCENE */
-data IScene with
-  var&  _lp_Scene              ref;
-  var&  Size?                  size;
-  var   bool                   auto_advance;
-  event (int, int, int, bool)  mouse_clicked;
-  event (int, int)             mouse_moved;
-  event (_char_ptr_ext, bool)  key;
-  event (u64)                  tick;
-  event (_char_ptr_ext)        error;
-  event (void)                 quit;
-end
-
-code/tight
-Scene_Pause (var& IScene scene) -> void;
-
-code/tight
-Scene_Resume (var& IScene scene) -> void;
-
-code/tight
-Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) -> void;
-
-
 code/await Scene (var Size? size)
               -> (var& IScene scene)
                   -> void
@@ -214,38 +150,6 @@ do
   end
 end
 
-data IPlay with
-  event void      ok;
-  event void      sought;
-  var&  _lp_Media ref;
-end
-
-code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) -> _lp_Media&&;
-
-code/tight/dynamic
-Play_Set_Media (var& IPlay play, dynamic var& Media media) -> void;
-
-code/tight
-Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
-
-code/tight
-Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> void;
-
-code/tight
-Play_Get_Int (var& IPlay play, var _char&& name) -> int;
-
-code/tight
-Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) -> void;
-
-code/tight
-Play_Get_Bool (var& IPlay play, var _char&& name) -> bool;
-
-code/tight
-Play_Seek (var& IPlay play, var u64 time, var bool relative) -> void;
-
-code/tight
-Play_Get_Running_Time (var& IPlay play) -> u64; 
 
 #include "media/aux.ceu"
 
