@@ -281,50 +281,6 @@ data IPlay with
   var&  _lp_Media ref;
 end
 
-#ifndef CEU_MEDIA_OVERRIDE
-/* Prototypes */
-code/tight
-Scene_Pause (var& IScene scene) -> void;
-
-code/tight
-Scene_Resume (var& IScene scene) -> void;
-
-code/tight
-Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) -> void;
-
-
-code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) -> _lp_Media&&;
-
-code/tight/dynamic
-Play_Set_Media (var& IPlay play, dynamic var& Media media) -> void;
-
-code/tight
-Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
-
-code/tight
-Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> void;
-
-code/tight
-Play_Get_Int (var& IPlay play, var _char&& name) -> int;
-
-code/tight
-Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) -> void;
-
-code/tight
-Play_Get_Bool (var& IPlay play, var _char&& name) -> bool;
-
-code/tight
-Play_Seek (var& IPlay play, var u64 time, var bool relative) -> void;
-
-code/tight
-Play_Get_Running_Time (var& IPlay play) -> u64;
-
-code/await Play (var& IScene scene, var& Media media)
-                  -> (var& IPlay play)
-                      -> void;
-#endif
-
 /* Base definitions */
 code/tight
 Scene_Pause_Base (var& IScene scene) -> void
@@ -505,6 +461,92 @@ code/tight
 Play_Get_Running_Time_Base (var& IPlay play) -> u64
 do
   escape _lp_media_get_running_time (&&play.ref);
+end
+
+
+#ifndef CEU_MEDIA_OVERRIDE
+/* Prototypes */
+code/tight
+Scene_Pause (var& IScene scene) -> void;
+
+code/tight
+Scene_Resume (var& IScene scene) -> void;
+
+code/tight
+Scene_Set_Tick_Interval (var& IScene scene, var u64 interval) -> void;
+
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media media) -> _lp_Media&&;
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media media) -> void;
+
+code/tight
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
+
+code/tight
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> void;
+
+code/tight
+Play_Get_Int (var& IPlay play, var _char&& name) -> int;
+
+code/tight
+Play_Set_Bool (var& IPlay play, var _char&& name, var bool value) -> void;
+
+code/tight
+Play_Get_Bool (var& IPlay play, var _char&& name) -> bool;
+
+code/tight
+Play_Seek (var& IPlay play, var u64 time, var bool relative) -> void;
+
+code/tight
+Play_Get_Running_Time (var& IPlay play) -> u64;
+
+code/await Play (var& IScene scene, var& Media media)
+                  -> (var& IPlay play)
+                      -> void;
+
+#include "media/aux.ceu"
+#endif
+
+code/await PlayFull (var& IScene scene, var& Media media)
+                    -> (var& IPlay play)
+                        -> void
+do
+  var&? _lp_Media ref = &call/dynamic Play_New_Base(&scene, &media)
+    finalize (ref) with
+        // TODO: who destroys?
+    end;
+
+  var IPlay play_ = val IPlay(_, _, &ref!);
+  play = &play_;
+
+  call/dynamic Play_Set_Media_Base (&play_, &media);
+
+  do
+    _lp_media_start(&&play_.ref);
+  finalize (play_.ref) with
+    _lp_media_stop(&&play_.ref);
+  end
+
+  _g_object_ref (&&play_.ref);
+
+  loop do
+    var _GObject&&  source;
+    var _lp_Event&& evt;
+    (source, evt) = await LP_EVENT until ((_LP_IS_MEDIA(source) as bool) and
+                                        _LP_MEDIA(source) == &&play_.ref);
+
+    var _GType type = _G_OBJECT_TYPE(evt);
+    if type == _LP_TYPE_EVENT_START then
+      emit play_.ok;
+    else/if type == _LP_TYPE_EVENT_SEEK then
+      emit play_.sought;
+    else/if type == _LP_TYPE_EVENT_STOP then
+      break;
+    end
+  end
 end
 
 #endif

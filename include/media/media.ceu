@@ -5,6 +5,7 @@
 #include "uv/uv.ceu"
 #include "media/raw.ceu"
 
+/* SCENE */
 code/await Scene (var Size? size)
               -> (var& IScene scene)
                   -> void
@@ -12,47 +13,12 @@ do
   await SceneFull (size!) -> (&scene);
 end
 
-
-#include "media/aux.ceu"
-
 /* PLAYER */
 code/await Play (var& IScene scene, var& Media media)
                   -> (var& IPlay play)
                       -> void
 do
-  var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
-    finalize (ref) with
-        // TODO: who destroys?
-    end;
-
-  var IPlay play_ = val IPlay(_, _, &ref!);
-  play = &play_;
-
-  call/dynamic Play_Set_Media(&play_, &media);
-
-  do
-    _lp_media_start(&&play_.ref);
-  finalize (play_.ref) with
-    _lp_media_stop(&&play_.ref);
-  end
-
-  _g_object_ref (&&play_.ref);
-
-  loop do
-    var _GObject&&  source;
-    var _lp_Event&& evt;
-    (source, evt) = await LP_EVENT until ((_LP_IS_MEDIA(source) as bool) and
-                                        _LP_MEDIA(source) == &&play_.ref);
-
-    var _GType type = _G_OBJECT_TYPE(evt);
-    if type == _LP_TYPE_EVENT_START then
-      emit play_.ok;
-    else/if type == _LP_TYPE_EVENT_SEEK then
-      emit play_.sought;
-    else/if type == _LP_TYPE_EVENT_STOP then
-      break;
-    end
-  end
+  await PlayFull (&scene, &media) -> (&play);
 end
 
 #endif
