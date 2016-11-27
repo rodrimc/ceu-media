@@ -28,26 +28,26 @@ watching Scene(Size(width,height)) -> (&scene)
 do
   spawn Play(&scene, &back);
 
-  var& IPlay play_video;
+  var& IPlayer play_video;
   watching Play(&scene, &video) -> (&play_video) do
     par/or do
       var _char_ptr_ext key;
       (key,_) = await scene.key until (_strcmp(key,"q") == 0);
     with
       loop do
-        var int x = call Play_Get_Int(&play_video, "x");
-        var int y = call Play_Get_Int(&play_video, "y");
+        var int x = call Player_Get_Int(&play_video, "x");
+        var int y = call Player_Get_Int(&play_video, "y");
 
         var _char_ptr_ext key;
         (key, _) = await scene.key;
         if _strcmp (key, "Left") == 0 or _strcmp (key, "h") == 0 then
-          call Play_Set_Int(&play_video, "x", x-10);
+          call Player_Set_Int(&play_video, "x", x-10);
         else/if _strcmp (key, "Right") == 0 or _strcmp (key, "l") == 0 then
-          call Play_Set_Int(&play_video, "x", x+10);
+          call Player_Set_Int(&play_video, "x", x+10);
         else/if _strcmp (key, "Up") == 0 or _strcmp (key, "k") == 0 then
-          call Play_Set_Int(&play_video, "y", y-10);
+          call Player_Set_Int(&play_video, "y", y-10);
         else/if _strcmp (key, "Down") == 0 or _strcmp (key, "j") == 0 then
-          call Play_Set_Int(&play_video, "y", y+10);
+          call Player_Set_Int(&play_video, "y", y+10);
         end
       end
     with

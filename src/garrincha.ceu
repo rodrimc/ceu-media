@@ -66,12 +66,12 @@ var& IScene scene;
 watching Scene(Size(scene_width,scene_height)) -> (&scene)
 do
   spawn Play(&scene, &back);
-  var& IPlay play_anim;
+  var& IPlayer play_anim;
   watching Play(&scene, &anim) -> (&play_anim) do
     par do
       var int x, y, width, height;
       every (x, y, width, height) in resize do
-        call Play_Set_Region(&play_anim,
+        call Player_Set_Region(&play_anim,
                            Region(x, y, width, height, anim.region.z));
       end
     with
@@ -82,16 +82,16 @@ do
       await Play(&scene, &drible);
     with
       await 41s;
-      var& IPlay play_photo;
+      var& IPlayer play_photo;
       watching Play(&scene,&photo) -> (&play_photo) do
         watching 5s do
           await 1s;
-          var int top = call Play_Get_Int(&play_photo,"y");
+          var int top = call Player_Get_Int(&play_photo,"y");
           var int diff = 290 - top;
           var int amount = 1;
           watching 3s do
-            every (3000.0/diff)ms do
-              call Play_Set_Int(&play_photo, "y", top + amount);
+            every (3000/diff)ms do
+              call Player_Set_Int(&play_photo, "y", top + amount);
               amount = amount + 1;
             end
           end

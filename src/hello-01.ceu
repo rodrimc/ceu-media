@@ -32,6 +32,5 @@ watching Scene(Size(width,height)) -> (&scene) do
     end
   end
 end
-_printf ("here");
 
 escape 0;

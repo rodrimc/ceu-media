@@ -8,7 +8,7 @@ var Media.Video m = val Media.Video (
 
 var& IScene scene;
 watching Scene (Size (300, 200)) -> (&scene) do 
-  var& IPlay player;
+  var& IPlayer player;
   watching Play (&scene, &m) -> (&player) do
     var bool mute = true;
     var int x;
@@ -17,10 +17,10 @@ watching Scene (Size (300, 200)) -> (&scene) do
     var bool press;
     every (x, y, button, press) in scene.mouse_clicked do
       if (press) then
-        call Play_Set_Region(&player,
+        call Player_Set_Region(&player,
                            Region(x, y, m.region.width, 
                                   m.region.height, m.region.z));
-        call Play_Set_Bool (&player, "mute", mute);
+        call Player_Set_Bool (&player, "mute", mute);
         mute = not mute;
       end
     end

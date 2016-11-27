@@ -5,7 +5,7 @@ var& IScene scene;
 watching Scene(_) -> (&scene), 10s do
   var u64 tick;
   every (tick) in scene.tick do
-    _printf("TICK: %llu\n", tick);
+    _printf("TICK: %lu\n", tick);
   end
 end
 
