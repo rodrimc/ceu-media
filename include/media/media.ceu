@@ -86,9 +86,10 @@ end
 
 /* PLAYER */
 data IPlayer with
-  var& IPlayerRaw raw;
-  event void      ok;
-  event void      sought;
+  var& IPlayerRaw             raw;
+  event void                  ok;
+  event (int, int, int, bool) mouse_clicked;
+  event void                  sought;
 end
 
 code/await Play (var& IScene scene, var& Media media)
@@ -99,7 +100,7 @@ do
 
   watching Play_Raw (&scene.raw, &media) -> (&raw)
   do
-    var IPlayer ref_ = val IPlayer (&raw, _, _);
+    var IPlayer ref_ = val IPlayer (&raw, _, _, _);
     player = &ref_;
     par do
       every raw.ok do
@@ -108,6 +109,14 @@ do
     with
       every raw.sought do
         emit ref_.sought;
+      end
+    with
+      var int x;
+      var int y;
+      var int button;
+      var bool press;
+      every (x, y, button, press) in raw.mouse_clicked do
+        emit ref_.mouse_clicked (x, y, button, press);
       end
     end
   end

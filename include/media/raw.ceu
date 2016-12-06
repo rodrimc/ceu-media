@@ -273,8 +273,9 @@ end
 
 /* PLAY */
 data IPlayerRaw with
-  event void      ok;
-  event void      sought;
+  event void                  ok;
+  event void                  sought;
+  event (int, int, int, bool) mouse_clicked;
   var&  _lp_Media ref;
 end
 
@@ -469,7 +470,7 @@ do
         // TODO: who destroys?
     end;
 
-  var IPlayerRaw player_ = val IPlayerRaw(_, _, &ref!);
+  var IPlayerRaw player_ = val IPlayerRaw(_, _, _, &ref!);
   player = &player_;
 
   call/dynamic Player_Raw_Set_Media (&player_, &media);
@@ -489,12 +490,35 @@ do
                                         _LP_MEDIA(source) == &&player_.ref);
 
     var _GType type = _G_OBJECT_TYPE(evt);
+    /* START */
     if type == _LP_TYPE_EVENT_START then
       emit player_.ok;
+
+    /* SEEK */
     else/if type == _LP_TYPE_EVENT_SEEK then
       emit player_.sought;
+
+    /* STOP */
     else/if type == _LP_TYPE_EVENT_STOP then
       break;
+
+    /* CLICK */
+    else/if type == _LP_TYPE_EVENT_POINTER_CLICK then
+      var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
+
+      var f64 x=_, y=_;
+      var int button=_, pressed=_;
+      _g_object_get(
+          _G_OBJECT(evt_),
+          "x", &&x,
+          "y", &&y,
+          "button", &&button,
+          "press", &&pressed,
+          null,
+      );
+
+      emit player_.mouse_clicked(x as int, y as int,
+                                   button, pressed as bool);
     end
   end
 end
