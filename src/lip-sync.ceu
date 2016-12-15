@@ -30,7 +30,7 @@ do
     spawn Play(&scene, &m3);
     spawn Play(&scene, &m4);
     spawn Play(&scene, &audio);
-    await scene.key;
+    await CM_SCENE_KEY;
 end
 
 escape 0;

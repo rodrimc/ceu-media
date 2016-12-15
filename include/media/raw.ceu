@@ -20,6 +20,7 @@ native/plain
   _lp_EventPointerMove,
   _lp_EventTick,
   _lp_Event_ptr_ext,
+  _GObject_ptr_ext,
 ;
 
 native/pure
@@ -64,6 +65,8 @@ native
   _lp_media_start,
   _lp_scene_new,
   _lp_Scene,
+  _SCENE_SEED,
+  _PLAYER_SEED,
 ;
 
 #define NS 1000000
@@ -71,11 +74,29 @@ native
 
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
+/* SCENE INPUT EVENTS */
+input (_GObject&&, int, int, int, bool) CM_SCENE_RAW_MOUSE_CLICK;
+input (_GObject&&, int, int)            CM_SCENE_RAW_MOUSE_MOVE;
+input (_GObject&&, _char_ptr_ext, bool) CM_SCENE_RAW_KEY;
+input (_GObject&&, u64)                 CM_SCENE_RAW_TICK;
+input (_GObject&&, _char_ptr_ext)       CM_SCENE_RAW_ERROR;
+
+/* PLAYER INPUT EVENTS */
+input (_GObject&&)                      CM_PLAYER_RAW_START;
+input (_GObject&&)                      CM_PLAYER_RAW_STOP;
+input (_GObject&&)                      CM_PLAYER_RAW_PAUSE;
+input (_GObject&&)                      CM_PLAYER_RAW_SOUGHT;
+input (_GObject&&, int, int, int, bool) CM_PLAYER_RAW_MOUSE_CLICK;
+
 native/pre do
   ##include <glib.h>
   ##include <play.h>
   typedef char* char_ptr_ext;
   typedef lp_Event* lp_Event_ptr_ext;
+  typedef GObject* GObject_ptr_ext;
+
+   unsigned int SCENE_SEED = 0;
+   unsigned int PLAYER_SEED = 0;
 end
 
 /*********  Library Public API ***********/
@@ -121,14 +142,9 @@ end
 
 /* SCENE */
 data ISceneRaw with
-  var&  _lp_Scene              ref;
-  var&  Size?                  size;
-  event (int, int, int, bool)  mouse_clicked;
-  event (int, int)             mouse_moved;
-  event (_char_ptr_ext, bool)  key;
-  event (u64)                  tick;
-  event (_char_ptr_ext)        error;
-  event (void)                 quit;
+  var&  _lp_Scene  ref;
+  var&  Size?      size;
+  event (void)     quit;
 end
 
 code/await Scene_Raw (var Size? size)
@@ -148,16 +164,16 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var ISceneRaw scene_ = val ISceneRaw (&ref_!,&size, _,_,_,_,_,_);
+  var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _);
   scene = &scene_;
 
   _g_object_set (&&ref,
                   "slave-audio", true,
-                  "lockstep", true,
-                  "interval", tick_interval,
+                  "lockstep",    true,
+                  "interval",    tick_interval,
                   null);
 
- spawn do
+  par/or do
     loop do
       var _lp_Event_ptr_ext evt = null;
       do finalize with
@@ -168,30 +184,11 @@ do
       await async/thread (ref, evt) do
         evt = _lp_scene_receive (&&ref, true);
       end
-      await async (evt) do
-        if evt != null then
-          emit LP_EVENT(_lp_event_get_source(evt), evt);
-        end
-      end
-    end
-    await FOREVER;
-  end
 
-  par/or do
-    every FREQ ms do
-      _lp_scene_advance(&&ref, FREQ * NS);
-    end
-  with
-    loop do
-      var _GObject&&  source;
-      var _lp_Event&& evt;
-      (source, evt) = await LP_EVENT until ((_LP_IS_SCENE(source) as bool) and
-                                            _LP_SCENE(source) == &&ref);
-
+      var _GObject_ptr_ext source = _lp_event_get_source(evt);
       var _GType type = _G_OBJECT_TYPE (evt);
 
-      /* MOUSE */
-
+      /* MOUSE CLICK*/
       if type == _LP_TYPE_EVENT_POINTER_CLICK then
         var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
 
@@ -206,18 +203,30 @@ do
             null,
         );
 
-        emit scene_.mouse_clicked(x as int, y as int,
-                                     button, pressed as bool);
+        await async (source, x, y, button, pressed) do
+          if _LP_IS_SCENE(source) as bool then
+              emit CM_SCENE_RAW_MOUSE_CLICK (source, x as int, y as int,
+                                             button, pressed as bool);
+          else
+              emit CM_PLAYER_RAW_MOUSE_CLICK (source, x as int, y as int,
+                                             button, pressed as bool);
+          end
+        end
+
+      /* MOUSE MOVE */
       else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
         var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
 
         var f64 x=_, y=_;
         _g_object_get(_G_OBJECT(evt_), "x", &&x, "y",&&y, null);
 
-        emit scene_.mouse_moved(x as int, y as int);
+        if _LP_IS_SCENE(source) as bool then
+          await async (source, x, y) do
+            emit CM_SCENE_RAW_MOUSE_MOVE (source, x as int, y as int);
+          end
+        end
 
       /* KEY */
-
       else/if type == _LP_TYPE_EVENT_KEY then
         var _lp_EventKey&& evt_ = _LP_EVENT_KEY(evt);
 
@@ -233,10 +242,13 @@ do
           _g_free (key);
         end
 
-        emit scene_.key(key, pressed as bool);
+        if _LP_IS_SCENE(source) as bool then
+          await async (source, key, pressed) do
+            emit CM_SCENE_RAW_KEY (source, key, pressed as bool);
+          end
+        end
 
       /* TICK */
-
       else/if type == _LP_TYPE_EVENT_TICK then
         var _lp_EventTick&& evt_ = _LP_EVENT_TICK(evt);
 
@@ -245,10 +257,39 @@ do
             "serial", &&ticks,
             null);
 
-        emit scene_.tick (ticks);
+        if _LP_IS_SCENE(source) as bool then
+          await async (source, ticks) do
+            emit CM_SCENE_RAW_TICK (source, ticks);
+          end
+        end
+
+      /* START */
+      else/if type == _LP_TYPE_EVENT_START then
+        if _LP_IS_MEDIA(source) as bool then
+          await async (source) do
+            emit CM_PLAYER_RAW_START (source);
+          end
+        end
+
+      /* SEEK */
+      else/if type == _LP_TYPE_EVENT_SEEK then
+        await async (source) do
+          emit CM_PLAYER_RAW_SOUGHT (source);
+        end
+
+      /* STOP */
+      else/if type == _LP_TYPE_EVENT_STOP then
+        await async (source) do
+          emit CM_PLAYER_RAW_STOP (source);
+        end
+
+      /* PAUSE */
+      else/if type == _LP_TYPE_EVENT_STOP then
+        await async (source) do
+          emit CM_PLAYER_RAW_PAUSE (source);
+        end
 
       /* ERROR */
-
       else/if type == _LP_TYPE_EVENT_ERROR then
         var _lp_EventError&& evt_ = _LP_EVENT_ERROR(evt);
         var _GError&& err = null;
@@ -257,7 +298,11 @@ do
         _g_object_get (_G_OBJECT(evt_), "error", &&err, null);
         msg = _lp_event_to_string (_LP_EVENT(evt));
 
-        emit scene_.error (msg);
+        if _LP_IS_SCENE(source) as bool then
+          await async (source, msg) do
+            emit CM_SCENE_RAW_ERROR (source, msg);
+          end
+        end
 
         do finalize with
           _g_free (msg);
@@ -267,15 +312,16 @@ do
       end
     end
   with
+    every FREQ ms do
+      _lp_scene_advance(&&ref, FREQ * NS);
+    end
+  with
     await scene_.quit;
   end
 end
 
 /* PLAY */
 data IPlayerRaw with
-  event void                  ok;
-  event void                  sought;
-  event (int, int, int, bool) mouse_clicked;
   var&  _lp_Media ref;
 end
 
@@ -470,7 +516,7 @@ do
         // TODO: who destroys?
     end;
 
-  var IPlayerRaw player_ = val IPlayerRaw(_, _, _, &ref!);
+  var IPlayerRaw player_ = val IPlayerRaw(&ref!);
   player = &player_;
 
   call/dynamic Player_Raw_Set_Media (&player_, &media);
@@ -483,44 +529,10 @@ do
 
   _g_object_ref (&&player_.ref);
 
-  loop do
-    var _GObject&&  source;
-    var _lp_Event&& evt;
-    (source, evt) = await LP_EVENT until ((_LP_IS_MEDIA(source) as bool) and
-                                        _LP_MEDIA(source) == &&player_.ref);
-
-    var _GType type = _G_OBJECT_TYPE(evt);
-    /* START */
-    if type == _LP_TYPE_EVENT_START then
-      emit player_.ok;
-
-    /* SEEK */
-    else/if type == _LP_TYPE_EVENT_SEEK then
-      emit player_.sought;
-
-    /* STOP */
-    else/if type == _LP_TYPE_EVENT_STOP then
-      break;
-
-    /* CLICK */
-    else/if type == _LP_TYPE_EVENT_POINTER_CLICK then
-      var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
-
-      var f64 x=_, y=_;
-      var int button=_, pressed=_;
-      _g_object_get(
-          _G_OBJECT(evt_),
-          "x", &&x,
-          "y", &&y,
-          "button", &&button,
-          "press", &&pressed,
-          null,
-      );
-
-      emit player_.mouse_clicked(x as int, y as int,
-                                   button, pressed as bool);
-    end
-  end
+  var _GObject_ptr_ext source;
+  source = await CM_PLAYER_RAW_STOP
+           until (_LP_MEDIA(source) == &&player_.ref);
 end
+
 
 #endif

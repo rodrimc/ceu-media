@@ -2,10 +2,12 @@
 #include "media/media.ceu"
 
 var& IScene scene;
-watching Scene(_) -> (&scene), 10s do
+watching Scene(_) -> (&scene),
+         10s do
+  var uint id;
   var u64 tick;
-  every (tick) in scene.tick do
-    _printf("TICK: %lu\n", tick);
+  every (id, tick) in CM_SCENE_TICK  do
+    _printf("TICK: %u %lu\n", id, tick);
   end
 end
 

@@ -15,7 +15,7 @@ watching Scene (Size (300, 200)) -> (&scene) do
     var int y;
     var int button;
     var bool press;
-    every (x, y, button, press) in scene.mouse_clicked do
+    every (_, x, y, button, press) in CM_SCENE_MOUSE_CLICK do
       if (press) then
         call Player_Set_Region(&player,
                            Region(x, y, m.region.width, 

@@ -36,7 +36,7 @@ do
   with
     var _char_ptr_ext key;
     var bool pressed;
-    (key, pressed) = await scene.key
+    (_, key, pressed) = await CM_SCENE_KEY
                      until (not pressed) and _strcmp(key,"q")==0;
   end
 end

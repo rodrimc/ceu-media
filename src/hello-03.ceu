@@ -37,7 +37,7 @@ watching Scene(Size(width,height)) -> (&scene) do
       end
     with 
       var _char_ptr_ext k;
-      (k,_) = await scene.key until (_strcmp(k,"q") == 0);
+      (_,k,_) = await CM_SCENE_KEY  until (_strcmp(k,"q") == 0);
     with
       await 12s;
     end

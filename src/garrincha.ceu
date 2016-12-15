@@ -103,7 +103,7 @@ do
         watching 6s do
           spawn Play(&scene, &icon);
           var _char_ptr_ext key;
-          (key,_) = await scene.key
+          (_, key,_) = await CM_SCENE_KEY
                   until _strcmp(key,"F1") == 0;
           escape true;
         end

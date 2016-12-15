@@ -32,14 +32,14 @@ do
   watching Play(&scene, &video) -> (&play_video) do
     par/or do
       var _char_ptr_ext key;
-      (key,_) = await scene.key until (_strcmp(key,"q") == 0);
+      (_,key,_) = await CM_SCENE_KEY until (_strcmp(key,"q") == 0);
     with
       loop do
         var int x = call Player_Get_Int(&play_video, "x");
         var int y = call Player_Get_Int(&play_video, "y");
 
         var _char_ptr_ext key;
-        (key, _) = await scene.key;
+        (_,key, _) = await CM_SCENE_KEY;
         if _strcmp (key, "Left") == 0 or _strcmp (key, "h") == 0 then
           call Player_Set_Int(&play_video, "x", x-10);
         else/if _strcmp (key, "Right") == 0 or _strcmp (key, "l") == 0 then
@@ -54,10 +54,10 @@ do
       loop do
         var _char_ptr_ext key;
         var bool pressed;
-        (key, pressed) = await scene.key
+        (_, key, pressed) = await CM_SCENE_KEY
                        until pressed and _strcmp(key,"space")==0;
         spawn Play(&scene, &audio);
-        (key, pressed) = await scene.key
+        (_, key, pressed) = await CM_SCENE_KEY
                      until pressed and _strcmp (key,"space")==0;
       end
     end

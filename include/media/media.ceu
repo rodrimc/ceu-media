@@ -5,15 +5,24 @@
 #include "uv/uv.ceu"
 #include "media/raw.ceu"
 
+input (uint, int, int, int, bool) CM_SCENE_MOUSE_CLICK;
+input (uint, int, int)            CM_SCENE_MOUSE_MOVE;
+input (uint, _char_ptr_ext, bool) CM_SCENE_KEY;
+input (uint, u64)                 CM_SCENE_TICK;
+input (uint, _char_ptr_ext)       CM_SCENE_ERROR;
+
+/* PLAYER INPUT EVENTS */
+input (uint)                      CM_PLAYER_START;
+input (uint)                      CM_PLAYER_STOP;
+input (uint)                      CM_PLAYER_PAUSE;
+input (uint)                      CM_PLAYER_SOUGHT;
+input (uint, int, int, int, bool) CM_PLAYER_MOUSE_CLICK;
+
 /* SCENE */
 data IScene with
   var& ISceneRaw raw;
-  event (int, int, int, bool)  mouse_clicked;
-  event (int, int)             mouse_moved;
-  event (_char_ptr_ext, bool)  key;
-  event (u64)                  tick;
-  event (_char_ptr_ext)        error;
-  event (void)                 quit;
+  var&  uint      self;
+  event (void)   quit;
 end
 
 code/await Scene (var Size? size)
@@ -27,41 +36,71 @@ do
   end
   watching Scene_Raw (raw_size) -> (&raw)
   do
-    var IScene ref_ = val IScene (&raw, _, _, _, _, _, _);
+    var uint self = _SCENE_SEED;
+    _SCENE_SEED = _SCENE_SEED + 1;
+    var IScene ref_ = val IScene (&raw, &self, _);
     scene = &ref_;
     par/or do
+      var _GObject&& source;
       var int x;
       var int y;
       var int button;
       var bool press;
-      every (x, y, button, press) in raw.mouse_clicked do
-        emit ref_.mouse_clicked (x, y, button, press);
+      loop do
+        (source, x, y, button, press) = await CM_SCENE_RAW_MOUSE_CLICK
+                                  until (_LP_SCENE(source) == &&raw.ref);
+        await async (ref_, x, y, button, press) do
+          emit CM_SCENE_MOUSE_CLICK (ref_.self, x, y, button, press);
+        end
       end
     with
+      var _GObject&& source;
       var int x;
       var int y;
-      every (x, y) in raw.mouse_moved do
-        emit ref_.mouse_moved (x, y);
+      loop do
+        (source, x, y) = await CM_SCENE_RAW_MOUSE_MOVE
+                         until (_LP_SCENE(source) == &&raw.ref);
+
+        await async (ref_, x, y) do
+          emit CM_SCENE_MOUSE_MOVE (ref_.self, x, y);
+        end
       end
     with
+      var _GObject&& source;
       var _char_ptr_ext key;
       var bool press;
-      every (key, press) in raw.key do
-        emit ref_.key (key, press);
+      loop do
+        (source, key, press) = await CM_SCENE_RAW_KEY
+                               until (_LP_SCENE(source) == &&raw.ref);
+
+        await async (ref_, key, press) do
+          emit CM_SCENE_KEY (ref_.self, key, press);
+        end
       end
     with
+      var _GObject&& source;
       var u64 tick;
-      every (tick) in raw.tick do
-        emit ref_.tick (tick);
+      loop do
+        (source, tick) = await CM_SCENE_RAW_TICK
+                         until (_LP_SCENE(source) == &&raw.ref);
+
+        await async (ref_, tick) do
+          emit CM_SCENE_TICK (ref_.self, tick);
+        end
       end
     with
+      var _GObject&& source;
       var _char_ptr_ext error;
-      every (error) in raw.error do
-        emit ref_.error (error);
+      loop do
+        (source, error) = await CM_SCENE_RAW_ERROR
+                          until (_LP_SCENE(source) == &&raw.ref);
+
+        await async (ref_, error) do
+          emit CM_SCENE_ERROR (ref_.self, error);
+        end
       end
     with
       await ref_.quit;
-      emit raw.quit;
     end
   end
 end
@@ -86,10 +125,8 @@ end
 
 /* PLAYER */
 data IPlayer with
-  var& IPlayerRaw             raw;
-  event void                  ok;
-  event (int, int, int, bool) mouse_clicked;
-  event void                  sought;
+  var& IPlayerRaw raw;
+  var& uint        self;
 end
 
 code/await Play (var& IScene scene, var& Media media)
@@ -100,23 +137,43 @@ do
 
   watching Play_Raw (&scene.raw, &media) -> (&raw)
   do
-    var IPlayer ref_ = val IPlayer (&raw, _, _, _);
+    var uint self = _PLAYER_SEED;
+    _PLAYER_SEED = _PLAYER_SEED + 1;
+
+    var IPlayer ref_ = val IPlayer (&raw, &self);
     player = &ref_;
+
     par do
-      every raw.ok do
-        emit ref_.ok;
+      loop do
+        var _GObject_ptr_ext source;
+        source = await CM_PLAYER_RAW_START
+                 until (_LP_MEDIA(source) == &&raw.ref);
+        await async (ref_) do
+          emit CM_PLAYER_START (ref_.self);
+        end
       end
     with
-      every raw.sought do
-        emit ref_.sought;
+      loop do
+        var _GObject_ptr_ext source;
+        source = await CM_PLAYER_RAW_SOUGHT
+                 until (_LP_MEDIA(source) == &&raw.ref);
+        await async (ref_) do
+          emit CM_PLAYER_SOUGHT (ref_.self);
+        end
       end
     with
+      var _GObject_ptr_ext source;
       var int x;
       var int y;
       var int button;
       var bool press;
-      every (x, y, button, press) in raw.mouse_clicked do
-        emit ref_.mouse_clicked (x, y, button, press);
+      loop do
+        (source, x, y, button, press) = await CM_PLAYER_RAW_MOUSE_CLICK
+                                      until (_LP_MEDIA(source) == &&raw.ref);
+
+        await async (ref_, x, y, button, press) do
+          emit CM_PLAYER_MOUSE_CLICK (ref_.self, x, y, button, press);
+        end
       end
     end
   end

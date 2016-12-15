@@ -23,10 +23,16 @@ watching Scene(Size(width,height)) -> (&scene) do
   watching 30s do
     loop do
       _printf("==-> RESTART\n");
-      watching 10s do
-        spawn Play(&scene, &m1);
-        spawn Play(&scene, &m2);
-        await FOREVER;
+      var& IPlayer p1;
+      var& IPlayer p2;
+      watching Play(&scene, &m1) -> (&p1),
+               Play(&scene, &m2) -> (&p2),
+               10s
+      do
+        var uint id;
+        every (id, _, _, _, _) in CM_PLAYER_MOUSE_CLICK do
+          _printf ("%u selected\n", id);
+        end
       end
       // after 10s, destroys everything and restarts
     end
