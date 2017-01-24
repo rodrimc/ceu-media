@@ -4,8 +4,15 @@
 var int width = 640;
 var int height = 480;
 
-var Media.Text text = val Media.Text (
+var Media.Text one = val Media.Text (
                           [].."one",
+                          [].."sans 40",
+                          Region(0, 400, width, 80, 2),
+                          0xffff0048,
+                        );
+
+var Media.Text two = val Media.Text (
+                          [].."two",
                           [].."sans 40",
                           Region(0, 400, width, 80, 2),
                           0xffff0048,
@@ -19,28 +26,31 @@ var Media.Video video = val Media.Video (
                         );
 
 var& IScene scene;
-watching Scene(Size(width,height)) -> (&scene) do
-  var& IPlayer text_play;
-  watching Play(&scene, &text) -> (&text_play) do
-    par/or do
-      loop do
-        await 1s;
-        call Player_Set_Char(&text_play, "text", "two");
-        await 1s;
-        call Player_Set_Char(&text_play, "text", "one");
+watching Scene(Size(width,height)) -> (&scene), 12s
+do
+  par/or do
+    var bool flag = true;
+    loop do
+      var& Media text;
+      if flag then
+        text = &one;
+      else
+        text = &two;
       end
-    with
-      loop do
-        watching 12s do   
-          await Play(&scene, &video);
-        end
+      watching 1s do
+        await Play (&scene, &text);
       end
-    with 
-      var _char_ptr_ext k;
-      (_,k,_) = await CM_SCENE_KEY  until (_strcmp(k,"q") == 0);
-    with
-      await 12s;
+      flag = not flag;
     end
+  with
+    loop do
+      watching 2s do
+        await Play(&scene, &video);
+      end
+    end
+  with
+    var _char_ptr_ext k;
+    (_,k,_) = await CM_SCENE_KEY  until (_strcmp(k,"q") == 0);
   end
 end
 

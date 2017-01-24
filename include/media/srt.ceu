@@ -73,7 +73,6 @@ do
           break;
         end
         lines = lines..[{'\n'}]..line;
-        _printf("%s\n", &&line[0]);
       end
 
       // Player.play()
@@ -81,6 +80,7 @@ do
         await (fr-now)ms;
 
         watching (to-fr)ms do
+          _printf("%s\n", &&lines[0]);
           var Media.Text text = val Media.Text (
                                     []..lines,
                                     [].."",
