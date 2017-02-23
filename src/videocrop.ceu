@@ -13,16 +13,16 @@ var Media.Video video = val Media.Video (
 var& IScene scene;
 var& IPlayer p_video;
 var& IPlayer p_cropped;
-watching Scene (Size (width, height)) -> (&scene), 
+watching Scene (Size (width, height)) -> (&scene),
          Play (&scene, &video)        -> (&p_video),
          Play (&scene, &video)        -> (&p_cropped),
          CM_SCENE_KEY
 do
-  call Player_Set_Int (&p_cropped, "x",           400); 
-  call Player_Set_Int (&p_cropped, "crop-top",    50); 
-  call Player_Set_Int (&p_cropped, "crop-left",   50); 
-  call Player_Set_Int (&p_cropped, "crop-right",  50); 
-  call Player_Set_Int (&p_cropped, "crop-bottom", 50); 
+  call Player_Set_Int (&p_cropped, "x",              400);
+  call Player_Set_Double (&p_cropped, "crop-top",    0.1);
+  call Player_Set_Double (&p_cropped, "crop-left",   0.1);
+  call Player_Set_Double (&p_cropped, "crop-right",  0.1);
+  call Player_Set_Double (&p_cropped, "crop-bottom", 0.1);
   await FOREVER;
 end
 
