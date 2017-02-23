@@ -448,13 +448,15 @@ end
 /* Player_Raw_Set_* */
 
 code/tight
-Player_Raw_Set_Char (var& IPlayerRaw player, var _char&& name, var _char&& value) -> void
+Player_Raw_Set_Char (var& IPlayerRaw player, var _char&& name,
+                     var _char&& value) -> void
 do
   _g_object_set(&&player.ref, name, value, null);
 end
 
 code/tight
-Player_Raw_Set_Int (var& IPlayerRaw player, var _char&& name, var int value) -> void
+Player_Raw_Set_Int (var& IPlayerRaw player, var _char&& name,
+                    var int value) -> void
 do
   _g_object_set(&&player.ref, name, value, null);
 end
@@ -468,7 +470,23 @@ do
 end
 
 code/tight
-Player_Raw_Set_Bool (var& IPlayerRaw player, var _char&& name, var bool value) -> void
+Player_Raw_Set_Double (var& IPlayerRaw player, var _char&& name,
+                       var f64 value) -> void
+do
+  _g_object_set(&&player.ref, name, value, null);
+end
+
+code/tight
+Player_Raw_Get_Double (var& IPlayerRaw player, var _char&& name) ->f64
+do
+  var int value = 0;
+  _g_object_get (&&player.ref, name, &&value, null);
+  escape value;
+end
+
+code/tight
+Player_Raw_Set_Bool (var& IPlayerRaw player, var _char&& name,
+                     var bool value) -> void
 do
   _g_object_set(&&player.ref, name, value, null);
 end
@@ -496,7 +514,8 @@ do
 end
 
 code/tight
-Player_Raw_Seek (var& IPlayerRaw player, var u64 time, var bool relative) -> void
+Player_Raw_Seek (var& IPlayerRaw player, var u64 time,
+                 var bool relative) -> void
 do
   _lp_media_seek(&&player.ref, relative, time);
 end
