@@ -117,27 +117,27 @@ data Media;
 
 data Media.Text with
   vector[] byte   text;
-  vector[] byte   font;
-  var      Region region;
-  var      uint   color;
+  vector[] byte   font    = [] .. "";
+  var      Region region  = val Region (0, 0, 0, 0, 0);
+  var      uint   color   = 0xffffffff;
 end
 
 data Media.Image with
   vector[] byte   uri;
-  var      Region region;
-  var      float  alpha;
+  var      Region region  = val Region (0, 0, 0, 0, 0);
+  var      float  alpha   = 1.0;
 end
 
 data Media.Audio with
   vector[] byte  uri;
-  var      float volume;
+  var      float volume   = 1.0;
 end
 
 data Media.Video with
   vector[] byte   uri;
-  var      Region region;
-  var      float  alpha;
-  var      float  volume;
+  var      Region region  = val Region (0, 0, 0, 0, 0);;
+  var      float  alpha   = 1.0;
+  var      float  volume  = 1.0;
 end
 
 /* SCENE */
