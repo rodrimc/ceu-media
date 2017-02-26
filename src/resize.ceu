@@ -1,0 +1,36 @@
+#include "media/media.ceu"
+
+var int width = 1080;
+var int height = 720;
+
+var Media.Video m = val Media.Video (
+                          [].."resources/animGar.mp4",
+                          _,
+                          1.0,
+                          1.0,
+                         );
+
+
+var& IScene scene;
+var& IPlayer player;
+
+watching Scene (Size (width, height)) -> (&scene),
+         Play (&scene, &m) -> (&player)
+do
+  loop do
+    var _char_ptr_ext k;
+    var bool press;
+    (_, k, press) = await CM_SCENE_KEY
+                    until (press == false);
+
+    if _strcmp (k, "space") == 0 then
+      call Player_Set_Int (&player, "width", 300);
+      call Player_Set_Int (&player, "height", 300);
+    else/if _strcmp (k, "q") == 0 then
+      break;
+    end
+  end
+end
+
+escape 0;
+         
