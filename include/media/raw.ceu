@@ -519,7 +519,7 @@ do
 end
 
 code/tight
-Player_Raw_Seek (var& IPlayerRaw player, var u64 time,
+Player_Raw_Seek (var& IPlayerRaw player, var s64 time,
                  var bool relative) -> void
 do
   _lp_media_seek(&&player.ref, relative, time);
