@@ -113,18 +113,23 @@ data Size with
   var int height;
 end
 
+#define MEDIA_TEXT(text) Media.Text([]..text, [] .. "40", Region(0,0,200,50,1), _)
+#define MEDIA_IMAGE(uri) Media.Image(uri, _, _)
+#define MEDIA_AUDIO(uri) Media.Audio(uri, _)
+#define MEDIA_VIDEO(uri) Media.Video(uri, _, _, _)
+
 data Media;
 
 data Media.Text with
   vector[] byte   text;
   vector[] byte   font    = [] .. "";
-  var      Region region  = val Region (0, 0, 0, 0, 0);
+  var      Region region  = val Region (0, 0, 0, 0, 1);
   var      uint   color   = 0xffffffff;
 end
 
 data Media.Image with
   vector[] byte   uri;
-  var      Region region  = val Region (0, 0, 0, 0, 0);
+  var      Region region  = val Region (0, 0, 0, 0, 1);
   var      float  alpha   = 1.0;
 end
 
@@ -135,7 +140,7 @@ end
 
 data Media.Video with
   vector[] byte   uri;
-  var      Region region  = val Region (0, 0, 0, 0, 0);;
+  var      Region region  = val Region (0, 0, 0, 0, 1);;
   var      float  alpha   = 1.0;
   var      float  volume  = 1.0;
 end
