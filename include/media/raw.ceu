@@ -117,6 +117,7 @@ end
 #define MEDIA_IMAGE(uri) Media.Image(uri, _, _)
 #define MEDIA_AUDIO(uri) Media.Audio(uri, _)
 #define MEDIA_VIDEO(uri) Media.Video(uri, _, _, _)
+#define MEDIA_DEFAULT(uri) Media.Default(uri, _)
 
 data Media;
 
@@ -143,6 +144,11 @@ data Media.Video with
   var      Region region  = val Region (0, 0, 0, 0, 1);;
   var      float  alpha   = 1.0;
   var      float  volume  = 1.0;
+end
+
+data Media.Default with
+  vector[] byte   uri;
+  var      Region region  = val Region (0, 0, 0, 0, 1);;
 end
 
 /* SCENE */
@@ -384,6 +390,16 @@ do
   escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
+code/tight/dynamic
+Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Default media) -> _lp_Media&&
+do
+  if _strcmp(&&media.uri[0], "") == 0 then
+    escape _lp_media_new(&&scene.ref, null);
+  else
+    escape _lp_media_new(&&scene.ref, &&media.uri[0]);
+  end
+end
+
 /* Player_Raw_Set_Media */
 
 code/tight/dynamic
@@ -446,6 +462,20 @@ do
     "height", video.region.height,
     "alpha",  video.alpha,
     "volume", video.volume,
+    null
+  );
+end
+
+code/tight/dynamic
+Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Default media) -> void
+do
+  _g_object_set (
+    _G_OBJECT(&&player.ref),
+    "x",      media.region.x,
+    "y",      media.region.y,
+    "z",      media.region.z,
+    "width",  media.region.width,
+    "height", media.region.height,
     null
   );
 end
