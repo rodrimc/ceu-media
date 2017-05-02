@@ -13,7 +13,7 @@ var Region frame = val Region (
 
 var Media.Image back = val Media.Image (
                     [].."resources/background.png",
-                    Region(0, 0, scene_width, scene_height, 0),
+                    Region(0, 0, scene_width, scene_height, 1),
                     1.0,
                    );
 
