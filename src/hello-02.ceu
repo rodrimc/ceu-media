@@ -10,11 +10,11 @@ var Media.Video m = val Media.Video (
                           1.0
                         );
 
-var& IScene scene;
-watching Scene(Size(width,height)) -> (&scene) do
+var&? Scene scene = spawn Scene(Size(width,height));
+watching (scene) do
   watching CM_SCENE_KEY, CM_SCENE_MOUSE_CLICK do
     loop do
-      await Play(&scene, &m);
+      await Play(&scene.scene, &m);
     end
   end
 end

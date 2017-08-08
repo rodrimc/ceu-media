@@ -10,13 +10,10 @@ var Media.Video m = val Media.Video (
                           1.0,
                          );
 
+var&? Scene scene = spawn Scene (Size (width, height));
 
-var& IScene scene;
-var& IPlayer player;
-
-watching Scene (Size (width, height)) -> (&scene),
-         Play (&scene, &m) -> (&player)
-do
+watching scene do
+  var&? Play player = spawn Play (&scene.scene, &m);
   loop do
     var _char_ptr_ext k;
     var bool press;
@@ -24,8 +21,8 @@ do
                     until (press == false);
 
     if _strcmp (k, "space") == 0 then
-      call Player_Set_Int (&player, "width", 300);
-      call Player_Set_Int (&player, "height", 300);
+      call Player_Set_Int (&player!.player, "width", 300);
+      call Player_Set_Int (&player!.player, "height", 300);
     else/if _strcmp (k, "q") == 0 then
       break;
     end

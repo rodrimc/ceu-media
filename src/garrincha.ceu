@@ -62,36 +62,38 @@ var Media.Video shoes = val Media.Video (
 
 event (int, int, int, int) resize;
 
-var& IScene scene;
-watching Scene(Size(scene_width,scene_height)) -> (&scene)
-do
-  spawn Play(&scene, &back);
-  var& IPlayer play_anim;
-  watching Play(&scene, &anim) -> (&play_anim) do
+var&? Scene scene = spawn Scene(Size(scene_width,scene_height));
+watching (scene) do
+  spawn Play(&scene.scene, &back);
+  var&? Play play_anim = spawn Play(&scene.scene, &anim);
+  watching (play_anim) do
     par do
-      var int x, y, width, height;
+      var int x;
+      var int y;
+      var int width;
+      var int height;
       every (x, y, width, height) in resize do
-        call Player_Set_Region(&play_anim,
+        call Player_Set_Region(&play_anim.player,
                            Region(x, y, width, height, anim.region.z));
       end
     with
       await 5s;
-      await Play(&scene, &choro);
+      await Play(&scene.scene, &choro);
     with
       await 12s;
-      await Play(&scene, &drible);
+      await Play(&scene.scene, &drible);
     with
       await 41s;
-      var& IPlayer play_photo;
-      watching Play(&scene,&photo) -> (&play_photo) do
+      var&? Play play_photo = spawn Play(&scene.scene, &photo);
+      watching  (play_photo) do
         watching 5s do
           await 1s;
-          var int top = call Player_Get_Int(&play_photo,"y");
+          var int top = call Player_Get_Int(&play_photo.player,"y");
           var int diff = 290 - top;
           var int amount = 1;
           watching 3s do
             every (3000/diff)ms do
-              call Player_Set_Int(&play_photo, "y", top + amount);
+              call Player_Set_Int(&play_photo.player, "y", top + amount);
               amount = amount + 1;
             end
           end
@@ -101,7 +103,7 @@ do
       await 45s;
       var bool clicked = do
         watching 6s do
-          spawn Play(&scene, &icon);
+          spawn Play(&scene.scene, &icon);
           var _char_ptr_ext key;
           (_, key,_) = await CM_SCENE_KEY
                   until _strcmp(key,"F1") == 0;
@@ -117,7 +119,7 @@ do
               (0.45   * scene_width)  as int,
               (0.45   * scene_height) as int,
            );
-        await Play(&scene, &shoes);
+        await Play(&scene.scene, &shoes);
         emit resize(0, 0, scene_width, scene_height);
       end
     end

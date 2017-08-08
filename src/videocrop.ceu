@@ -10,19 +10,17 @@ var Media.Video video = val Media.Video (
                           1.0
                         );
 
-var& IScene scene;
-var& IPlayer p_video;
-var& IPlayer p_cropped;
-watching Scene (Size (width, height)) -> (&scene),
-         Play (&scene, &video)        -> (&p_video),
-         Play (&scene, &video)        -> (&p_cropped),
-         CM_SCENE_KEY
-do
-  call Player_Set_Int (&p_cropped, "x",              400);
-  call Player_Set_Double (&p_cropped, "crop-top",    0.1);
-  call Player_Set_Double (&p_cropped, "crop-left",   0.1);
-  call Player_Set_Double (&p_cropped, "crop-right",  0.1);
-  call Player_Set_Double (&p_cropped, "crop-bottom", 0.1);
+var&? Scene scene     = spawn Scene (Size (width, height));
+
+watching scene, CM_SCENE_KEY do
+  var&? Play p_video    = spawn Play (&scene.scene, &video);
+  var&? Play p_cropped  = spawn Play (&scene.scene, &video);
+
+  call Player_Set_Int (&p_cropped!.player, "x",              400);
+  call Player_Set_Double (&p_cropped!.player, "crop-top",    0.1);
+  call Player_Set_Double (&p_cropped!.player, "crop-left",   0.1);
+  call Player_Set_Double (&p_cropped!.player, "crop-right",  0.1);
+  call Player_Set_Double (&p_cropped!.player, "crop-bottom", 0.1);
   await FOREVER;
 end
 

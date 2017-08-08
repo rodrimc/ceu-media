@@ -1,9 +1,8 @@
 #include "c.ceu"
 #include "media/media.ceu"
 
-var& IScene scene;
-watching Scene(_) -> (&scene),
-         10s do
+var&? Scene scene = spawn Scene(_);
+watching scene, 10s do
   var uint id;
   var u64 tick;
   every (id, tick) in CM_SCENE_TICK  do

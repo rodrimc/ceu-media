@@ -13,31 +13,30 @@ var Media.Image img2  = val Media.Image([].."resources/img2.jpg", region, 1.0);
 var Media.Image img3  = val Media.Image([].."resources/img3.jpg", region, 1.0);
 var Media.Image img4  = val Media.Image([].."resources/img4.jpg", region, 1.0);
 
-var& IScene scene;
-watching Scene(Size(800,585)) -> (&scene)
-do
-  spawn Play(&scene, &frame);
-  spawn Srt(&scene,
+var&? Scene scene = spawn Scene(Size(800,585));
+watching (scene) do
+  spawn Play(&scene.scene, &frame);
+  spawn Srt(&scene.scene,
             "resources/slideshow.srt",
             Region(0, 450, 800, 80, 3),
         );
 
   par/or do
     watching 5s do
-        await Play(&scene, &img1);
+        await Play(&scene.scene, &img1);
     end
     watching 5s do
-        await Play(&scene, &img2);
+        await Play(&scene.scene, &img2);
     end
     watching 5s do
-        await Play(&scene, &img3);
+        await Play(&scene.scene, &img3);
     end
     watching 5s do
-        await Play(&scene, &img4);
+        await Play(&scene.scene, &img4);
     end
   with
     loop do
-      await Play(&scene, &piano);
+      await Play(&scene.scene, &piano);
     end
   with
     var _char_ptr_ext key;

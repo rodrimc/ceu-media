@@ -18,23 +18,19 @@ var Media.Video m2 = val Media.Video (
                           0
                          );
 
-var& IScene scene;
-watching Scene(Size(width,height)) -> (&scene) do
+var&? Scene scene = spawn Scene(Size(width,height));
+watching  (scene) do
   watching 30s do
     loop do
       _printf("==-> RESTART\n");
-      var& IPlayer p1;
-      var& IPlayer p2;
-      watching Play(&scene, &m1) -> (&p1),
-               Play(&scene, &m2) -> (&p2),
-               10s
-      do
+      var&? Play p1 = spawn Play(&scene.scene, &m1);
+      var&? Play p2 = spawn Play(&scene.scene, &m2);
+      watching p1, p2, 10s do
         var uint id;
         every (id, _, _, _, _) in CM_PLAYER_MOUSE_CLICK do
           _printf ("%u selected\n", id);
         end
       end
-      // after 10s, destroys everything and restarts
     end
   end
 end

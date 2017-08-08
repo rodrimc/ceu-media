@@ -4,20 +4,21 @@
 var int width = 1080;
 var int height = 720;
 
-var& IScene scene;
-watching Scene(Size(width,height)) -> (&scene),
-         10s do
+var&? Scene scene = spawn Scene(Size(width,height));
+watching scene, 10s do
   par do
     var uint id;
-    var int x, y;
+    var int x;
+    var int y;
     var int but;
     var bool pressed;
     every (id, x,y,but,pressed) in CM_SCENE_MOUSE_CLICK do
-        _printf("CLICK: %u %d %d %d %d\n", id, x,y,but,pressed as int);
+        _printf("CLICK: %u %d %d %d %d\n", id, x, y, but,pressed as int);
     end
   with
     var uint id;
-    var int x, y;
+    var int x;
+    var int y;
     every (id, x, y) in CM_SCENE_MOUSE_MOVE do
       _printf("MOVE: %u %d %d\n", id, x, y);
     end

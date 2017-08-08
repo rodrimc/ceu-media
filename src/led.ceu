@@ -46,8 +46,8 @@ var Media.Image off4 = val Media.Image (
 /* It seems that bellow this value LibPlay starts to drop a lot of buffers  */
 var int freq = 500; 
 
-var& IScene scene;
-watching Scene (Size (600, 600)) -> (&scene) do
+var&? Scene scene = spawn Scene (Size (600, 600));
+watching (scene) do
   par/or do
     var _char_ptr_ext key;
     var bool pressed;
@@ -56,31 +56,31 @@ watching Scene (Size (600, 600)) -> (&scene) do
     loop do
       par/or do
         watching (freq)ms do
-          await Play (&scene, &on1);
+          await Play (&scene.scene, &on1);
         end
         watching (freq)ms do
-          await Play (&scene, &off1);
-        end
-      with
-        watching (freq)ms do
-          await Play (&scene, &on2);
-        end
-        watching (freq)ms do
-          await Play (&scene, &off2);
+          await Play (&scene.scene, &off1);
         end
       with
         watching (freq)ms do
-          await Play (&scene, &on3);
+          await Play (&scene.scene, &on2);
         end
         watching (freq)ms do
-          await Play (&scene, &off3);
+          await Play (&scene.scene, &off2);
         end
       with
         watching (freq)ms do
-          await Play (&scene, &on4);
+          await Play (&scene.scene, &on3);
         end
         watching (freq)ms do
-          await Play (&scene, &off4);
+          await Play (&scene.scene, &off3);
+        end
+      with
+        watching (freq)ms do
+          await Play (&scene.scene, &on4);
+        end
+        watching (freq)ms do
+          await Play (&scene.scene, &off4);
         end
       end
     end

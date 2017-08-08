@@ -5,14 +5,12 @@ var Media.Text text = val MEDIA_TEXT(
         [] .. "Press left/right to back/advance 1s ('q' to abort)");
 text.region = val Region (0, 300, 640, 200, 2);
 
-var& IScene scene;
+var&? Scene scene = spawn Scene (Size (640, 480));
 
-watching Scene (Size (640, 480)) -> (&scene)
-do
-  var& IPlayer player;
-  watching Play (&scene, &video) -> (&player)
-  do
-    spawn Play (&scene, &text);
+watching (scene) do
+  var&? Play player = spawn Play (&scene.scene, &video);
+  watching (player) do
+    spawn Play (&scene.scene, &text);
     loop do
       var _char_ptr_ext k;
       var bool press;
@@ -20,9 +18,9 @@ do
       if (_strcmp (k, "q") == 0) then
         break;
       else/if (_strcmp (k, "Left") == 0) then
-        call Player_Seek (&player, -1000 * NS, true);
+        call Player_Seek (&player.player, -1000 * NS, true);
       else/if (_strcmp (k, "Right") == 0) then
-        call Player_Seek (&player, 1000 * NS, true);
+        call Player_Seek (&player.player, 1000 * NS, true);
       end
     end
   end

@@ -67,6 +67,7 @@ native
   _lp_Scene,
   _SCENE_SEED,
   _PLAYER_SEED,
+  _strdup,
 ;
 
 #define NS 1000000
@@ -122,47 +123,49 @@ end
 data Media;
 
 data Media.Text with
-  vector[] byte   text;
-  vector[] byte   font    = [] .. "";
+  var[] byte   text;
+  var[] byte   font    = [] .. "";
   var      Region region  = val Region (0, 0, 0, 0, 1);
   var      uint   color   = 0xffffffff;
 end
 
 data Media.Image with
-  vector[] byte   uri;
-  var      Region region  = val Region (0, 0, 0, 0, 1);
-  var      float  alpha   = 1.0;
+  var[] byte   uri;
+  var   Region region  = val Region (0, 0, 0, 0, 1);
+  var   real  alpha   = 1.0;
 end
 
 data Media.Audio with
-  vector[] byte  uri;
-  var      float volume   = 1.0;
+  var[] byte  uri;
+  var   real volume   = 1.0;
 end
 
 data Media.Video with
-  vector[] byte   uri;
-  var      Region region  = val Region (0, 0, 0, 0, 1);;
-  var      float  alpha   = 1.0;
-  var      float  volume  = 1.0;
+  var[] byte   uri;
+  var   Region region  = val Region (0, 0, 0, 0, 1);;
+  var   real  alpha   = 1.0;
+  var   real  volume  = 1.0;
 end
 
 data Media.Default with
-  vector[] byte   uri;
-  var      Region region  = val Region (0, 0, 0, 0, 1);;
+  var[] byte   uri;
+  var   Region region  = val Region (0, 0, 0, 0, 1);;
 end
 
 /* SCENE */
 data ISceneRaw with
   var&  _lp_Scene  ref;
   var&  Size?      size;
-  event (void)     quit;
+  event (none)     quit;
 end
 
 code/await Scene_Raw (var Size? size)
               -> (var& ISceneRaw scene)
-                  -> void
+                  -> none
 do
-  var int w=0, h=0, tick_interval = 30 * NS;
+  var int w = 0;
+  var int h = 0;
+  var int tick_interval = 30 * NS;
   if size? then
     w = size!.width;
     h = size!.height;
@@ -203,8 +206,10 @@ do
       if type == _LP_TYPE_EVENT_POINTER_CLICK then
         var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
 
-        var f64 x=_, y=_;
-        var int button=_, pressed=_;
+        var r64 x = _;
+        var r64 y = _;
+        var int button=_;
+        var int pressed=_;
         _g_object_get(
             _G_OBJECT(evt_),
             "x", &&x,
@@ -228,7 +233,8 @@ do
       else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
         var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
 
-        var f64 x=_, y=_;
+        var r64 x = _;
+        var r64 y = _;
         _g_object_get(_G_OBJECT(evt_), "x", &&x, "y",&&y, null);
 
         if _LP_IS_SCENE(source) as bool then
@@ -338,19 +344,19 @@ end
 
 /* Scene Raw functions */
 code/tight
-Scene_Raw_Pause (var& ISceneRaw scene) -> void
+Scene_Raw_Pause (var& ISceneRaw scene) -> none
 do
   _lp_scene_pause (&&scene.ref);
 end
 
 code/tight
-Scene_Raw_Resume (var& ISceneRaw scene) -> void
+Scene_Raw_Resume (var& ISceneRaw scene) -> none
 do
   _lp_scene_resume(&&scene.ref);
 end
 
 code/tight
-Scene_Raw_Set_Tick_Interval (var& ISceneRaw scene, var u64 interval) -> void
+Scene_Raw_Set_Tick_Interval (var& ISceneRaw scene, var u64 interval) -> none
 do
   _g_object_set (&&scene.ref,
                 "interval",
@@ -361,37 +367,37 @@ end
 /* Player_Raw_New */
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media media) -> _lp_Media&&
 do
   _ceu_dbg_assert(0);
 end
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Text media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Text media) -> _lp_Media&&
 do
   escape _lp_media_new(&&scene.ref, null);
 end
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Image media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Image media) -> _lp_Media&&
 do
   escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Video media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Video media) -> _lp_Media&&
 do
   escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Audio media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Audio media) -> _lp_Media&&
 do
   escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, dynamic var& Media.Default media) -> _lp_Media&&
+Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Default media) -> _lp_Media&&
 do
   if _strcmp(&&media.uri[0], "") == 0 then
     escape _lp_media_new(&&scene.ref, null);
@@ -403,13 +409,13 @@ end
 /* Player_Raw_Set_Media */
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media media) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media media) -> none
 do
   _ceu_dbg_assert(0);
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Text text) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Text text) -> none
 do
   _g_object_set (
       _G_OBJECT(&&player.ref),
@@ -426,7 +432,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Image image) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Image image) -> none
 do
   _g_object_set (
       _G_OBJECT(&&player.ref),
@@ -441,7 +447,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Audio audio) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Audio audio) -> none
 do
   _g_object_set (
     _G_OBJECT(&&player.ref),
@@ -451,7 +457,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Video video) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Video video) -> none
 do
   _g_object_set (
     _G_OBJECT(&&player.ref),
@@ -467,7 +473,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, dynamic var& Media.Default media) -> void
+Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Default media) -> none
 do
   _g_object_set (
     _G_OBJECT(&&player.ref),
@@ -484,14 +490,14 @@ end
 
 code/tight
 Player_Raw_Set_Char (var& IPlayerRaw player, var _char&& name,
-                     var _char&& value) -> void
+                     var _char&& value) -> none
 do
   _g_object_set(&&player.ref, name, value, null);
 end
 
 code/tight
 Player_Raw_Set_Int (var& IPlayerRaw player, var _char&& name,
-                    var int value) -> void
+                    var int value) -> none
 do
   _g_object_set(&&player.ref, name, value, null);
 end
@@ -506,13 +512,13 @@ end
 
 code/tight
 Player_Raw_Set_Double (var& IPlayerRaw player, var _char&& name,
-                       var f64 value) -> void
+                       var r64 value) -> none
 do
   _g_object_set(&&player.ref, name, value, null);
 end
 
 code/tight
-Player_Raw_Get_Double (var& IPlayerRaw player, var _char&& name) ->f64
+Player_Raw_Get_Double (var& IPlayerRaw player, var _char&& name) ->r64
 do
   var int value = 0;
   _g_object_get (&&player.ref, name, &&value, null);
@@ -521,7 +527,7 @@ end
 
 code/tight
 Player_Raw_Set_Bool (var& IPlayerRaw player, var _char&& name,
-                     var bool value) -> void
+                     var bool value) -> none
 do
   _g_object_set(&&player.ref, name, value, null);
 end
@@ -535,7 +541,7 @@ do
 end
 
 code/tight
-Player_Raw_Set_Region (var& IPlayerRaw player, var Region region) -> void
+Player_Raw_Set_Region (var& IPlayerRaw player, var Region region) -> none
 do
   _g_object_set(
       _G_OBJECT(&&player.ref),
@@ -550,7 +556,7 @@ end
 
 code/tight
 Player_Raw_Seek (var& IPlayerRaw player, var s64 time,
-                 var bool relative) -> void
+                 var bool relative) -> none
 do
   _lp_media_seek(&&player.ref, relative, time);
 end
@@ -563,7 +569,7 @@ end
 
 code/await Play_Raw (var& ISceneRaw scene, var& Media media)
                     -> (var& IPlayerRaw player)
-                        -> void
+                        -> none
 do
   var&? _lp_Media ref = &call/dynamic Player_Raw_New(&scene, &media)
     finalize (ref) with

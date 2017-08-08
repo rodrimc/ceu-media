@@ -1,8 +1,8 @@
 #include "media/srt.ceu"
 
-var& IScene scene;
-watching Scene(Size(640,480)) -> (&scene) do
-  await Srt(&scene,
+var&? Scene scene = spawn Scene(Size(640,480));
+watching (scene) do
+  await Srt(&scene.scene,
           "resources/slideshow.srt",
           Region(0, 400, 640, 80, 3),
       );

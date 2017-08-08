@@ -1,15 +1,15 @@
 #include "media/media.ceu"
 
 var Media.Video m = val Media.Video (
-                           [] .. "resources/clock.ogv",                         
-                           Region(0, 0, 320, 240, 2),  0.75, 
+                           [] .. "resources/clock.ogv",
+                           Region(0, 0, 320, 240, 2),  0.75,
                            1.0
                          );
 
-var& IScene scene;
-watching Scene (Size (300, 200)) -> (&scene) do 
-  var& IPlayer player;
-  watching Play (&scene, &m) -> (&player) do
+var&? Scene scene = spawn Scene (Size (300, 200));
+watching  (scene) do
+  var&? Play player = spawn Play (&scene.scene, &m);
+  watching  (player) do
     var bool mute = true;
     var int x;
     var int y;
@@ -17,10 +17,10 @@ watching Scene (Size (300, 200)) -> (&scene) do
     var bool press;
     every (_, x, y, button, press) in CM_SCENE_MOUSE_CLICK do
       if (press) then
-        call Player_Set_Region(&player,
-                           Region(x, y, m.region.width, 
+        call Player_Set_Region(&player.player,
+                           Region(x, y, m.region.width,
                                   m.region.height, m.region.z));
-        call Player_Set_Bool (&player, "mute", mute);
+        call Player_Set_Bool (&player.player, "mute", mute);
         mute = not mute;
       end
     end
