@@ -37,10 +37,12 @@ watching (scene) do
     var[] byte towrite = [] .. "";
     every (_, key, press) in CM_SCENE_KEY do
       if (press) then
+        $towrite = $towrite - 1;
+
         if _strcmp(key, "space") == 0 then
-          towrite = towrite .. " ";
+          towrite = towrite .. " \0";
         else
-          towrite = towrite .. [key[0]];
+          towrite = towrite .. [key[0]] .. "\0";
         end
         call Player_Set_Char (&p_text!.player, "text", &&towrite[0]);
       end
