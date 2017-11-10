@@ -144,7 +144,7 @@ data Media.Video with
   var[] byte   uri;
   var   Region region  = val Region (0, 0, 0, 0, 1);;
   var   real  alpha   = 1.0;
-  var   real  volume  = 1.0;
+  var   r64   volume  = 1.0;
 end
 
 data Media.Default with
@@ -369,7 +369,8 @@ end
 code/tight/dynamic
 Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media media) -> _lp_Media&&
 do
-  _ceu_dbg_assert(0);
+  /* _ceu_dbg_assert(0); */
+  escape null;
 end
 
 code/tight/dynamic
@@ -411,7 +412,8 @@ end
 code/tight/dynamic
 Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media media) -> none
 do
-  _ceu_dbg_assert(0);
+  /* none; */
+  /* _ceu_dbg_assert(0); */
 end
 
 code/tight/dynamic
@@ -520,7 +522,22 @@ end
 code/tight
 Player_Raw_Get_Double (var& IPlayerRaw player, var _char&& name) ->r64
 do
-  var int value = 0;
+  var r64 value = 0.0;
+  _g_object_get (&&player.ref, name, &&value, null);
+  escape value;
+end
+
+code/tight
+Player_Raw_Set_Real (var& IPlayerRaw player, var _char&& name,
+                       var real value) -> none
+do
+  _g_object_set(&&player.ref, name, value, null);
+end
+
+code/tight
+Player_Raw_Get_Real (var& IPlayerRaw player, var _char&& name) ->real
+do
+  var real value = 0.0;
   _g_object_get (&&player.ref, name, &&value, null);
   escape value;
 end
