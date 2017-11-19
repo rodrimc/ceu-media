@@ -238,7 +238,7 @@ end
 code/tight
 Player_Get_Double (var& IPlayer player, var _char&& name) ->r64
 do
-  escape call Player_Raw_Get_Int (&player.raw, name);
+  escape call Player_Raw_Get_Double (&player.raw, name);
 end
 
 code/tight
