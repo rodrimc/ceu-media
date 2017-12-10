@@ -21,12 +21,12 @@ input (uint, int, int, int, bool) CM_PLAYER_MOUSE_CLICK;
 /* SCENE */
 data IScene with
   var& ISceneRaw raw;
-  var&  uint      self;
+  var&  uint     self;
   event (none)   quit;
 end
 
 code/await Scene (var Size? size)
-              -> (var& IScene scene)
+              -> (var& IScene handle)
                   -> none
 do
   var Size raw_size =  _;
@@ -38,7 +38,7 @@ do
     var uint self = _SCENE_SEED;
     _SCENE_SEED = _SCENE_SEED + 1;
     var IScene ref_ = val IScene (&raw.scene, &self, _);
-    scene = &ref_;
+    handle = &ref_;
     par/or do
       var _GObject&& source;
       var int x;
@@ -130,20 +130,20 @@ end
 /* PLAYER */
 data IPlayer with
   var& IPlayerRaw raw;
-  var& uint        self;
+  var& uint       self;
 end
 
-code/await Play (var& IScene scene, var& Media media)
-                  -> (var& IPlayer player)
+code/await Play (var& []byte uri, var& Properties prop, var& IScene scene)
+                  -> (var& IPlayer handle)
                       -> none
 do
-  var&? Play_Raw raw = spawn Play_Raw (&scene.raw, &media);
+  var&? Play_Raw raw = spawn Play_Raw (&uri, &prop, &scene.raw);
   watching (raw) do
     var uint self = _PLAYER_SEED;
     _PLAYER_SEED = _PLAYER_SEED + 1;
 
     var IPlayer ref_ = val IPlayer (&raw.player, &self);
-    player = &ref_;
+    handle = &ref_;
 
     par do
       loop do
@@ -182,33 +182,33 @@ do
 end
 
 code/tight/dynamic
-Player_Set_Media (var& IPlayer player, var&/dynamic Media media) -> none
+Player_Set_Properties (var& IPlayer player, var&/dynamic Properties prop) -> none
 do
-  call/dynamic Player_Raw_Set_Media (&player.raw, &media);
+  call/dynamic Player_Raw_Set_Properties (&player.raw, &prop);
 end
 
 code/tight/dynamic
-Player_Set_Media (var& IPlayer player, var&/dynamic Media.Text text) -> none
+Player_Set_Properties (var& IPlayer player, var&/dynamic Properties.Text text) -> none
 do
-  call/dynamic Player_Raw_Set_Media (&player.raw, &text);
+  call/dynamic Player_Raw_Set_Properties (&player.raw, &text);
 end
 
 code/tight/dynamic
-Player_Set_Media (var& IPlayer player, var&/dynamic Media.Image image) -> none
+Player_Set_Properties (var& IPlayer player, var&/dynamic Properties.Image image) -> none
 do
-  call/dynamic Player_Raw_Set_Media (&player.raw, &image);
+  call/dynamic Player_Raw_Set_Properties (&player.raw, &image);
 end
 
 code/tight/dynamic
-Player_Set_Media (var& IPlayer player, var&/dynamic Media.Audio audio) -> none
+Player_Set_Properties (var& IPlayer player, var&/dynamic Properties.Audio audio) -> none
 do
-  call/dynamic Player_Raw_Set_Media (&player.raw, &audio);
+  call/dynamic Player_Raw_Set_Properties (&player.raw, &audio);
 end
 
 code/tight/dynamic
-Player_Set_Media (var& IPlayer player, var&/dynamic Media.Video video) -> none
+Player_Set_Properties (var& IPlayer player, var&/dynamic Properties.Video video) -> none
 do
-  call/dynamic Player_Raw_Set_Media (&player.raw, &video);
+  call/dynamic Player_Raw_Set_Properties (&player.raw, &video);
 end
 
 code/tight

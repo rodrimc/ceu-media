@@ -3,24 +3,24 @@
 var int width = 800;
 var int height = 300;
 
-var Media.Video video = val Media.Video (
-                          [].."resources/clock.ogv",
+var[] byte videouri = [].."resources/clock.ogv";
+var Properties.Video videoprop = val Properties.Video (
                           Region(0, 0, 0, 0, 1),
                           1.0,
                           1.0
                         );
 
-var&? Scene scene     = spawn Scene (Size (width, height));
+var&? Scene scene = spawn Scene (Size (width, height));
 
 watching scene, CM_SCENE_KEY do
-  var&? Play p_video    = spawn Play (&scene.scene, &video);
-  var&? Play p_cropped  = spawn Play (&scene.scene, &video);
+  var&? Play p_video    = spawn Play (&videouri, &videoprop, &scene.handle);
+  var&? Play p_cropped  = spawn Play (&videouri, &videoprop, &scene.handle);
 
-  call Player_Set_Int (&p_cropped!.player, "x",              400);
-  call Player_Set_Double (&p_cropped!.player, "crop-top",    0.1);
-  call Player_Set_Double (&p_cropped!.player, "crop-left",   0.1);
-  call Player_Set_Double (&p_cropped!.player, "crop-right",  0.1);
-  call Player_Set_Double (&p_cropped!.player, "crop-bottom", 0.1);
+  call Player_Set_Int    (&p_cropped!.handle, "x",           400);
+  call Player_Set_Double (&p_cropped!.handle, "crop-top",    0.1);
+  call Player_Set_Double (&p_cropped!.handle, "crop-left",   0.1);
+  call Player_Set_Double (&p_cropped!.handle, "crop-right",  0.1);
+  call Player_Set_Double (&p_cropped!.handle, "crop-bottom", 0.1);
   await FOREVER;
 end
 

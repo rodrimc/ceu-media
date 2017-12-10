@@ -1,44 +1,38 @@
 
 #include "media/media.ceu"
 
+var[] byte on_uri  =  [] .. "resources/on.png";
+var[] byte off_uri =  [] .. "resources/off.png";
 
-var Media.Image on1 = val Media.Image (
-            [] .. "resources/on.png", 
+var Properties.Image on1 = val Properties.Image (
             Region(0, 0, 300, 300, 1), 
             1.0
           );
-var Media.Image off1 = val Media.Image (
-            [].."resources/off.png", 
+var Properties.Image off1 = val Properties.Image (
             Region(0, 0, 300, 300, 1), 
             1.0
           );
-var Media.Image on2 = val Media.Image (
-            [].."resources/on.png", 
+var Properties.Image on2 = val Properties.Image (
             Region(300, 0, 300, 300, 1), 
             1.0
           );
-var Media.Image off2 = val Media.Image (
-            [].."resources/off.png", 
+var Properties.Image off2 = val Properties.Image (
             Region(300, 0, 300, 300, 1),
             1.0
           );
-var Media.Image on3 = val Media.Image (
-            [].."resources/on.png", 
+var Properties.Image on3 = val Properties.Image (
             Region(0, 300, 300, 300, 1),
             1.0
           );
-var Media.Image off3 = val Media.Image (
-            [].."resources/off.png", 
+var Properties.Image off3 = val Properties.Image (
             Region(0, 300, 300, 300, 1),
             1.0
           );
-var Media.Image on4 = val Media.Image (
-            [].."resources/on.png", 
+var Properties.Image on4 = val Properties.Image (
             Region(300, 300, 300, 300, 1),
             1.0
           );
-var Media.Image off4 = val Media.Image (
-            [].."resources/off.png", 
+var Properties.Image off4 = val Properties.Image (
             Region(300, 300, 300, 300, 1),
             1.0
           );
@@ -56,31 +50,31 @@ watching (scene) do
     loop do
       par/or do
         watching (freq)ms do
-          await Play (&scene.scene, &on1);
+          await Play (&on_uri, &on1, &scene.handle);
         end
         watching (freq)ms do
-          await Play (&scene.scene, &off1);
-        end
-      with
-        watching (freq)ms do
-          await Play (&scene.scene, &on2);
-        end
-        watching (freq)ms do
-          await Play (&scene.scene, &off2);
+          await Play (&off_uri, &off1, &scene.handle);
         end
       with
         watching (freq)ms do
-          await Play (&scene.scene, &on3);
+          await Play (&on_uri, &on2, &scene.handle);
         end
         watching (freq)ms do
-          await Play (&scene.scene, &off3);
+          await Play (&off_uri, &off2, &scene.handle);
         end
       with
         watching (freq)ms do
-          await Play (&scene.scene, &on4);
+          await Play (&on_uri, &on3, &scene.handle);
         end
         watching (freq)ms do
-          await Play (&scene.scene, &off4);
+          await Play (&off_uri, &off3, &scene.handle);
+        end
+      with
+        watching (freq)ms do
+          await Play (&on_uri, &on4, &scene.handle);
+        end
+        watching (freq)ms do
+          await Play (&off_uri, &off4, &scene.handle);
         end
       end
     end

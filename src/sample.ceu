@@ -1,14 +1,14 @@
 #include "media/media.ceu"
 
-var Media.Video m = val Media.Video (
-                           [] .. "resources/clock.ogv",
+var[] byte videouri = [] .. "resources/clock.ogv";
+var Properties.Video prop = val Properties.Video (
                            Region(0, 0, 320, 240, 2),  0.75,
                            1.0
                          );
 
 var&? Scene scene = spawn Scene (Size (300, 200));
 watching  (scene) do
-  var&? Play player = spawn Play (&scene.scene, &m);
+  var&? Play player = spawn Play (&videouri, &prop, &scene.handle);
   watching  (player) do
     var bool mute = true;
     var int x;
@@ -17,10 +17,10 @@ watching  (scene) do
     var bool press;
     every (_, x, y, button, press) in CM_SCENE_MOUSE_CLICK do
       if (press) then
-        call Player_Set_Region(&player.player,
-                           Region(x, y, m.region.width,
-                                  m.region.height, m.region.z));
-        call Player_Set_Bool (&player.player, "mute", mute);
+        call Player_Set_Region(&player.handle,
+                           Region(x, y, prop.region.width,
+                                  prop.region.height, prop.region.z));
+        call Player_Set_Bool (&player.handle, "mute", mute);
         mute = not mute;
       end
     end

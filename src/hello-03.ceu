@@ -4,26 +4,28 @@
 var int width = 640;
 var int height = 480;
 
-var Media.Text one = val Media.Text (
+var Properties.Text one = val Properties.Text (
                           [].."one",
                           [].."sans 40",
                           Region(0, 400, width, 80, 2),
                           0xffff0048,
                         );
 
-var Media.Text two = val Media.Text (
+var Properties.Text two = val Properties.Text (
                           [].."two",
                           [].."sans 40",
                           Region(0, 400, width, 80, 2),
                           0xffff0048,
                         );
 
-var Media.Video video = val Media.Video (
-                          [].."resources/night.avi",
+var Properties.Video prop = val Properties.Video (
                           Region(0, 0, width, height, 1),
                           1.0,
                           1.0,
                         );
+
+var[] byte uri = [] .."resources/night.avi";
+var[] byte dummy = _;
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene), 12s
@@ -31,21 +33,21 @@ do
   par/or do
     var bool flag = true;
     loop do
-      var& Media text;
+      var& Properties text;
       if flag then
         text = &one;
       else
         text = &two;
       end
       watching 1s do
-        await Play (&scene.scene, &text);
+        await Play (&dummy, &text, &scene.handle);
       end
       flag = not flag;
     end
   with
     loop do
       watching 2s do
-        await Play(&scene.scene, &video);
+        await Play(&uri, &prop, &scene.handle);
       end
     end
   with

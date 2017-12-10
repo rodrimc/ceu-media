@@ -3,18 +3,19 @@
 var int width = 1080;
 var int height = 720;
 
-var Media.Video m = val Media.Video (
-                          [].."resources/clock.ogv",
+var Properties.Video p = val Properties.Video (
                           Region(0, 0, width, height, 1),
                           1.0,
                           1.0
                         );
 
+var[] byte uri = [].."resources/clock.ogv";
+
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
   watching CM_SCENE_KEY, CM_SCENE_MOUSE_CLICK do
     loop do
-      await Play(&scene.scene, &m);
+      await Play(&uri, &p, &scene.handle);
     end
   end
 end

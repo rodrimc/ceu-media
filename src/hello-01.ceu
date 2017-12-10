@@ -4,15 +4,15 @@
 var int width = 1080;
 var int height = 720;
 
-var Media.Video m1 = val Media.Video (
-                          [].."resources/animGar.mp4",
+var [] byte uri = [].."resources/animGar.mp4";
+
+var Properties.Video prop1 = val Properties.Video (
                           Region(0, 0, width/2, height/2, 1),
                           1.0,
                           1.0,
                          );
 
-var Media.Video m2 = val Media.Video (
-                          [].."resources/animGar.mp4",
+var Properties.Video prop2 = val Properties.Video (
                           Region(width/2, height/2, width/2, height/2, 1),
                           1.0,
                           0
@@ -23,12 +23,16 @@ watching  (scene) do
   watching 30s do
     loop do
       _printf("==-> RESTART\n");
-      var&? Play p1 = spawn Play(&scene.scene, &m1);
-      var&? Play p2 = spawn Play(&scene.scene, &m2);
-      watching p1, p2, 10s do
-        var uint id;
-        every (id, _, _, _, _) in CM_PLAYER_MOUSE_CLICK do
-          _printf ("%u selected\n", id);
+      par/or do
+        await Play (&uri, &prop1, &scene.handle);
+      with
+        await Play (&uri, &prop2, &scene.handle);
+      with
+        watching 10s do
+          var uint id;
+          every (id, _, _, _, _) in CM_PLAYER_MOUSE_CLICK do
+            _printf ("%u selected\n", id);
+          end
         end
       end
     end

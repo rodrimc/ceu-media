@@ -2,10 +2,16 @@
 
 var&? Scene scene = spawn Scene(Size(640,480));
 watching (scene) do
-  await Srt(&scene.scene,
-          "resources/slideshow.srt",
-          Region(0, 400, 640, 80, 3),
-      );
+  var Exception? e;
+  catch e do
+    await Srt(&scene.handle,
+            "resources/slideshow.srt",
+            Region(0, 400, 640, 80, 3),
+        );
+  end
+  if e? then
+    _fprintf (_stderr, "[error:] %s\n", e!.message);
+  end
 end
 
 escape 0;

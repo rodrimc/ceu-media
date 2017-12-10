@@ -3,21 +3,23 @@
 var int width = 1080;
 var int height = 720;
 
-var Media.Video m = val Media.Video (
-                          [].."resources/clock.ogv",
+var[] byte videouri = [].."resources/clock.ogv";
+var[] byte dummy = _;
+
+var Properties.Video videoprop = val Properties.Video (
                           Region(0, 0, width, height, 1),
                           1.0,
                           1.0
                         );
 
-var Media.Text text = val Media.Text (
+var Properties.Text text = val Properties.Text (
                           [] .. "",
                           [] .. "",
                           Region (0, 600, width, 100, 2),
                           0xffffffff,
                           );
 
-var Media.Text label = val Media.Text (
+var Properties.Text label = val Properties.Text (
                           [] .. "Type a text",
                           [] .. "",
                           Region (0, 550, width, 100, 2),
@@ -26,11 +28,11 @@ var Media.Text label = val Media.Text (
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
-  var&? Play p = spawn Play(&scene.scene, &m);
-  var&? Play p_text = spawn Play(&scene.scene, &text);
+  var&? Play p = spawn Play(&videouri, &videoprop, &scene.handle);
+  var&? Play p_text = spawn Play(&dummy, &text, &scene.handle);
 
   par do 
-    spawn Play (&scene.scene, &label);
+    await Play (&dummy, &label, &scene.handle);
   with
     var bool press;
     var _char_ptr_ext key;
@@ -44,7 +46,7 @@ watching (scene) do
         else
           towrite = towrite .. [key[0]] .. "\0";
         end
-        call Player_Set_Char (&p_text!.player, "text", &&towrite[0]);
+        call Player_Set_Char (&p_text!.handle, "text", &&towrite[0]);
       end
     end
   end

@@ -3,8 +3,8 @@
 var int width = 1080;
 var int height = 720;
 
-var Media.Video v1 = val Media.Video (
-                          [].."resources/clock.ogv",
+var[] byte videouri = [] .. "resources/clock.ogv";
+var Properties.Video v1 = val Properties.Video (
                           Region(0, 0, width, height, 1),
                           1.0,
                           1.0
@@ -13,7 +13,7 @@ var Media.Video v1 = val Media.Video (
 var&? Scene scene = spawn Scene(Size(width,height));
 
 watching  scene do
-  var&? Play play = spawn Play (&scene.scene, &v1);
+  var&? Play play = spawn Play (&videouri, &v1, &scene.handle);
   var _char_ptr_ext key;
   var bool press;
   var bool paused = false;
@@ -21,9 +21,9 @@ watching  scene do
     if press then
       if _strcmp (key, "space") == 0  then
         if (paused) then
-          call Scene_Resume (&scene.scene); /* Not working yet*/
+          call Scene_Resume (&scene.handle); /* Not working yet*/
         else
-          call Scene_Pause (&scene.scene);
+          call Scene_Pause (&scene.handle);
         end
         paused = not paused;
       end

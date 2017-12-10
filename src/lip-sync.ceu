@@ -4,32 +4,43 @@
 var int width = 640;
 var int height = 480;
 
-var Media.Video m1 = val Media.Video([].."resources/muted-video.m4v",
-                                   Region(0,0,width/2,height/2,1),
-                                   1.0,
-                                   1.0);
-var Media.Video m2 = val Media.Video([].."resources/muted-video.m4v",
-                                   Region(width/2,0,width/2,height/2,1),
-                                   1.0,
-                                   0);
-var Media.Video m3 = val Media.Video([].."resources/muted-video.m4v",
-                                   Region(0,height/2,width/2,height/2,1),
-                                   1.0,
-                                   0);
-var Media.Video m4 = val Media.Video([].."resources/muted-video.m4v",
+var[] byte videouri = [] .. "resources/muted-video.m4v";
+var[] byte audiouri = [] .. "resources/audio.aac";
+
+var Properties.Video p1 = val Properties.Video(
+                                  Region(0,0,width/2,height/2,1),
+                                  1.0,
+                                  1.0);
+var Properties.Video p2 = val Properties.Video(
+                                  Region(width/2,0,width/2,height/2,1),
+                                  1.0,
+                                  0);
+var Properties.Video p3 = val Properties.Video(
+                                  Region(0,height/2,width/2,height/2,1),
+                                  1.0,
+                                  0);
+var Properties.Video p4 = val Properties.Video(
                                    Region(width/2,height/2,width/2,height/2,1),
                                    1.0,
                                    0);
-var Media.Audio audio = val Media.Audio([].."resources/audio.aac", 1.0);
+var Properties.Audio audioprop = val Properties.Audio(1.0);
 
 var&? Scene scene = spawn Scene(Size(width,height));
-watching (scene) do
-    spawn Play(&scene.scene, &m1);
-    spawn Play(&scene.scene, &m2);
-    spawn Play(&scene.scene, &m3);
-    spawn Play(&scene.scene, &m4);
-    spawn Play(&scene.scene, &audio);
+watching (scene)
+do
+  par/or do
+    await Play(&videouri, &p1, &scene.handle);
+  with                       
+    await Play(&videouri, &p2, &scene.handle);
+  with                       
+    await Play(&videouri, &p3, &scene.handle);
+  with                       
+    await Play(&videouri, &p4, &scene.handle);
+  with
+    await Play(&audiouri, &audioprop, &scene.handle);
+  with
     await CM_SCENE_KEY;
+  end
 end
 
 escape 0;

@@ -2,22 +2,24 @@
 
 var&? Scene scene = spawn Scene(Size(1080,720));
 var Size size = val Size (1080, 720);
+
 watching (scene) do
-  var Media.Video m1 = val Media.Video (
-                        [].."resources/misc.avi",
+  var Properties.Video p1 = val Properties.Video (
                         Region(0, 0, size.width, size.height, 1),
                         1.0,
                         1.0,
                        );
-  var Media.Video m2 = val Media.Video (
-                        [].."resources/bars.ogg",
+  var Properties.Video p2 = val Properties.Video (
                         Region(0, 0, size.width, size.height, 1),
                         1.0,
                         1.0,
                        );
 
-  await Play(&scene.scene, &m1);
-  await Play(&scene.scene, &m2);
+  var[] byte v1 = [] .. "resources/misc.avi";
+  var[] byte v2 = [] .. "resources/bars.ogg";
+
+  await Play(&v1, &p1, &scene.handle);
+  await Play(&v2, &p2, &scene.handle);
 end
 
 escape 0;

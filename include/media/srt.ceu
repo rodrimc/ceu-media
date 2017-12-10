@@ -5,33 +5,31 @@
 #include "media/media.ceu"
 
 code/await Srt (var& IScene scene, var _char&& path, var Region region) -> none 
+  throws Exception.Uv 
 do
   var&? UV_FS_Open fs = spawn UV_FS_Open(path, _, _O_RDONLY, 0);
   watching (fs) do
     await fs.file.ok;
-    _ceu_dbg_assert(fs.file.handle >= 0);
 
     var int   now = 0;
     var usize length = 0;
-    var int i;
-    loop i do
+    var ssize i = _;
+    loop do
       var int fr = 0;
       var int to = 0;
 
       // N
       do
         var[] byte line;
-        var ssize n = await UV_FS_Read_Line(&fs.file,&line,length);
+        var ssize n = await UV_FS_Read_Line(&fs.file, &line, _);
+        _printf ("ok\n");
         if n == 0 then
           break;
         end
-        _ceu_dbg_assert(n > 0);
         length = length + (n as usize);
 
         var int cur = _;
         var ssize n = _sscanf(&&line[0], "%d", &&cur);
-        _ceu_dbg_assert(n == 1);
-        _ceu_dbg_assert(cur == i+1);
         _printf("SUBTITLE = %d\n", cur);
       end
 
@@ -39,8 +37,6 @@ do
       do
         var[] byte line;
         var ssize n = await UV_FS_Read_Line(&fs.file,&line,length);
-        _ceu_dbg_assert(n > 0);
-        _ceu_dbg_assert(n == 30);
         length = length + (n as usize);
 
         var int fr_h=0;
@@ -54,7 +50,6 @@ do
         var int n = _sscanf(&&line[0], "%d:%d:%d,%d --> %d:%d:%d,%d",
                     &&fr_h, &&fr_m, &&fr_s, &&fr_ms,
                     &&to_h, &&to_m, &&to_s, &&to_ms);
-        _ceu_dbg_assert(n == 8);
 
         _printf("%d:%d:%d,%d --> %d:%d:%d,%d\n",
                     fr_h, fr_m, fr_s, fr_ms,
@@ -72,7 +67,6 @@ do
         if n == 0 then
           break;
         end
-        _ceu_dbg_assert(n > 0);
         length = length + (n as usize);
 
         if $line == 0 then
@@ -84,16 +78,17 @@ do
       // Player.play()
       do
         await (fr-now)ms;
+        var[] byte dummy = _;
 
         watching (to-fr)ms do
           _printf("%s\n", &&lines[0]);
-          var Media.Text text = val Media.Text (
+          var Properties.Text text = val Properties.Text (
                                     []..lines,
                                     [].."",
                                     region,
                                     0xffff0000,
                                   );
-          await Play(&scene, &text);
+          await Play(&dummy, &text, &scene);
         end
 
         now = to;

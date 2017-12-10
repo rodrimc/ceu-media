@@ -1,16 +1,19 @@
 #include "media/media.ceu"
 
-var Media.Video video = val MEDIA_VIDEO([] .. "resources/clock.ogv");
-var Media.Text text = val MEDIA_TEXT(
-        [] .. "Press left/right to back/advance 1s ('q' to abort)");
-text.region = val Region (0, 300, 640, 200, 2);
+var[] byte videouri = [] .. "resources/clock.ogv";
+var[] byte dummy = _;
+
+var Properties.Video video = val Properties.Video (_, _, _);
+var Properties.Text text = val Properties.Text(
+        [] .. "Press left/right to back/advance 1s ('q' to abort)", _, 
+        Region (0, 300, 640, 200, 2), _);
 
 var&? Scene scene = spawn Scene (Size (640, 480));
 
 watching (scene) do
-  var&? Play player = spawn Play (&scene.scene, &video);
+  var&? Play player = spawn Play (&videouri, &video, &scene.handle);
   watching (player) do
-    spawn Play (&scene.scene, &text);
+    spawn Play (&dummy, &text, &scene.handle);
     loop do
       var _char_ptr_ext k;
       var bool press;
@@ -18,9 +21,9 @@ watching (scene) do
       if (_strcmp (k, "q") == 0) then
         break;
       else/if (_strcmp (k, "Left") == 0) then
-        call Player_Seek (&player.player, -1000 * NS, true);
+        call Player_Seek (&player.handle, -1000 * NS, true);
       else/if (_strcmp (k, "Right") == 0) then
-        call Player_Seek (&player.player, 1000 * NS, true);
+        call Player_Seek (&player.handle, 1000 * NS, true);
       end
     end
   end

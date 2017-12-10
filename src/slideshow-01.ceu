@@ -2,35 +2,40 @@
 
 var Region region = val Region(76, 74, 650, 440, 2);
 
-var Media.Image frame = val Media.Image([].."resources/frame.png",
-                                        Region(0,0,800,585,1),
-                                        1.0);
-var Media.Audio piano = val Media.Audio([].."resources/piano.ogg", 0.5);
-var Media.Image img1  = val Media.Image([].."resources/img1.jpg", region, 1.0);
-var Media.Image img2  = val Media.Image([].."resources/img2.jpg", region, 1.0);
-var Media.Image img3  = val Media.Image([].."resources/img3.jpg", region, 1.0);
-var Media.Image img4  = val Media.Image([].."resources/img4.jpg", region, 1.0);
+var[] byte frameuri = [].."resources/frame.png";
+var[] byte audiouri = [] .. "resources/piano.ogg";
+var[] byte imguri1 = [] .. "resources/img1.jpg";
+var[] byte imguri2 = [] .. "resources/img2.jpg";
+var[] byte imguri3 = [] .. "resources/img3.jpg";
+var[] byte imguri4 = [] .. "resources/img4.jpg";
+
+var Properties.Image frame = val Properties.Image (Region(0,0,800,585,1), 1.0);
+var Properties.Audio piano = val Properties.Audio (0.5);
+var Properties.Image img1  = val Properties.Image (region, 1.0);
+var Properties.Image img2  = val Properties.Image (region, 1.0);
+var Properties.Image img3  = val Properties.Image (region, 1.0);
+var Properties.Image img4  = val Properties.Image (region, 1.0);
 
 var&? Scene scene = spawn Scene(Size(800,585));
 watching (scene) do
-  spawn Play(&scene.scene, &frame);
+  spawn Play(&frameuri, &frame, &scene.handle);
 
   par/or do
     watching 5s do
-      await Play(&scene.scene, &img1);
-    end
+      await Play(&imguri1, &img1, &scene.handle);
+    end                 
     watching 5s do
-      await Play(&scene.scene, &img2);
-    end
+      await Play(&imguri2, &img2, &scene.handle);
+    end                 
     watching 5s do
-      await Play(&scene.scene, &img3);
-    end
+      await Play(&imguri3, &img3, &scene.handle);
+    end                 
     watching 5s do
-      await Play(&scene.scene, &img4);
-    end
-  with
-    loop do
-      await Play(&scene.scene, &piano);
+      await Play(&imguri4, &img4, &scene.handle);
+    end                 
+  with                  
+    loop do             
+      await Play(&audiouri, &piano, &scene.handle);
     end
   with
     var _char_ptr_ext key;

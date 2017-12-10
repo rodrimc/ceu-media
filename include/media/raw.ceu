@@ -114,42 +114,28 @@ data Size with
   var int height;
 end
 
-#define MEDIA_TEXT(text) Media.Text([]..text, [] .. "40", Region(0,0,200,50,1), _)
-#define MEDIA_IMAGE(uri) Media.Image(uri, _, _)
-#define MEDIA_AUDIO(uri) Media.Audio(uri, _)
-#define MEDIA_VIDEO(uri) Media.Video(uri, _, _, _)
-#define MEDIA_DEFAULT(uri) Media.Default(uri, _)
+data Properties;
 
-data Media;
-
-data Media.Text with
-  var[] byte   text;
+data Properties.Text with
+  var[] byte   text    = [] .. "";
   var[] byte   font    = [] .. "";
-  var      Region region  = val Region (0, 0, 0, 0, 1);
-  var      uint   color   = 0xffffffff;
+  var   Region region  = val Region (0, 0, 0, 0, 1);
+  var   uint   color   = 0xffffffff;
 end
 
-data Media.Image with
-  var[] byte   uri;
+data Properties.Image with
   var   Region region  = val Region (0, 0, 0, 0, 1);
   var   real  alpha   = 1.0;
 end
 
-data Media.Audio with
-  var[] byte  uri;
+data Properties.Audio with
   var   real volume   = 1.0;
 end
 
-data Media.Video with
-  var[] byte   uri;
+data Properties.Video with
   var   Region region  = val Region (0, 0, 0, 0, 1);;
   var   real  alpha   = 1.0;
   var   r64   volume  = 1.0;
-end
-
-data Media.Default with
-  var[] byte   uri;
-  var   Region region  = val Region (0, 0, 0, 0, 1);;
 end
 
 /* SCENE */
@@ -366,58 +352,27 @@ end
 
 /* Player_Raw_New */
 
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media media) -> _lp_Media&&
+code/tight
+Player_Raw_New (var& ISceneRaw scene, var&[] byte uri) -> _lp_Media&&
 do
-  /* _ceu_dbg_assert(0); */
-  escape null;
-end
-
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Text media) -> _lp_Media&&
-do
-  escape _lp_media_new(&&scene.ref, null);
-end
-
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Image media) -> _lp_Media&&
-do
-  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
-end
-
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Video media) -> _lp_Media&&
-do
-  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
-end
-
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Audio media) -> _lp_Media&&
-do
-  escape _lp_media_new(&&scene.ref, &&media.uri[0]);
-end
-
-code/tight/dynamic
-Player_Raw_New (var& ISceneRaw scene, var&/dynamic Media.Default media) -> _lp_Media&&
-do
-  if _strcmp(&&media.uri[0], "") == 0 then
+  if $uri == 0 then
     escape _lp_media_new(&&scene.ref, null);
   else
-    escape _lp_media_new(&&scene.ref, &&media.uri[0]);
+    escape _lp_media_new(&&scene.ref, &&uri[0]);
   end
 end
 
-/* Player_Raw_Set_Media */
+/* Player_Raw_Set_Properties */
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media media) -> none
+Player_Raw_Set_Properties (var& IPlayerRaw player, var&/dynamic Properties prop) -> none
 do
   /* none; */
   /* _ceu_dbg_assert(0); */
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Text text) -> none
+Player_Raw_Set_Properties (var& IPlayerRaw player, var&/dynamic Properties.Text text) -> none
 do
   _g_object_set (
       _G_OBJECT(&&player.ref),
@@ -434,7 +389,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Image image) -> none
+Player_Raw_Set_Properties (var& IPlayerRaw player, var&/dynamic Properties.Image image) -> none
 do
   _g_object_set (
       _G_OBJECT(&&player.ref),
@@ -449,7 +404,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Audio audio) -> none
+Player_Raw_Set_Properties (var& IPlayerRaw player, var&/dynamic Properties.Audio audio) -> none
 do
   _g_object_set (
     _G_OBJECT(&&player.ref),
@@ -459,7 +414,7 @@ do
 end
 
 code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Video video) -> none
+Player_Raw_Set_Properties (var& IPlayerRaw player, var&/dynamic Properties.Video video) -> none
 do
   _g_object_set (
     _G_OBJECT(&&player.ref),
@@ -470,20 +425,6 @@ do
     "height", video.region.height,
     "alpha",  video.alpha,
     "volume", video.volume,
-    null
-  );
-end
-
-code/tight/dynamic
-Player_Raw_Set_Media (var& IPlayerRaw player, var&/dynamic Media.Default media) -> none
-do
-  _g_object_set (
-    _G_OBJECT(&&player.ref),
-    "x",      media.region.x,
-    "y",      media.region.y,
-    "z",      media.region.z,
-    "width",  media.region.width,
-    "height", media.region.height,
     null
   );
 end
@@ -584,11 +525,11 @@ do
   escape _lp_media_get_running_time (&&player.ref);
 end
 
-code/await Play_Raw (var& ISceneRaw scene, var& Media media)
+code/await Play_Raw (var& []byte uri, var& Properties prop, var& ISceneRaw scene)
                     -> (var& IPlayerRaw player)
                         -> none
 do
-  var&? _lp_Media ref = &call/dynamic Player_Raw_New(&scene, &media)
+  var&? _lp_Media ref = &call Player_Raw_New(&scene, &uri)
     finalize (ref) with
         // TODO: who destroys?
     end;
@@ -596,7 +537,7 @@ do
   var IPlayerRaw player_ = val IPlayerRaw(&ref!);
   player = &player_;
 
-  call/dynamic Player_Raw_Set_Media (&player_, &media);
+  call/dynamic Player_Raw_Set_Properties (&player_, &prop);
 
   do
     _lp_media_start(&&player_.ref);

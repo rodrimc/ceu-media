@@ -3,8 +3,8 @@
 var int width = 1080;
 var int height = 720;
 
-var Media.Video m = val Media.Video (
-                          [].."resources/animGar.mp4",
+var[] byte videouri = [].."resources/animGar.mp4";
+var Properties.Video p = val Properties.Video (
                           _,
                           1.0,
                           1.0,
@@ -13,7 +13,7 @@ var Media.Video m = val Media.Video (
 var&? Scene scene = spawn Scene (Size (width, height));
 
 watching scene do
-  var&? Play player = spawn Play (&scene.scene, &m);
+  var&? Play player = spawn Play (&videouri, &p, &scene.handle);
   loop do
     var _char_ptr_ext k;
     var bool press;
@@ -21,8 +21,8 @@ watching scene do
                     until (press == false);
 
     if _strcmp (k, "space") == 0 then
-      call Player_Set_Int (&player!.player, "width", 300);
-      call Player_Set_Int (&player!.player, "height", 300);
+      call Player_Set_Int (&player!.handle, "width", 300);
+      call Player_Set_Int (&player!.handle, "height", 300);
     else/if _strcmp (k, "q") == 0 then
       break;
     end

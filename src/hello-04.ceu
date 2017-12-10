@@ -4,49 +4,49 @@
 var int width = 640;
 var int height = 480;
 
-var Media.Video back = val Media.Video (
-                            [].."resources/animGar.mp4",
+var[] byte video1uri = [].."resources/animGar.mp4";
+var Properties.Video prop1 = val Properties.Video (
                             Region(0, 0, width, height, 1),
                             1.0,
                             1.0,
                           );
 
-var Media.Video video = val Media.Video (
-                            [].."resources/diode.mp4",
+var[] byte video2uri = [].."resources/diode.mp4";
+var Properties.Video prop2 = val Properties.Video (
                             Region(0, 0, 320, 240, 2),
                             0.75,
                             1.0,
                           );
 
-var Media.Audio audio = val Media.Audio (
-                            [].."resources/choro.mp4",
+var[] byte audiouri = [].."resources/choro.mp4";
+var Properties.Audio audioprop = val Properties.Audio (
                             0.5,
                           );
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
-  spawn Play(&scene.scene, &back);
+  spawn Play(&video1uri, &prop1, &scene.handle);
 
-  var&? Play play_video = spawn Play(&scene.scene, &video);
+  var&? Play play_video = spawn Play(&video2uri, &prop2, &scene.handle);
   watching (play_video) do
     par/or do
       var _char_ptr_ext key;
       (_,key,_) = await CM_SCENE_KEY until (_strcmp(key,"q") == 0);
     with
       loop do
-        var int x = call Player_Get_Int(&play_video.player, "x");
-        var int y = call Player_Get_Int(&play_video.player, "y");
+        var int x = call Player_Get_Int(&play_video.handle, "x");
+        var int y = call Player_Get_Int(&play_video.handle, "y");
 
         var _char_ptr_ext key;
         (_,key, _) = await CM_SCENE_KEY;
         if _strcmp (key, "Left") == 0 or _strcmp (key, "h") == 0 then
-          call Player_Set_Int(&play_video.player, "x", x-10);
+          call Player_Set_Int(&play_video.handle, "x", x-10);
         else/if _strcmp (key, "Right") == 0 or _strcmp (key, "l") == 0 then
-          call Player_Set_Int(&play_video.player, "x", x+10);
+          call Player_Set_Int(&play_video.handle, "x", x+10);
         else/if _strcmp (key, "Up") == 0 or _strcmp (key, "k") == 0 then
-          call Player_Set_Int(&play_video.player, "y", y-10);
+          call Player_Set_Int(&play_video.handle, "y", y-10);
         else/if _strcmp (key, "Down") == 0 or _strcmp (key, "j") == 0 then
-          call Player_Set_Int(&play_video.player, "y", y+10);
+          call Player_Set_Int(&play_video.handle, "y", y+10);
         end
       end
     with
@@ -55,7 +55,7 @@ watching (scene) do
         var bool pressed;
         (_, key, pressed) = await CM_SCENE_KEY
                        until pressed and _strcmp(key,"space")==0;
-        spawn Play(&scene.scene, &audio);
+        spawn Play(&audiouri, &audioprop, &scene.handle);
         (_, key, pressed) = await CM_SCENE_KEY
                      until pressed and _strcmp (key,"space")==0;
       end
