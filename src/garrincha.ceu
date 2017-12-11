@@ -10,33 +10,34 @@ var Region frame = val Region (
                       (0.185 * scene_height) as int,
                       3,
                    );
-
-var Media.Image back = val Media.Image (
-                    [].."resources/background.png",
+var[] byte background = [].."resources/background.png";
+var Properties.Image backprop = val Properties.Image (
                     Region(0, 0, scene_width, scene_height, 1),
                     1.0,
                    );
 
-var Media.Video anim = val Media.Video (
-                    [].."resources/animGar.mp4",
+var[] byte anim = [].."resources/animGar.mp4";
+var Properties.Video animprop = val Properties.Video (
                     Region(0, 0, scene_width, scene_height, 2),
                     1.0,
                     1.0,
                    );
 
-var Media.Audio choro = val Media.Audio([].."resources/choro.mp4", 1.0);
+var[] byte choro = [].."resources/choro.mp4";
+var Properties.Audio choroprop = val Properties.Audio(1.0);
 
-var Media.Video drible = val Media.Video (
-                    [].."resources/drible.mp4",
+var[] byte drible = [].."resources/drible.mp4";
+var Properties.Video dribleprop = val Properties.Video (
                     frame,
                     1.0,
                     1.0,
                  );
 
-var Media.Image photo = val Media.Image([].."resources/photo.png", frame, 0.6);
+var[] byte photo = [].."resources/photo.png";
+var Properties.Image photoprop = val Properties.Image(frame, 0.6);
 
-var Media.Image icon = val Media.Image (
-                  [].."resources/icon.png",
+var[] byte icon = [].."resources/icon.png";
+var Properties.Image iconprop = val Properties.Image (
                   Region(
                       (0.875 * scene_width) as int,
                       (0.117 * scene_height) as int,
@@ -47,8 +48,8 @@ var Media.Image icon = val Media.Image (
                   1.0,
                  );
 
-var Media.Video shoes = val Media.Video (
-                    [].."resources/shoes.mp4",
+var[] byte shoes = [].."resources/shoes.mp4";
+var Properties.Video shoesprop = val Properties.Video (
                     Region(
                         (0.15 * scene_width) as int,
                         (0.6 * scene_height) as int,
@@ -64,8 +65,8 @@ event (int, int, int, int) resize;
 
 var&? Scene scene = spawn Scene(Size(scene_width,scene_height));
 watching (scene) do
-  spawn Play(&scene.scene, &back);
-  var&? Play play_anim = spawn Play(&scene.scene, &anim);
+  spawn Play(&background, &backprop, &scene.handle);
+  var&? Play play_anim = spawn Play(&anim, &animprop, &scene.handle);
   watching (play_anim) do
     par do
       var int x;
@@ -73,27 +74,27 @@ watching (scene) do
       var int width;
       var int height;
       every (x, y, width, height) in resize do
-        call Player_Set_Region(&play_anim.player,
-                           Region(x, y, width, height, anim.region.z));
+        call Player_Set_Region(&play_anim.handle,
+                           Region(x, y, width, height, animprop.region.z));
       end
     with
       await 5s;
-      await Play(&scene.scene, &choro);
+      await Play(&choro, &choroprop, &scene.handle);
     with
       await 12s;
-      await Play(&scene.scene, &drible);
+      await Play(&drible, &dribleprop, &scene.handle);
     with
       await 41s;
-      var&? Play play_photo = spawn Play(&scene.scene, &photo);
+      var&? Play play_photo = spawn Play(&photo, &photoprop, &scene.handle);
       watching  (play_photo) do
         watching 5s do
           await 1s;
-          var int top = call Player_Get_Int(&play_photo.player,"y");
+          var int top = call Player_Get_Int(&play_photo.handle,"y");
           var int diff = 290 - top;
           var int amount = 1;
           watching 3s do
             every (3000/diff)ms do
-              call Player_Set_Int(&play_photo.player, "y", top + amount);
+              call Player_Set_Int(&play_photo.handle, "y", top + amount);
               amount = amount + 1;
             end
           end
@@ -103,11 +104,14 @@ watching (scene) do
       await 45s;
       var bool clicked = do
         watching 6s do
-          spawn Play(&scene.scene, &icon);
-          var _char_ptr_ext key;
-          (_, key,_) = await CM_SCENE_KEY
-                  until _strcmp(key,"F1") == 0;
-          escape true;
+          par/or do 
+            await Play(&icon, &iconprop, &scene.handle);
+          with
+            var _char_ptr_ext key;
+            (_, key,_) = await CM_SCENE_KEY
+                    until _strcmp(key,"F1") == 0;
+            escape true;
+          end
         end
         escape false;
       end;
@@ -119,7 +123,7 @@ watching (scene) do
               (0.45   * scene_width)  as int,
               (0.45   * scene_height) as int,
            );
-        await Play(&scene.scene, &shoes);
+        await Play(&shoes, &shoesprop, &scene.handle);
         emit resize(0, 0, scene_width, scene_height);
       end
     end
