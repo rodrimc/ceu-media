@@ -1,4 +1,4 @@
-CEU_DIR    = $(error set absolute path to "<ceu>" repository)
+CEU_DIR = modules/ceu
 
 override CFLAGS += `pkg-config play lua5.3 libuv --libs --cflags` -l pthread
 

@@ -1,0 +1,3 @@
+[submodule "modules/ceu"]
+	path = modules/ceu
+	url = https://github.com/fsantanna/ceu
