@@ -21,7 +21,7 @@ native/plain
   _lp_EventTick,
   _lp_Event_ptr_ext,
   _GObject_ptr_ext,
-  _cb,
+  _media_cb_,
 ;
 
 native/pure
@@ -128,10 +128,10 @@ native/pre do
     return ret;
   }
 
-  tceu_callback cb = { &ceu_callback_media, NULL };
+  tceu_callback media_cb_ = { &ceu_callback_media, NULL };
 end
 
-_ceu_callback_register (&&_cb);
+_ceu_callback_register (&&_media_cb_);
 
 /*********  Library Public API ***********/
 data Region with
