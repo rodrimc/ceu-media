@@ -21,6 +21,7 @@ native/plain
   _lp_EventTick,
   _lp_Event_ptr_ext,
   _GObject_ptr_ext,
+  _cb,
 ;
 
 native/pure
@@ -54,6 +55,7 @@ native/nohold
   _lp_scene_pause,
   _lp_scene_receive,
   _lp_scene_resume,
+  _ceu_callback_register,
 ;
 
 native
@@ -72,7 +74,6 @@ native
 
 #define NS 1000000
 #define FREQ 15
-
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 /* SCENE INPUT EVENTS */
@@ -96,9 +97,41 @@ native/pre do
   typedef lp_Event* lp_Event_ptr_ext;
   typedef GObject* GObject_ptr_ext;
 
-   unsigned int SCENE_SEED = 0;
-   unsigned int PLAYER_SEED = 0;
+  unsigned int SCENE_SEED = 0;
+  unsigned int PLAYER_SEED = 0;
+
+  tceu_callback_ret
+  ceu_callback_media (int cmd, tceu_callback_arg p1, tceu_callback_arg p2,
+        const char* file, u32 line)
+  {
+    tceu_callback_ret ret = { .is_handled=1 };
+    static int64_t old = 0;
+
+    switch (cmd)
+    {
+##ifndef DISABLE_CLOCK
+      case CEU_CALLBACK_WCLOCK_DT:
+      {
+        int64_t now = g_get_monotonic_time ();
+        if (old == 0)
+          ret.value.num = 0;
+        else
+          ret.value.num = now - old;
+        old = now;
+        break;
+      }
+##endif
+
+      default:
+        ret.is_handled = 0;
+    }
+    return ret;
+  }
+
+  tceu_callback cb = { &ceu_callback_media, NULL };
 end
+
+_ceu_callback_register (&&_cb);
 
 /*********  Library Public API ***********/
 data Region with
@@ -146,7 +179,7 @@ data ISceneRaw with
 end
 
 code/await Scene_Raw (var Size? size)
-              -> (var& ISceneRaw scene)
+              -> (var& ISceneRaw handle)
                   -> none
 do
   var int w = 0;
@@ -165,7 +198,7 @@ do
   var& _lp_Scene ref = &ref_!;
 
   var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _);
-  scene = &scene_;
+  handle = &scene_;
 
   _g_object_set (&&ref,
                   "slave-audio", true,

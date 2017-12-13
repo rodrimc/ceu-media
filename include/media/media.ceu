@@ -2,7 +2,6 @@
 #define _CEU_MEDIA_MEDIA
 
 #include "c.ceu"
-#include "uv/uv.ceu"
 #include "media/raw.ceu"
 
 input (uint, int, int, int, bool) CM_SCENE_MOUSE_CLICK;
@@ -37,7 +36,7 @@ do
   watching (raw) do
     var uint self = _SCENE_SEED;
     _SCENE_SEED = _SCENE_SEED + 1;
-    var IScene ref_ = val IScene (&raw.scene, &self, _);
+    var IScene ref_ = val IScene (&raw.handle, &self, _);
     handle = &ref_;
     par/or do
       var _GObject&& source;
@@ -47,7 +46,7 @@ do
       var bool press;
       loop do
         (source, x, y, button, press) = await CM_SCENE_RAW_MOUSE_CLICK
-                                  until (_LP_SCENE(source) == &&raw.scene.ref);
+                                  until (_LP_SCENE(source) == &&raw.handle.ref);
         await async (ref_, x, y, button, press) do
           emit CM_SCENE_MOUSE_CLICK (ref_.self, x, y, button, press);
         end
@@ -58,7 +57,7 @@ do
       var int y;
       loop do
         (source, x, y) = await CM_SCENE_RAW_MOUSE_MOVE
-                         until (_LP_SCENE(source) == &&raw.scene.ref);
+                         until (_LP_SCENE(source) == &&raw.handle.ref);
 
         await async (ref_, x, y) do
           emit CM_SCENE_MOUSE_MOVE (ref_.self, x, y);
@@ -70,7 +69,7 @@ do
       var bool press;
       loop do
         (source, key, press) = await CM_SCENE_RAW_KEY
-                               until (_LP_SCENE(source) == &&raw.scene.ref);
+                               until (_LP_SCENE(source) == &&raw.handle.ref);
 
         key = _strdup (key);
         do finalize with
@@ -86,7 +85,7 @@ do
       var u64 tick;
       loop do
         (source, tick) = await CM_SCENE_RAW_TICK
-                         until (_LP_SCENE(source) == &&raw.scene.ref);
+                         until (_LP_SCENE(source) == &&raw.handle.ref);
 
         await async (ref_, tick) do
           emit CM_SCENE_TICK (ref_.self, tick);
@@ -97,7 +96,7 @@ do
       var _char_ptr_ext error;
       loop do
         (source, error) = await CM_SCENE_RAW_ERROR
-                          until (_LP_SCENE(source) == &&raw.scene.ref);
+                          until (_LP_SCENE(source) == &&raw.handle.ref);
 
         await async (ref_, error) do
           emit CM_SCENE_ERROR (ref_.self, error);
