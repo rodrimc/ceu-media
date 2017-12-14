@@ -1,6 +1,6 @@
 CEU_DIR = modules/ceu
 
-override CFLAGS += `pkg-config play lua5.3 libuv --libs --cflags` -l pthread
+override CC_ARGS += `pkg-config play lua5.3 --libs --cflags` -l pthread
 
 SRC_NAME= $(notdir $(SRC))
 BIN = $(SRC_NAME:%.ceu=%)
@@ -19,7 +19,7 @@ all:
 	          --env-threads=$(CEU_DIR)/env/threads.h                    \
 	          --env-main=$(CEU_DIR)/env/main.c                          \
 	          --env-output=/tmp/x.c                                     \
-	    --cc --cc-args="$(CFLAGS)" 																			\
+	    --cc --cc-args="$(CC_ARGS)" 																		\
 	         --cc-output=build/$(BIN)
 	$(BUILD_PATH)/$(BIN)
 

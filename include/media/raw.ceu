@@ -109,7 +109,7 @@ native/pre do
 
     switch (cmd)
     {
-##ifndef DISABLE_MEDIA_CLOCK
+##ifndef CEU_MEDIA_WCLOCK_DISABLE
       case CEU_CALLBACK_WCLOCK_DT:
       {
         int64_t now = g_get_monotonic_time ();
