@@ -37,10 +37,12 @@ native/pure
   _LP_IS_SCENE,
   _LP_MEDIA,
   _LP_SCENE,
+  _LP_TYPE_SCENE,
 ;
 
 native/nohold
   _g_free,
+  _g_object_new,
   _g_object_get,
   _g_object_set,
   _g_object_unref,
@@ -191,7 +193,13 @@ do
     h = size!.height;
   end
 
-  var&? _lp_Scene ref_ = &_lp_scene_new(w, h)
+  var&? _lp_Scene ref_ = &_g_object_new(_LP_TYPE_SCENE,
+                              "width",       w,
+                              "height",      h,
+                              "slave-audio", true,
+                              "lockstep",    true,
+                              "interval",    tick_interval,
+                              null)
     finalize (ref_) with
       _g_object_unref (_G_OBJECT(&&ref_!));
     end;
@@ -201,11 +209,6 @@ do
   var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _, _);
   handle = &scene_;
 
-  _g_object_set (&&ref,
-                 "slave-audio", true,
-                 "lockstep",    true,
-                 "interval",    tick_interval,
-                 null);
 
   par/or do
     loop do
