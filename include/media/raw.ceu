@@ -175,6 +175,7 @@ end
 data ISceneRaw with
   var&  _lp_Scene  ref;
   var&  Size?      size;
+  event (bool)     freeze_clock;
   event (none)     quit;
 end
 
@@ -197,14 +198,14 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _);
+  var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _, _);
   handle = &scene_;
 
   _g_object_set (&&ref,
-                  "slave-audio", true,
-                  "lockstep",    true,
-                  "interval",    tick_interval,
-                  null);
+                 "slave-audio", true,
+                 "lockstep",    true,
+                 "interval",    tick_interval,
+                 null);
 
   par/or do
     loop do
@@ -240,10 +241,10 @@ do
 
         await async (source, x, y, button, pressed) do
           if _LP_IS_SCENE(source) as bool then
-              emit CM_SCENE_RAW_MOUSE_CLICK (source, x as int, y as int,
+            emit CM_SCENE_RAW_MOUSE_CLICK (source, x as int, y as int,
                                              button, pressed as bool);
           else
-              emit CM_PLAYER_RAW_MOUSE_CLICK (source, x as int, y as int,
+            emit CM_PLAYER_RAW_MOUSE_CLICK (source, x as int, y as int,
                                              button, pressed as bool);
           end
         end
@@ -348,8 +349,10 @@ do
       end
     end
   with
-    every FREQ ms do
-      _lp_scene_advance(&&ref, FREQ * NS);
+    pause/if handle.freeze_clock do
+      every FREQ ms do
+        _lp_scene_advance(&&ref, FREQ * NS);
+      end
     end
   with
     await scene_.quit;
@@ -362,16 +365,16 @@ data IPlayerRaw with
 end
 
 /* Scene Raw functions */
-code/tight
+code/await
 Scene_Raw_Pause (var& ISceneRaw scene) -> none
 do
-  _lp_scene_pause (&&scene.ref);
+  emit scene.freeze_clock (true);
 end
 
-code/tight
+code/await
 Scene_Raw_Resume (var& ISceneRaw scene) -> none
 do
-  _lp_scene_resume(&&scene.ref);
+  emit scene.freeze_clock (false);
 end
 
 code/tight

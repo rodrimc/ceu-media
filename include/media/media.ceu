@@ -108,16 +108,16 @@ do
   end
 end
 
-code/tight
+code/await
 Scene_Pause (var& IScene scene) -> none
 do
-  call Scene_Raw_Pause (&scene.raw);
+  await Scene_Raw_Pause (&scene.raw);
 end
 
-code/tight
+code/await
 Scene_Resume (var& IScene scene) -> none
 do
-  call Scene_Raw_Resume (&scene.raw);
+  await Scene_Raw_Resume (&scene.raw);
 end
 
 code/tight
