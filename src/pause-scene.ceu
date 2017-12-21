@@ -1,28 +1,29 @@
 #include "media/media.ceu"
 
-var int width = 1080;
+var int width = 540;
 var int height = 360;
 
 var[] byte videouri = [] .. "resources/clock.ogv";
 var Properties.Video v1 = val Properties.Video (
-                          Region(0, 0, width/2, height, 1),
+                          Region(0, 0, width, height, 1),
                           1.0,
                           1.0
                         );
 
 var Properties.Video v2 = val Properties.Video (
-                          Region(width/2, 0, width/2, height, 1),
+                          Region(0, 0, width, height, 1),
                           1.0,
                           1.0
                         );
 
-var&? Scene scene = spawn Scene(Size(width,height));
+var&? Scene scene1 = spawn Scene(Size(width,height));
+var&? Scene scene2 = spawn Scene(Size(width,height));
 
-watching scene do
+watching scene1, scene2 do
   par/or do
-    await Play (&videouri, &v1, &scene.handle);
+    await Play (&videouri, &v1, &scene1.handle);
   with
-    await Play (&videouri, &v2, &scene.handle);
+    await Play (&videouri, &v2, &scene2.handle);
   with
     var _char_ptr_ext key;
     var bool press;
@@ -33,9 +34,11 @@ watching scene do
       if press then
         if _strcmp (key, "space") == 0  then
           if (paused) then
-            spawn Scene_Resume (&scene.handle) in p2;
+            spawn Scene_Resume (&scene1.handle) in p2;
+            spawn Scene_Resume (&scene2.handle) in p2;
           else
-            spawn Scene_Pause (&scene.handle) in p1;
+            spawn Scene_Pause (&scene1.handle) in p1;
+            spawn Scene_Pause (&scene2.handle) in p1;
           end
           paused = not paused;
         end
