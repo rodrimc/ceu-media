@@ -111,13 +111,15 @@ end
 code/await
 Scene_Pause (var& IScene scene) -> none
 do
-  await Scene_Raw_Pause (&scene.raw);
+  /* await Scene_Raw_Pause (&scene.raw); */
+  emit scene.raw.cm_pause;
 end
 
 code/await
 Scene_Resume (var& IScene scene) -> none
 do
-  await Scene_Raw_Resume (&scene.raw);
+  emit scene.raw.cm_resume;
+  /* await Scene_Raw_Resume (&scene.raw); */
 end
 
 code/tight

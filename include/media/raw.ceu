@@ -177,7 +177,8 @@ end
 data ISceneRaw with
   var&  _lp_Scene  ref;
   var&  Size?      size;
-  event (bool)     freeze_clock;
+  event (none)     cm_pause;
+  event (none)     cm_resume;
   event (none)     quit;
 end
 
@@ -206,9 +207,10 @@ do
 
   var& _lp_Scene ref = &ref_!;
 
-  var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _, _);
+  var ISceneRaw scene_ = val ISceneRaw (&ref_!, &size, _, _, _);
   handle = &scene_;
 
+  event (bool) freeze_clock;
 
   par/or do
     loop do
@@ -352,7 +354,16 @@ do
       end
     end
   with
-    pause/if handle.freeze_clock do
+    loop do
+      await handle.cm_pause;
+      /* _lp_scene_pause (&&scene.ref); */
+      emit freeze_clock (true);
+      await handle.cm_resume;
+      /* _lp_scene_resume (&&scene.ref); */
+      emit freeze_clock (false);
+    end
+  with
+    pause/if freeze_clock do
       every FREQ ms do
         _lp_scene_advance(&&ref, FREQ * NS);
       end
@@ -368,18 +379,6 @@ data IPlayerRaw with
 end
 
 /* Scene Raw functions */
-code/await
-Scene_Raw_Pause (var& ISceneRaw scene) -> none
-do
-  emit scene.freeze_clock (true);
-end
-
-code/await
-Scene_Raw_Resume (var& ISceneRaw scene) -> none
-do
-  emit scene.freeze_clock (false);
-end
-
 code/tight
 Scene_Raw_Set_Tick_Interval (var& ISceneRaw scene, var u64 interval) -> none
 do
