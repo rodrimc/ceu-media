@@ -1,5 +1,6 @@
 CEU_DIR = modules/ceu
 
+override CEU_ARGS := #-DCEU_MEDIA_DEBUG
 override CC_ARGS += `pkg-config play lua5.3 --libs --cflags` -l pthread
 
 SRC_NAME= $(notdir $(SRC))
@@ -7,10 +8,11 @@ BIN = $(SRC_NAME:%.ceu=%)
 
 BUILD_PATH = build
 
+
 all:
 	mkdir -p $(BUILD_PATH)
 	ceu --pre --pre-args="-I$(CEU_DIR)/include  												\
-						-I./include" 																							\
+						-I./include $(CEU_ARGS)" 																	\
 	          --pre-input=$(SRC)                                  			\
 	    --ceu --ceu-err-unused=pass --ceu-err-uninitialized=pass        \
 					  --ceu-features-lua=true --ceu-features-thread=true   			\

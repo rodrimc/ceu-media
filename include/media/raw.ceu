@@ -57,6 +57,7 @@ native/nohold
   _lp_scene_pause,
   _lp_scene_receive,
   _lp_scene_resume,
+  _lp_scene_get_current_time,
   _ceu_callback_register,
 ;
 
@@ -428,8 +429,20 @@ do
     end
   with
     pause/if freeze_clock do
-      every FREQ ms do
-        _lp_scene_advance(&&ref, FREQ * NS);
+      var uint ticks = 0;
+      par do
+        loop do
+          await pause;
+          var u64 time = _lp_scene_get_current_time (&&ref);
+#ifdef CEU_MEDIA_DEBUG
+          _printf ("ticks, time: %u, %lu\n", ticks, time);
+#endif
+        end
+      with
+        every FREQ ms do
+          ticks = ticks + 1;
+          _lp_scene_advance(&&ref, FREQ * NS);
+        end
       end
     end
   with
