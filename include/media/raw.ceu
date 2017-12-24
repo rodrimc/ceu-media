@@ -420,10 +420,10 @@ do
   with
     loop do
       await handle.cm_pause;
-      /* _lp_scene_pause (&&scene.ref); */
+      _lp_scene_pause (&&ref);
       emit freeze_clock (true);
       await handle.cm_resume;
-      /* _lp_scene_resume (&&scene.ref); */
+      _lp_scene_resume (&&ref);
       emit freeze_clock (false);
     end
   with
