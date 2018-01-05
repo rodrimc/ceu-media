@@ -76,7 +76,7 @@ native
 ;
 
 #define NS 1000000
-#define FREQ 15
+#define FREQ 33 
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 /* SCENE INPUT EVENTS */
@@ -282,7 +282,7 @@ do
                               "height",      h,
                               "slave-audio", true,
                               "lockstep",    true,
-                              "interval",    tick_interval,
+                              "sync",        true,
                               null)
     finalize (ref_) with
       _g_object_unref (_G_OBJECT(&&ref_!));
@@ -441,7 +441,7 @@ do
       with
         every FREQ ms do
           ticks = ticks + 1;
-          _lp_scene_advance(&&ref, FREQ * NS);
+          _lp_scene_advance (&&ref, FREQ * NS);
         end
       end
     end
