@@ -276,6 +276,7 @@ do
     w = size!.width;
     h = size!.height;
   end
+  var bool finalizing = false;
 
   var&? _lp_Scene ref_ = &_g_object_new(_LP_TYPE_SCENE,
                               "width",       w,
@@ -285,6 +286,7 @@ do
                               "sync",        true,
                               null)
     finalize (ref_) with
+      finalizing = true;
       _g_object_unref (_G_OBJECT(&&ref_!));
     end;
 
@@ -303,6 +305,11 @@ do
           _g_object_unref(_G_OBJECT(evt));
         end
       end
+
+      if finalizing then
+        break;
+      end
+
       await async/thread (ref, evt) do
         evt = _lp_scene_receive (&&ref, true);
       end
