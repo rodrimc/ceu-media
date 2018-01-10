@@ -8,6 +8,7 @@ var Properties.Video prop = val Properties.Video (
 
 var&? Scene scene = spawn Scene (Size (300, 200));
 watching  (scene) do
+  await scene.handle.ok;
   var&? Play player = spawn Play (&videouri, &prop, &scene.handle);
   watching  (player) do
     var bool mute = true;

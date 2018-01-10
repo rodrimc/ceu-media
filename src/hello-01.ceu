@@ -20,6 +20,7 @@ var Properties.Video prop2 = val Properties.Video (
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching  (scene) do
+  await scene.handle.ok;
   watching 30s do
     loop do
       _printf("==-> RESTART\n");

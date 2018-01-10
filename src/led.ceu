@@ -42,6 +42,7 @@ var int freq = 500;
 
 var&? Scene scene = spawn Scene (Size (600, 600));
 watching (scene) do
+  await scene.handle.ok;
   par/or do
     var _char_ptr_ext key;
     var bool pressed;

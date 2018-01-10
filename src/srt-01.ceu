@@ -2,6 +2,7 @@
 
 var&? Scene scene = spawn Scene(Size(640,480));
 watching (scene) do
+  await scene.handle.ok;
   var Exception? e;
   catch e do
     await Srt(&scene.handle,

@@ -3,27 +3,34 @@
 var int width = 540;
 var int height = 360;
 
-var[] byte videouri = [] .. "resources/clock.ogv";
-var Properties.Video v1 = val Properties.Video (
-                          Region(0, 0, width, height, 1),
-                          1.0,
-                          1.0
-                        );
-
-var Properties.Video v2 = val Properties.Video (
-                          Region(0, 0, width, height, 1),
-                          1.0,
-                          1.0
+var[] byte videouri = [] .. "../mars/resources/video-frame.avi";
+var Properties.Video v = val Properties.Video (
+                         Region(0, 0, width, height, 1),
+                         1.0,
+                         1.0
                         );
 
 var&? Scene scene1 = spawn Scene(Size(width,height));
 var&? Scene scene2 = spawn Scene(Size(width,height));
+var&? Scene scene3 = spawn Scene(Size(width,height));
 
-watching scene1, scene2 do
-  par/or do
-    await Play (&videouri, &v1, &scene1.handle);
+event (none) quit;
+
+watching scene1, scene2, scene3, quit do
+  par/and do
+    await scene1.handle.ok;
   with
-    await Play (&videouri, &v2, &scene2.handle);
+    await scene2.handle.ok;
+  with
+    await scene3.handle.ok;
+  end
+  
+  par/or do
+    await Play (&videouri, &v, &scene1.handle);
+  with
+    await Play (&videouri, &v, &scene2.handle);
+  with
+    await Play (&videouri, &v, &scene3.handle);
   with
     var _char_ptr_ext key;
     var bool press;
@@ -36,11 +43,15 @@ watching scene1, scene2 do
           if (paused) then
             spawn Scene_Resume (&scene1.handle) in p2;
             spawn Scene_Resume (&scene2.handle) in p2;
+            spawn Scene_Resume (&scene3.handle) in p2;
           else
             spawn Scene_Pause (&scene1.handle) in p1;
             spawn Scene_Pause (&scene2.handle) in p1;
+            spawn Scene_Pause (&scene3.handle) in p1;
           end
           paused = not paused;
+        else/if _strcmp (key, "q") == 0 then
+          emit quit;
         end
       end
     end

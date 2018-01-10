@@ -28,6 +28,7 @@ var Properties.Text label = val Properties.Text (
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
+  await scene.handle.ok;
   var&? Play p = spawn Play(&videouri, &videoprop, &scene.handle);
   var&? Play p_text = spawn Play(&dummy, &text, &scene.handle);
 

@@ -11,6 +11,7 @@ var Properties.Text text = val Properties.Text(
 var&? Scene scene = spawn Scene (Size (640, 480));
 
 watching (scene) do
+  await scene.handle.ok;
   var&? Play player = spawn Play (&videouri, &video, &scene.handle);
   watching (player) do
     spawn Play (&dummy, &text, &scene.handle);

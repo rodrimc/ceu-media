@@ -25,6 +25,7 @@ var Properties.Audio audioprop = val Properties.Audio (
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
+  await scene.handle.ok;
   spawn Play(&video1uri, &prop1, &scene.handle);
 
   var&? Play play_video = spawn Play(&video2uri, &prop2, &scene.handle);

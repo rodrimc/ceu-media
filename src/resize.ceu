@@ -13,6 +13,7 @@ var Properties.Video p = val Properties.Video (
 var&? Scene scene = spawn Scene (Size (width, height));
 
 watching scene do
+  await scene.handle.ok;
   var&? Play player = spawn Play (&videouri, &p, &scene.handle);
   loop do
     var _char_ptr_ext k;

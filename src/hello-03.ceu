@@ -30,6 +30,7 @@ var[] byte dummy = _;
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene), 12s
 do
+  await scene.handle.ok;
   par/or do
     var bool flag = true;
     loop do

@@ -13,6 +13,7 @@ var Properties.Video videoprop = val Properties.Video (
 var&? Scene scene = spawn Scene (Size (width, height));
 
 watching scene, CM_SCENE_KEY do
+  await scene.handle.ok;
   var&? Play p_video    = spawn Play (&videouri, &videoprop, &scene.handle);
   var&? Play p_cropped  = spawn Play (&videouri, &videoprop, &scene.handle);
 

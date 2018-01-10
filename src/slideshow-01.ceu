@@ -18,6 +18,7 @@ var Properties.Image img4  = val Properties.Image (region, 1.0);
 
 var&? Scene scene = spawn Scene(Size(800,585));
 watching (scene) do
+  await scene.handle.ok;
   spawn Play(&frameuri, &frame, &scene.handle);
 
   par/or do

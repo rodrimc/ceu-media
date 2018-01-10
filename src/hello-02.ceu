@@ -13,6 +13,7 @@ var[] byte uri = [].."resources/clock.ogv";
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching (scene) do
+  await scene.handle.ok;
   watching CM_SCENE_KEY, CM_SCENE_MOUSE_CLICK do
     loop do
       await Play(&uri, &p, &scene.handle);

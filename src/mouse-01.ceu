@@ -6,6 +6,7 @@ var int height = 720;
 
 var&? Scene scene = spawn Scene(Size(width,height));
 watching scene, 10s do
+  await scene.handle.ok;
   par do
     var uint id;
     var int x;
