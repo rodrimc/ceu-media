@@ -1,7 +1,7 @@
 CEU_DIR = modules/ceu
 
 override CEU_ARGS := #-DCEU_MEDIA_DEBUG
-override CC_ARGS += `pkg-config play lua5.3 --libs --cflags` -l pthread
+override CC_ARGS += `pkg-config play lua5.3 --libs --cflags` -l pthread -g
 
 SRC_NAME= $(notdir $(SRC))
 BIN = $(SRC_NAME:%.ceu=%)
