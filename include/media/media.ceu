@@ -103,6 +103,7 @@ native/nohold
 data IScene with
   var& ISceneRaw raw;
   var&  uint     self;
+  event (none)   ok;
   event (none)   quit;
 end
 
@@ -118,9 +119,15 @@ do
   watching (raw) do
     var uint self = _SCENE_SEED;
     _SCENE_SEED = _SCENE_SEED + 1;
-    var IScene ref_ = val IScene (&raw.handle, &self, _);
+    var IScene ref_ = val IScene (&raw.handle, &self, _, _);
     handle = &ref_;
     par/or do
+      var _GObject&& source;
+      source = await CM_SCENE_RAW_START until
+                                _LP_SCENE (source) == &&raw.handle.ref;
+      emit ref_.ok;
+      await FOREVER;
+    with
       var _GObject&& source;
       var int x;
       var int y;

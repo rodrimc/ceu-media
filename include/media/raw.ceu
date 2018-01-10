@@ -80,6 +80,7 @@ native
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 /* SCENE INPUT EVENTS */
+input (_GObject&&)                      CM_SCENE_RAW_START;
 input (_GObject&&, int, int, int, bool) CM_SCENE_RAW_MOUSE_CLICK;
 input (_GObject&&, int, int)            CM_SCENE_RAW_MOUSE_MOVE;
 input (_GObject&&, _char_ptr_ext, bool) CM_SCENE_RAW_KEY;
@@ -136,6 +137,12 @@ end
 
 native/pos do
   /* scene raw */
+  void emit_scene_raw_start (GObject *source)
+  {
+    tceu_input_CM_SCENE_RAW_START p = {source};
+    ceu_input (CEU_INPUT_CM_SCENE_RAW_START, &p);
+  }
+
   void emit_scene_raw_mouse_click (GObject *source, int x, int y, int button,
     int pressed)
   {
@@ -202,6 +209,7 @@ end
 
 native/nohold
   /* scene raw */
+  _emit_scene_raw_start,
   _emit_scene_raw_mouse_click,
   _emit_scene_raw_mouse_move,
   _emit_scene_raw_key,
@@ -283,7 +291,6 @@ do
                               "height",      h,
                               "slave-audio", true,
                               "lockstep",    true,
-                              "sync",        true,
                               null)
     finalize (ref_) with
       finalizing = true;
@@ -296,6 +303,7 @@ do
   handle = &scene_;
 
   event (bool) freeze_clock;
+  event (none) ok;
 
   par/or do
     loop do
@@ -391,6 +399,11 @@ do
       else/if type == _LP_TYPE_EVENT_START then
         if _LP_IS_MEDIA(source) as bool then
           _emit_player_raw_start (source);
+        else/if _LP_IS_SCENE(source) as bool then
+          if _LP_SCENE (source) == &&handle.ref then
+            emit ok;
+          end
+          _emit_scene_raw_start (source);
         end
 
       /* SEEK */
@@ -435,6 +448,7 @@ do
       emit freeze_clock (false);
     end
   with
+    await ok;
     pause/if freeze_clock do
       var uint ticks = 0;
       par do
