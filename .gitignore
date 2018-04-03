@@ -1,3 +1,4 @@
 *_ceu_app.*
 *.out
 build/
+src/test.ceu
