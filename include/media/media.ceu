@@ -17,88 +17,6 @@ input (uint)                      CM_PLAYER_PAUSE;
 input (uint)                      CM_PLAYER_SOUGHT;
 input (uint, int, int, int, bool) CM_PLAYER_MOUSE_CLICK;
 
-native/pos do
-  /* scene raw */
-  void emit_scene_mouse_click (uint self, int x, int y, int button,
-    int pressed)
-  {
-    tceu_input_CM_SCENE_MOUSE_CLICK p = {self, x, y, button, pressed};
-    ceu_input (CEU_INPUT_CM_SCENE_MOUSE_CLICK, &p);
-  }
-
-  void emit_scene_mouse_move (uint self, int x, int y)
-  {
-    tceu_input_CM_SCENE_MOUSE_MOVE p = {self, x, y};
-    ceu_input (CEU_INPUT_CM_SCENE_MOUSE_MOVE, &p);
-  }
-
-  void emit_scene_key (uint self, char *key, int pressed)
-  {
-    tceu_input_CM_SCENE_KEY p = {self, key, pressed};
-    ceu_input (CEU_INPUT_CM_SCENE_KEY, &p);
-  }
-
-  void emit_scene_tick (uint self, uint64_t ticks)
-  {
-    tceu_input_CM_SCENE_TICK p = {self, ticks};
-    ceu_input (CEU_INPUT_CM_SCENE_TICK, &p);
-  }
-
-  void emit_scene_error (uint self, char *msg)
-  {
-    tceu_input_CM_SCENE_ERROR p = {self, msg};
-    ceu_input (CEU_INPUT_CM_SCENE_ERROR, &p);
-  }
-
-  /* player raw */
-  void emit_player_mouse_click (uint self, int x, int y, int button,
-    int pressed)
-  {
-    tceu_input_CM_PLAYER_MOUSE_CLICK p = {self, x, y, button, pressed};
-    ceu_input (CEU_INPUT_CM_PLAYER_MOUSE_CLICK, &p);
-  }
-
-  void emit_player_start (uint self)
-  {
-    tceu_input_CM_PLAYER_START p = {self};
-    ceu_input (CEU_INPUT_CM_PLAYER_START, &p);
-  }
-
-  void emit_player_sought (uint self)
-  {
-    tceu_input_CM_PLAYER_SOUGHT p = {self};
-    ceu_input (CEU_INPUT_CM_PLAYER_SOUGHT, &p);
-  }
-
-  void emit_player_stop (uint self)
-  {
-    tceu_input_CM_PLAYER_STOP p = {self};
-    ceu_input (CEU_INPUT_CM_PLAYER_STOP, &p);
-  }
-
-  void emit_player_pause (uint self)
-  {
-    tceu_input_CM_PLAYER_PAUSE p = {self};
-    ceu_input (CEU_INPUT_CM_PLAYER_PAUSE, &p);
-  }
-end
-
-native/nohold
-  /* scene raw */
-  _emit_scene_mouse_click,
-  _emit_scene_mouse_move,
-  _emit_scene_key,
-  _emit_scene_tick,
-  _emit_scene_error,
-
-  /* player raw */
-  _emit_player_mouse_click,
-  _emit_player_start,
-  _emit_player_sought,
-  _emit_player_stop,
-  _emit_player_pause,
-;
-
 /* SCENE */
 data IScene with
   var& ISceneRaw raw;
@@ -107,10 +25,91 @@ data IScene with
   event (none)   quit;
 end
 
+code/await Emit_Scene_Mouse_Click (var uint id, var int x, var int y,
+  var int button, var bool pressed) -> none
+do
+  await async (id, x, y, button, pressed) do
+    emit CM_SCENE_MOUSE_CLICK (id, x, y, button, pressed);
+  end
+end
+
+code/await Emit_Scene_Mouse_Move (var uint id, var int x, var int y) -> none
+do
+  await async (id, x, y) do
+    emit CM_SCENE_MOUSE_MOVE (id, x, y);
+  end
+end
+
+code/await Emit_Scene_Key (var uint id, var _char_ptr_ext key,
+  var bool pressed) -> none
+do
+  await async (id, key, pressed) do
+    emit CM_SCENE_KEY (id, key, pressed);
+  end
+  _free (key);
+end
+
+code/await Emit_Scene_Tick (var uint id, var u64 ticks) -> none
+do
+  await async (id, ticks) do
+    emit CM_SCENE_TICK (id, ticks);
+  end
+end
+
+code/await Emit_Scene_Error (var uint id, var _char_ptr_ext msg) -> none
+do
+  await async (id, msg) do
+    emit CM_SCENE_ERROR (id, msg);
+  end
+end
+
+code/await Emit_Player_Mouse_Click (var uint id, var int x, var int y,
+  var int button, var bool pressed) -> none
+do
+  await async (id, x, y, button, pressed) do
+    emit CM_PLAYER_MOUSE_CLICK (id, x, y, button, pressed);
+  end
+end
+
+code/await Emit_Player_Start (var uint id) -> none
+do
+  await async (id) do
+    emit CM_PLAYER_START (id);
+  end
+end
+
+code/await Emit_Player_Stop (var uint id) -> none
+do
+  await async (id) do
+    emit CM_PLAYER_STOP (id);
+  end
+end
+
+code/await Emit_Player_Pause (var uint id) -> none
+do
+  await async (id) do
+    emit CM_PLAYER_PAUSE (id);
+  end
+end
+
+code/await Emit_Player_Sought (var uint id) -> none
+do
+  await async (id) do
+    emit CM_PLAYER_SOUGHT (id);
+  end
+end
+
 code/await Scene (var Size? size)
               -> (var& IScene handle)
                   -> none
 do
+  /* pools */
+  pool [] Emit_Scene_Mouse_Click pool_scene_mouse_click;
+  pool [] Emit_Scene_Mouse_Move  pool_scene_mouse_move;
+  pool [] Emit_Scene_Key         pool_scene_key;
+  pool [] Emit_Scene_Tick        pool_scene_tick;
+  pool [] Emit_Scene_Error       pool_scene_error;
+
   var Size raw_size =  _;
   if (size?) then
     raw_size = size!;
@@ -132,10 +131,11 @@ do
       var int x;
       var int y;
       var int button;
-      var bool press;
-      every (source, x, y, button, press) in CM_SCENE_RAW_MOUSE_CLICK do
+      var bool pressed;
+      every (source, x, y, button, pressed) in CM_SCENE_RAW_MOUSE_CLICK do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          _emit_scene_mouse_click (ref_.self, x, y, button, press);
+          spawn Emit_Scene_Mouse_Click (ref_.self, x, y, button, pressed)
+            in pool_scene_mouse_click;
         end
       end
     with
@@ -144,7 +144,8 @@ do
       var int y;
       every (source, x, y) in CM_SCENE_RAW_MOUSE_MOVE do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          _emit_scene_mouse_move (ref_.self, x, y);
+          spawn Emit_Scene_Mouse_Move (ref_.self, x, y)
+            in pool_scene_mouse_move;
         end
       end
     with
@@ -154,8 +155,7 @@ do
       every (source, key, press) in CM_SCENE_RAW_KEY do
         if _LP_SCENE(source) == &&raw.handle.ref then
           key = _strdup (key);
-          _emit_scene_key (ref_.self, key, press);
-          _free (key);
+          spawn Emit_Scene_Key (ref_.self, key, press) in pool_scene_key;
         end
       end
     with
@@ -163,7 +163,7 @@ do
       var u64 tick;
       every (source, tick) in CM_SCENE_RAW_TICK do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          _emit_scene_tick (ref_.self, tick);
+          spawn Emit_Scene_Tick (ref_.self, tick) in pool_scene_tick;
         end
       end
     with
@@ -171,7 +171,7 @@ do
       var _char_ptr_ext error;
       every (source, error) in CM_SCENE_RAW_ERROR do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          _emit_scene_error (ref_.self, error);
+          spawn Emit_Scene_Tick (ref_.self, error) in pool_scene_error;
         end
       end
     with
@@ -210,6 +210,13 @@ code/await Play (var& []byte uri, var& Properties prop, var& IScene scene)
                   -> (var& IPlayer handle)
                       -> none
 do
+  /* pools */
+  pool [] Emit_Player_Mouse_Click pool_player_mouse_click;
+  pool [] Emit_Player_Start       pool_player_start;
+  pool [] Emit_Player_Stop        pool_player_stop;
+  pool [] Emit_Player_Pause       pool_player_pause;
+  pool [] Emit_Player_Sought      pool_player_sought;
+
   var&? Play_Raw raw = spawn Play_Raw (&uri, &prop, &scene.raw);
   watching (raw) do
     var uint self = _PLAYER_SEED;
@@ -222,14 +229,14 @@ do
       var _GObject_ptr_ext source;
       every (source) in CM_PLAYER_RAW_START do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          _emit_player_start (ref_.self);
+          spawn Emit_Player_Start (ref_.self) in pool_player_start;
         end
       end
     with
       var _GObject_ptr_ext source;
       every (source) in CM_PLAYER_RAW_SOUGHT do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          _emit_player_sought (ref_.self);
+          spawn Emit_Player_Sought (ref_.self) in pool_player_sought;
         end
       end
     with
@@ -240,7 +247,8 @@ do
       var bool press;
       every (source, x, y, button, press) in CM_PLAYER_RAW_MOUSE_CLICK do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          _emit_player_mouse_click (ref_.self, x, y, button, press);
+          spawn Emit_Player_Mouse_Click (ref_.self, x, y, button, press)
+            in pool_player_mouse_click;
         end
       end
     end

@@ -21,11 +21,13 @@ native/plain
   _lp_EventTick,
   _lp_Event_ptr_ext,
   _GObject_ptr_ext,
+  _ceu_callback_media,
   _media_cb_,
 ;
 
 native/pure
   _G_OBJECT,
+  _G_IS_OBJECT,
   _G_OBJECT_TYPE,
   _LP_EVENT,
   _LP_EVENT_ERROR,
@@ -76,7 +78,7 @@ native
 ;
 
 #define NS 1000000
-#define FREQ 33 
+#define FREQ 33
 input (_GObject&&, _lp_Event&&) LP_EVENT;
 
 /* SCENE INPUT EVENTS */
@@ -104,11 +106,14 @@ native/pre do
   unsigned int SCENE_SEED = 0;
   unsigned int PLAYER_SEED = 0;
 
-  tceu_callback_ret
-  ceu_callback_media (int cmd, tceu_callback_arg p1, tceu_callback_arg p2,
-        const char* file, u32 line)
+  int
+  ceu_callback_media (int cmd, tceu_callback_val p1, tceu_callback_val p2
+##ifdef CEU_FEATURES_TRACE
+                      , tceu_trace
+##endif
+                      )
   {
-    tceu_callback_ret ret = { .is_handled=1 };
+    int is_handled = 1;
     static int64_t old = 0;
 
     switch (cmd)
@@ -118,111 +123,22 @@ native/pre do
       {
         int64_t now = g_get_monotonic_time ();
         if (old == 0)
-          ret.value.num = 0;
+          ceu_callback_ret.num = 0;
         else
-          ret.value.num = now - old;
+          ceu_callback_ret.num = now - old;
         old = now;
         break;
       }
 ##endif
 
       default:
-        ret.is_handled = 0;
+        is_handled = 0;
     }
-    return ret;
+    return is_handled;
   }
 
   tceu_callback media_cb_ = { &ceu_callback_media, NULL };
 end
-
-native/pos do
-  /* scene raw */
-  void emit_scene_raw_start (GObject *source)
-  {
-    tceu_input_CM_SCENE_RAW_START p = {source};
-    ceu_input (CEU_INPUT_CM_SCENE_RAW_START, &p);
-  }
-
-  void emit_scene_raw_mouse_click (GObject *source, int x, int y, int button,
-    int pressed)
-  {
-    tceu_input_CM_SCENE_RAW_MOUSE_CLICK p = {source, x, y, button, pressed};
-    ceu_input (CEU_INPUT_CM_SCENE_RAW_MOUSE_CLICK, &p);
-  }
-
-  void emit_scene_raw_mouse_move (GObject *source, int x, int y)
-  {
-    tceu_input_CM_SCENE_RAW_MOUSE_MOVE p = {source, x, y};
-    ceu_input (CEU_INPUT_CM_SCENE_RAW_MOUSE_MOVE, &p);
-  }
-
-  void emit_scene_raw_key (GObject *source, char *key, int pressed)
-  {
-    tceu_input_CM_SCENE_RAW_KEY p = {source, key, pressed};
-    ceu_input (CEU_INPUT_CM_SCENE_RAW_KEY, &p);
-  }
-
-  void emit_scene_raw_tick (GObject *source, uint64_t ticks)
-  {
-    tceu_input_CM_SCENE_RAW_TICK p = {source, ticks};
-    ceu_input (CEU_INPUT_CM_SCENE_RAW_TICK, &p);
-  }
-
-  void emit_scene_raw_error (GObject *source, char *msg)
-  {
-    tceu_input_CM_SCENE_RAW_ERROR p = {source, msg};
-    ceu_input (CEU_INPUT_CM_SCENE_ERROR, &p);
-  }
-
-  /* player raw */
-  void emit_player_raw_mouse_click (GObject *source, int x, int y, int button,
-    int pressed)
-  {
-    tceu_input_CM_PLAYER_RAW_MOUSE_CLICK p = {source, x, y, button, pressed};
-    ceu_input (CEU_INPUT_CM_PLAYER_RAW_MOUSE_CLICK, &p);
-  }
-
-  void emit_player_raw_start (GObject *source)
-  {
-    tceu_input_CM_PLAYER_RAW_START p = {source};
-    ceu_input (CEU_INPUT_CM_PLAYER_RAW_START, &p);
-  }
-
-  void emit_player_raw_sought (GObject *source)
-  {
-    tceu_input_CM_PLAYER_RAW_SOUGHT p = {source};
-    ceu_input (CEU_INPUT_CM_PLAYER_RAW_SOUGHT, &p);
-  }
-
-  void emit_player_raw_stop (GObject *source)
-  {
-    tceu_input_CM_PLAYER_RAW_STOP p = {source};
-    ceu_input (CEU_INPUT_CM_PLAYER_RAW_STOP, &p);
-  }
-
-  void emit_player_raw_pause (GObject *source)
-  {
-    tceu_input_CM_PLAYER_RAW_PAUSE p = {source};
-    ceu_input (CEU_INPUT_CM_PLAYER_RAW_PAUSE, &p);
-  }
-end
-
-native/nohold
-  /* scene raw */
-  _emit_scene_raw_start,
-  _emit_scene_raw_mouse_click,
-  _emit_scene_raw_mouse_move,
-  _emit_scene_raw_key,
-  _emit_scene_raw_tick,
-  _emit_scene_raw_error,
-
-  /* player raw */
-  _emit_player_raw_mouse_click,
-  _emit_player_raw_start,
-  _emit_player_raw_sought,
-  _emit_player_raw_stop,
-  _emit_player_raw_pause,
-;
 
 _ceu_callback_register (&&_media_cb_);
 
@@ -343,11 +259,15 @@ do
         );
 
         if _LP_IS_SCENE(source) as bool then
-          _emit_scene_raw_mouse_click (source, x as int, y as int,
-                                           button, pressed as bool);
+          await async (source, x, y, button, pressed) do
+            emit CM_SCENE_RAW_MOUSE_CLICK (source, x as int, y as int, button,
+              pressed as bool);
+          end
         else
-          _emit_player_raw_mouse_click (source, x as int, y as int,
-                                           button, pressed as bool);
+          await async (source, x, y, button, pressed) do
+            emit CM_PLAYER_RAW_MOUSE_CLICK (source, x as int, y as int,
+              button, pressed as bool);
+          end
         end
 
       /* MOUSE MOVE */
@@ -359,7 +279,9 @@ do
         _g_object_get(_G_OBJECT(evt_), "x", &&x, "y",&&y, null);
 
         if _LP_IS_SCENE(source) as bool then
-          _emit_scene_raw_mouse_move (source, x as int, y as int);
+          await async (source, x, y) do
+            emit CM_SCENE_RAW_MOUSE_MOVE (source, x as int, y as int);
+          end
         end
 
       /* KEY */
@@ -379,7 +301,9 @@ do
         end
 
         if _LP_IS_SCENE(source) as bool then
-          _emit_scene_raw_key (source, key, pressed as bool);
+          await async (source, key, pressed) do
+            emit CM_SCENE_RAW_KEY (source, key, pressed as bool);
+          end
         end
 
       /* TICK */
@@ -392,31 +316,43 @@ do
             null);
 
         if _LP_IS_SCENE(source) as bool then
-          _emit_scene_raw_tick (source, ticks);
+          await async (source, ticks) do
+            emit CM_SCENE_RAW_TICK (source, ticks);
+          end
         end
 
       /* START */
       else/if type == _LP_TYPE_EVENT_START then
         if _LP_IS_MEDIA(source) as bool then
-          _emit_player_raw_start (source);
+          await async (source) do
+            emit CM_PLAYER_RAW_START (source);
+          end
         else/if _LP_IS_SCENE(source) as bool then
           if _LP_SCENE (source) == &&handle.ref then
             emit ok;
           end
-          _emit_scene_raw_start (source);
+          await async (source) do
+            emit CM_SCENE_RAW_START (source);
+          end
         end
 
       /* SEEK */
       else/if type == _LP_TYPE_EVENT_SEEK then
-        _emit_player_raw_sought (source);
+        await async (source) do
+          emit CM_PLAYER_RAW_SOUGHT (source);
+        end
 
       /* STOP */
       else/if type == _LP_TYPE_EVENT_STOP then
-        _emit_player_raw_stop (source);
+        await async (source) do
+          emit CM_PLAYER_RAW_STOP (source);
+        end
 
       /* PAUSE */
       else/if type == _LP_TYPE_EVENT_STOP then
-        _emit_player_raw_pause (source);
+        await async (source) do
+          emit CM_PLAYER_RAW_PAUSE (source);
+        end
 
       /* ERROR */
       else/if type == _LP_TYPE_EVENT_ERROR then
@@ -428,7 +364,9 @@ do
         msg = _lp_event_to_string (_LP_EVENT(evt));
 
         if _LP_IS_SCENE(source) as bool then
-          _emit_scene_raw_error (source, msg);
+          await async (source, msg) do
+            emit CM_SCENE_RAW_ERROR (source, msg);
+          end
         end
 
         do finalize with
