@@ -76,7 +76,6 @@ end
 code/await/dynamic
 Emit_Event (var&/dynamic Emit_Args args) -> none
 do
-  _printf ("none code\n");
   /* none; */
 end
 
@@ -113,7 +112,7 @@ do
   await async (source, key, pressed) do
     emit CM_SCENE_KEY (source, key, pressed);
   end
-  /* _free(key); */
+  _free(key);
 end
 
 code/await/dynamic
