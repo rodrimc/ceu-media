@@ -17,6 +17,174 @@ input (uint)                      CM_PLAYER_PAUSE;
 input (uint)                      CM_PLAYER_SOUGHT;
 input (uint, int, int, int, bool) CM_PLAYER_MOUSE_CLICK;
 
+data Emit_Args;
+
+data Emit_Args.Scene_Mouse_Click with
+  var uint          source;
+  var int           x;
+  var int           y;
+  var int           button;
+  var bool          pressed;
+end
+
+data Emit_Args.Scene_Mouse_Move with
+  var uint          source;
+  var int           x;
+  var int           y;
+end
+
+data Emit_Args.Scene_Key with
+  var uint          source;
+  var _char_ptr_ext key;
+  var bool          pressed;
+end
+
+data Emit_Args.Scene_Tick with
+  var uint          source;
+  var u64           tick;
+end
+
+data Emit_Args.Scene_Error with
+  var uint          source;
+  var _char_ptr_ext error;
+end
+
+data Emit_Args.Player_Start with
+  var uint          source;
+end
+
+data Emit_Args.Player_Stop with
+  var uint          source;
+end
+
+data Emit_Args.Player_Pause with
+  var uint          source;
+end
+
+data Emit_Args.Player_Sought with
+  var uint          source;
+end
+
+data Emit_Args.Player_Mouse_Click with
+  var uint          source;
+  var int           x;
+  var int           y;
+  var int           button;
+  var bool          pressed;
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args args) -> none
+do
+  _printf ("none code\n");
+  /* none; */
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Scene_Mouse_Click args) -> none
+do
+  var uint source = args.source;
+  var int  x = args.x;
+  var int  y = args.y;
+  var int  button = args.button;
+  var bool pressed = args.pressed;
+  await async (source, x, y, button, pressed) do
+    emit CM_SCENE_MOUSE_CLICK (source, x, y, button, pressed);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Scene_Mouse_Move args) -> none
+do
+  var uint source = args.source;
+  var int  x = args.x;
+  var int  y = args.y;
+  await async (source, x, y) do
+    emit CM_SCENE_MOUSE_MOVE (source, x, y);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Scene_Key args) -> none
+do
+  var uint           source = args.source;
+  var _char_ptr_ext  key = args.key;
+  var bool           pressed = args.pressed;
+  await async (source, key, pressed) do
+    emit CM_SCENE_KEY (source, key, pressed);
+  end
+  /* _free(key); */
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Scene_Tick args) -> none
+do
+  var uint source = args.source;
+  var u64  tick = args.tick;
+  await async (source, tick) do
+    emit CM_SCENE_TICK (source, tick);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Scene_Error args) -> none
+do
+  var uint           source = args.source;
+  var _char_ptr_ext  error = args.error;
+  await async (source, error) do
+    emit CM_SCENE_ERROR (source, error);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Player_Start args) -> none
+do
+  var uint source = args.source;
+  await async (source) do
+    emit CM_PLAYER_START (source);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Player_Stop args) -> none
+do
+  var uint source = args.source;
+  await async (source) do
+    emit CM_PLAYER_STOP (source);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Player_Pause args) -> none
+do
+  var uint source = args.source;
+  await async (source) do
+    emit CM_PLAYER_PAUSE (source);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Player_Sought args) -> none
+do
+  var uint source = args.source;
+  await async (source) do
+    emit CM_PLAYER_SOUGHT (source);
+  end
+end
+
+code/await/dynamic
+Emit_Event (var&/dynamic Emit_Args.Player_Mouse_Click args) -> none
+do
+  var uint source = args.source;
+  var int  x = args.x;
+  var int  y = args.y;
+  var int  button = args.button;
+  var bool pressed = args.pressed;
+  await async (source, x, y, button, pressed) do
+    emit CM_PLAYER_MOUSE_CLICK (source, x, y, button, pressed);
+  end
+end
+
 /* SCENE */
 data IScene with
   var& ISceneRaw raw;
@@ -25,90 +193,23 @@ data IScene with
   event (none)   quit;
 end
 
-code/await Emit_Scene_Mouse_Click (var uint id, var int x, var int y,
-  var int button, var bool pressed) -> none
-do
-  await async (id, x, y, button, pressed) do
-    emit CM_SCENE_MOUSE_CLICK (id, x, y, button, pressed);
-  end
-end
+pool [] Emit_Event pool_evts;
+var Emit_Args.Scene_Mouse_Click  sclick = val Emit_Args.Scene_Mouse_Click (_, _, _, _,_);
+var Emit_Args.Scene_Mouse_Move   smm_args = val Emit_Args.Scene_Mouse_Move (_, _, _);
+var Emit_Args.Scene_Key          skey = val Emit_Args.Scene_Key (_, _, _);
+var Emit_Args.Scene_Tick         stick = val Emit_Args.Scene_Tick (_, _);
+var Emit_Args.Scene_Error        serror = val Emit_Args.Scene_Error (_, _);
 
-code/await Emit_Scene_Mouse_Move (var uint id, var int x, var int y) -> none
-do
-  await async (id, x, y) do
-    emit CM_SCENE_MOUSE_MOVE (id, x, y);
-  end
-end
-
-code/await Emit_Scene_Key (var uint id, var _char_ptr_ext key,
-  var bool pressed) -> none
-do
-  await async (id, key, pressed) do
-    emit CM_SCENE_KEY (id, key, pressed);
-  end
-  _free (key);
-end
-
-code/await Emit_Scene_Tick (var uint id, var u64 ticks) -> none
-do
-  await async (id, ticks) do
-    emit CM_SCENE_TICK (id, ticks);
-  end
-end
-
-code/await Emit_Scene_Error (var uint id, var _char_ptr_ext msg) -> none
-do
-  await async (id, msg) do
-    emit CM_SCENE_ERROR (id, msg);
-  end
-end
-
-code/await Emit_Player_Mouse_Click (var uint id, var int x, var int y,
-  var int button, var bool pressed) -> none
-do
-  await async (id, x, y, button, pressed) do
-    emit CM_PLAYER_MOUSE_CLICK (id, x, y, button, pressed);
-  end
-end
-
-code/await Emit_Player_Start (var uint id) -> none
-do
-  await async (id) do
-    emit CM_PLAYER_START (id);
-  end
-end
-
-code/await Emit_Player_Stop (var uint id) -> none
-do
-  await async (id) do
-    emit CM_PLAYER_STOP (id);
-  end
-end
-
-code/await Emit_Player_Pause (var uint id) -> none
-do
-  await async (id) do
-    emit CM_PLAYER_PAUSE (id);
-  end
-end
-
-code/await Emit_Player_Sought (var uint id) -> none
-do
-  await async (id) do
-    emit CM_PLAYER_SOUGHT (id);
-  end
-end
+var Emit_Args.Player_Start       pstart_args = val Emit_Args.Player_Start (_);
+var Emit_Args.Player_Stop        pstop_args =  val Emit_Args.Player_Stop (_);
+var Emit_Args.Player_Pause       ppause_args = val Emit_Args.Player_Pause (_);
+var Emit_Args.Player_Sought      psought_args = val Emit_Args.Player_Sought (_);
+var Emit_Args.Player_Mouse_Click pclick_args = val Emit_Args.Player_Mouse_Click (_, _, _, _, _);
 
 code/await Scene (var Size? size)
               -> (var& IScene handle)
                   -> none
 do
-  /* pools */
-  pool [] Emit_Scene_Mouse_Click pool_scene_mouse_click;
-  pool [] Emit_Scene_Mouse_Move  pool_scene_mouse_move;
-  pool [] Emit_Scene_Key         pool_scene_key;
-  pool [] Emit_Scene_Tick        pool_scene_tick;
-  pool [] Emit_Scene_Error       pool_scene_error;
 
   var Size raw_size =  _;
   if (size?) then
@@ -128,50 +229,46 @@ do
       await FOREVER;
     with
       var _GObject&& source;
-      var int x;
-      var int y;
-      var int button;
-      var bool pressed;
-      every (source, x, y, button, pressed) in CM_SCENE_RAW_MOUSE_CLICK do
+      every (source, outer.sclick.x, outer.sclick.y, outer.sclick.button,
+        outer.sclick.pressed) in CM_SCENE_RAW_MOUSE_CLICK do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          spawn Emit_Scene_Mouse_Click (ref_.self, x, y, button, pressed)
-            in pool_scene_mouse_click;
+          outer.sclick.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.sclick) in outer.pool_evts;
         end
       end
     with
       var _GObject&& source;
-      var int x;
-      var int y;
-      every (source, x, y) in CM_SCENE_RAW_MOUSE_MOVE do
+      every (source, outer.smm_args.x, outer.smm_args.y) in
+                                                  CM_SCENE_RAW_MOUSE_MOVE do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          spawn Emit_Scene_Mouse_Move (ref_.self, x, y)
-            in pool_scene_mouse_move;
+          outer.smm_args.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.smm_args) in outer.pool_evts;
         end
       end
     with
       var _GObject&& source;
-      var _char_ptr_ext key;
-      var bool press;
-      every (source, key, press) in CM_SCENE_RAW_KEY do
+      every (source, outer.skey.key, outer.skey.pressed) in
+                                                         CM_SCENE_RAW_KEY do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          key = _strdup (key);
-          spawn Emit_Scene_Key (ref_.self, key, press) in pool_scene_key;
+          outer.skey.source = ref_.self;
+          outer.skey.key = _strdup (outer.skey.key);
+          spawn/dynamic Emit_Event (&outer.skey) in outer.pool_evts;
         end
       end
     with
       var _GObject&& source;
-      var u64 tick;
-      every (source, tick) in CM_SCENE_RAW_TICK do
+      every (source, outer.stick.tick) in CM_SCENE_RAW_TICK do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          spawn Emit_Scene_Tick (ref_.self, tick) in pool_scene_tick;
+          outer.stick.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.stick) in outer.pool_evts;
         end
       end
     with
       var _GObject&& source;
-      var _char_ptr_ext error;
-      every (source, error) in CM_SCENE_RAW_ERROR do
+      every (source, outer.serror.error) in CM_SCENE_RAW_ERROR do
         if _LP_SCENE(source) == &&raw.handle.ref then
-          spawn Emit_Scene_Tick (ref_.self, error) in pool_scene_error;
+          outer.serror.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.serror) in outer.pool_evts;
         end
       end
     with
@@ -210,13 +307,6 @@ code/await Play (var& []byte uri, var& Properties prop, var& IScene scene)
                   -> (var& IPlayer handle)
                       -> none
 do
-  /* pools */
-  pool [] Emit_Player_Mouse_Click pool_player_mouse_click;
-  pool [] Emit_Player_Start       pool_player_start;
-  pool [] Emit_Player_Stop        pool_player_stop;
-  pool [] Emit_Player_Pause       pool_player_pause;
-  pool [] Emit_Player_Sought      pool_player_sought;
-
   var&? Play_Raw raw = spawn Play_Raw (&uri, &prop, &scene.raw);
   watching (raw) do
     var uint self = _PLAYER_SEED;
@@ -229,26 +319,26 @@ do
       var _GObject_ptr_ext source;
       every (source) in CM_PLAYER_RAW_START do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          spawn Emit_Player_Start (ref_.self) in pool_player_start;
+          outer.pstart_args.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.pstart_args) in outer.pool_evts;
         end
       end
     with
       var _GObject_ptr_ext source;
       every (source) in CM_PLAYER_RAW_SOUGHT do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          spawn Emit_Player_Sought (ref_.self) in pool_player_sought;
+          outer.pstop_args.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.pstop_args) in outer.pool_evts;
         end
       end
     with
       var _GObject_ptr_ext source;
-      var int x;
-      var int y;
-      var int button;
-      var bool press;
-      every (source, x, y, button, press) in CM_PLAYER_RAW_MOUSE_CLICK do
+      every (source, outer.pclick_args.x, outer.pclick_args.y,
+        outer.pclick_args.button, outer.pclick_args.pressed) in
+                                                  CM_PLAYER_RAW_MOUSE_CLICK do
         if _LP_MEDIA(source) == &&raw.player.ref then
-          spawn Emit_Player_Mouse_Click (ref_.self, x, y, button, press)
-            in pool_player_mouse_click;
+          outer.pclick_args.source = ref_.self;
+          spawn/dynamic Emit_Event (&outer.pclick_args) in outer.pool_evts;
         end
       end
     end
