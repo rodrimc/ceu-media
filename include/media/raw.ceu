@@ -109,7 +109,7 @@ native/pre do
   int
   ceu_callback_media (int cmd, tceu_callback_val p1, tceu_callback_val p2
 ##ifdef CEU_FEATURES_TRACE
-                      , tceu_trace
+                      , tceu_trace trace
 ##endif
                       )
   {
