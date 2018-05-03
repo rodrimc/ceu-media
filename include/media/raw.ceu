@@ -189,6 +189,8 @@ data ISceneRaw with
   event (none)     quit;
 end
 
+event (bool) pause_all;
+
 code/await Scene_Raw (var Size? size)
               -> (var& ISceneRaw handle)
                   -> none
@@ -398,9 +400,11 @@ do
 #endif
         end
       with
-        every FREQ ms do
-          ticks = ticks + 1;
-          _lp_scene_advance (&&ref, FREQ * NS);
+        pause/if outer.pause_all do
+          every FREQ ms do
+            ticks = ticks + 1;
+            _lp_scene_advance (&&ref, FREQ * NS);
+          end
         end
       end
     end
