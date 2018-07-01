@@ -40,6 +40,7 @@ native/pure
   _LP_MEDIA,
   _LP_SCENE,
   _LP_TYPE_SCENE,
+  _LP_TYPE_MEDIA,
 ;
 
 native/nohold
@@ -209,6 +210,7 @@ do
                               "height",      h,
                               "slave-audio", true,
                               "lockstep",    true,
+                              "sync",        true,
                               null)
     finalize (ref_) with
       finalizing = true;
@@ -434,9 +436,17 @@ code/tight
 Player_Raw_New (var& ISceneRaw scene, var&[] byte uri) -> _lp_Media&&
 do
   if $uri == 0 then
-    escape _lp_media_new(&&scene.ref, null);
+    escape _g_object_new (_LP_TYPE_MEDIA,
+                          "scene", &&scene.ref,
+                          "sync", true,
+                          "uri", null,
+                          null);
   else
-    escape _lp_media_new(&&scene.ref, &&uri[0]);
+    escape _g_object_new (_LP_TYPE_MEDIA,
+                          "scene", &&scene.ref,
+                          "sync", true,
+                          "uri", &&uri[0],
+                          null);
   end
 end
 
